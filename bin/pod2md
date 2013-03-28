@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Run all via:
+# > find ./ -name "*.pm" -exec bin/pod2md {} \;
+
+# Must have Pod::Markdown intalled in order to work.
+
+MD=$(echo "$1" | sed 's/\.\/lib\///' | sed 's/\//_/g' | sed 's/\.pm/.md/')
+echo "$1 -> doc/$MD"
+pod2markdown $1 > "doc/$MD"
