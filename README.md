@@ -1,2 +1,2 @@
-kelp
+Kelp - Light but very nutritional
 ====
