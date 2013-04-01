@@ -6,41 +6,46 @@ Kelp - A web framework light, yet rich in nutrients.
 
 File `MyWebApp.pm`:
 
-    package MyWebApp;
-    use base 'Kelp';
+```perl
+package MyWebApp;
+use base 'Kelp';
 
-    sub build {
-        my $self = shift;
-        my $r = $self->routes;
-        $r->add( "/hello", sub { "Hello, world!" } );
-        $r->add( '/hello/:name', 'greet' );
-    }
+sub build {
+    my $self = shift;
+    my $r = $self->routes;
+    $r->add( "/hello", sub { "Hello, world!" } );
+    $r->add( '/hello/:name', 'greet' );
+}
 
-    sub greet {
-        my ( $self, $name ) = @_;
-        "Hello, $name!";
-    }
+sub greet {
+    my ( $self, $name ) = @_;
+    "Hello, $name!";
+}
 
-    1;
+1;
+```
 
 File `app.psgi`:
 
-    use MyWebApp;
-    my $app = MyWebApp->new;
-    $app->run;
-
+```perl
+use MyWebApp;
+my $app = MyWebApp->new;
+$app->run;
+```
 
 
 Or, for quick prototyping use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less):
 
-    use Kelp::Less;
+```perl
+use Kelp::Less;
 
-    get '/hello/?name' => sub {
-        my ( $self, $name ) = @_;
-        "Hello " . $name // 'world';
-    };
+get '/hello/?name' => sub {
+    my ( $self, $name ) = @_;
+    "Hello " . $name // 'world';
+};
 
-    run;
+run;
+```
 
 # DESCRIPTION
 
