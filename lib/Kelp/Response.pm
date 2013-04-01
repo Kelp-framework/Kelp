@@ -110,6 +110,4 @@ sub template {
     $self->render($output);
 }
 
-no Kelp::Base;
-
 1;

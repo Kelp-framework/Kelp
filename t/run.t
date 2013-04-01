@@ -5,10 +5,7 @@ use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
 
-my $app = Kelp->new(
-    mode => 'test',
-    modules => ['JSON', 'Template']
-);
+my $app = Kelp->new( mode => 'test' );
 $app->routes->base("main");
 my $t = Kelp::Test->new( app => $app );
 
@@ -101,6 +98,14 @@ $app->add_route("/auth" => {
 $t->request( GET '/auth/work' )
   ->code_is(200)
   ->content_is('foo');
+
+# Methods
+$app->add_route( [ POST => "/meth1" ] => sub { "OK" } );
+$t->request( POST "/meth1" )->content_is("OK");
+$app->add_route( [ GET => "/meth2" ] => sub { "OK" } );
+$t->request( GET "/meth2" )->content_is("OK");
+$app->add_route( [ PUT => "/meth3" ] => sub { "OK" } );
+$t->request( PUT "/meth3" )->content_is("OK");
 
 done_testing;
 

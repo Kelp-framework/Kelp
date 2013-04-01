@@ -1,0 +1,44 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use v5.10;
+
+use File::Path 'make_path';
+use Getopt::Long;
+
+my $path = '.';
+my $verbose = 1;
+
+# Remove the slash at the end
+$path =~ s{/$}{};
+
+sub create {
+    my ( $name ) = @_;
+
+    # Make the main folder
+    if ( ! -d $path ) {
+        _say("Creating $path");
+        make_path( $path );
+    }
+
+    # Make the sub folders
+    for my $sub (qw/bin lib t view conf/) {
+        _say("Creating $path/$sub");
+        make_path("$path/$sub");
+    }
+
+    # Create the files
+
+
+}
+
+sub _say {
+    my $what = shift;
+    if ($verbose) {
+        say $what;
+    }
+}
+
+
+# vim:syntax=perl

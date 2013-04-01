@@ -11,18 +11,18 @@ sub build {
 
     # Create the config object with some default attributes,
     # but have %args at the end to trump all.
-    my $filename = $self->app->path . '/' . lc( $self->app->name ) . '.conf';
-    my $config = Config::Hash->new(
-        data => $self->defaults,
-        mode => $self->app->mode,
-        ( -e $filename ? ( filename => $filename ) : () ),
+    my $filename = $self->app->path . '/conf/' . lc( $self->app->name ) . '.conf';
+    my $config   = Config::Hash->new(
+        data     => $self->defaults,
+        mode     => $self->app->mode,
+        filename => $filename,
         %args
     );
 
     # Register two methods: config and config_hash
     $self->register(
         config_hash => $config->data,
-        config => sub {
+        config      => sub {
             my ( $app, $path ) = @_;
             return $config->get($path);
         }
@@ -42,17 +42,20 @@ sub defaults {
 
         app_url => 'http://localhost:5000',
 
-        # Module initialization params
-        modules => {
+        # Modules to load
+        modules => [qw/JSON Template Logger/],
 
-            # Template
-            Template => {
-                INCLUDE_PATH => $self->app->path . '/views'
-            },
+        # Module initialization params
+        modules_init => {
 
             # Routes
             Routes => {
                 base => ref( $self->app )
+            },
+
+            # Template
+            Template => {
+                INCLUDE_PATH => $self->app->path . '/views'
             },
 
             # Logger - Default config is for developement
@@ -61,7 +64,7 @@ sub defaults {
                     [
                         'File',
                         name      => 'debug',
-                        filename  => 'log/debug.log',
+                        filename  => $self->app->path . '/log/debug.log',
                         min_level => 'debug',
                         mode      => '>>',
                         newline   => 1,
@@ -69,7 +72,7 @@ sub defaults {
                     ], [
                         'File',
                         name      => 'error',
-                        filename  => 'log/error.log',
+                        filename  => $self->app->path . '/log/error.log',
                         min_level => 'error',
                         mode      => '>>',
                         newline   => 1,
@@ -80,7 +83,7 @@ sub defaults {
 
             # JSON
             JSON => {},
-          },
+        },
 
     };
 

@@ -8,6 +8,9 @@ sub import {
     my $class = shift;
     my $caller = caller;
 
+    # Do not import into inherited classes
+    return if $class ne __PACKAGE__;
+
     my $base = shift || $class;
 
     if ( $base ne '-strict' ) {

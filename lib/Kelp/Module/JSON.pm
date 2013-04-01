@@ -7,7 +7,9 @@ sub build {
     my ( $self, %args ) = @_;
     my $json = JSON->new;
     $json->allow_blessed->convert_blessed->utf8;
-    $json->pretty(1) if $self->app->mode eq 'development';
+#    for ( my ( $key, $value ) = each %args ) {
+#        $json->$key($value);
+#    }
     $self->register( json => $json );
 }
 

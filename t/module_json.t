@@ -10,7 +10,7 @@ use Test::More;
 
 # Basic
 {
-    my $app = Kelp->new( modules => [] );
+    my $app = Kelp->new( mode => 'nomod' );
     my $m = $app->load_module('JSON');
     isa_ok $m, "Kelp::Module::JSON";
     can_ok $app, $_ for qw/json/;

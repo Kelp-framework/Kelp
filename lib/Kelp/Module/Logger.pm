@@ -5,6 +5,7 @@ use Kelp::Base 'Kelp::Module';
 use File::Path;
 use Carp;
 use Log::Dispatch;
+use Data::Dumper;
 
 sub build {
     my ( $self, %args ) = @_;
@@ -18,7 +19,7 @@ sub build {
         my $level = $_;
         $level => sub {
             my $app = shift;
-            $self->message( $level, sprintf(shift, @_) );
+            $self->message( $level, @_ );
         };
     } @levels_to_register;
 
@@ -33,7 +34,7 @@ sub build {
 }
 
 sub message {
-    my ( $self, $level, $message ) = @_;
+    my ( $self, $level, @messages ) = @_;
     my @a    = localtime(time);
     my $date = sprintf(
         "%4i-%02i-%02i %02i:%02i:%02i",
@@ -42,10 +43,13 @@ sub message {
         $a[3], $a[2], $a[1], $a[0]
     );
 
-    $self->{logger}->log(
-        level   => $level,
-        message => sprintf( '%s - %s - %s', $date, $level, $message )
-    );
+    for (@messages) {
+        $self->{logger}->log(
+            level   => $level,
+            message => sprintf( '%s - %s - %s',
+                $date, $level, ref($_) ? Dumper($_) : $_ )
+        );
+    }
 }
 
 1;

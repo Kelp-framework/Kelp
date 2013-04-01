@@ -14,12 +14,9 @@ use Kelp::Response;
 
 # Basic attributes
 attr -host => hostname;
-attr -mode => $ENV{PLACK_ENV} // 'development';
+attr -mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
 attr -name => 'Kelp';
-
-# Modules to load on startup
-attr -modules => [qw/Template Logger JSON/];
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
@@ -35,11 +32,12 @@ attr res => undef;
 sub new {
     my $self = shift->SUPER::new(@_);
 
-    my @required_modules = qw(Config Routes);
-    $self->load_module($_) for (
-        @required_modules,
-        @{ $self->modules }
-    );
+    # Always load these modules
+    $self->load_module($_) for ( qw/Config Routes/ );
+
+    # Load the modules from the config
+    $self->load_module($_)
+      for ( qw(Config Routes), @{ $self->config('modules') } );
 
     $self->build();
     return $self;
@@ -58,7 +56,7 @@ sub load_module {
 
     my %args = ();
     if ( $self->can('config')
-        && defined( my $c = $self->config("modules.$name") ) ) {
+        && defined( my $c = $self->config("modules_init.$name") ) ) {
         %args = %$c;
     }
     my $class = Plack::Util::load_class( $name, 'Kelp::Module' );
@@ -97,7 +95,7 @@ sub run {
     my $res = $self->res( $self->response );
 
     # Get route matches
-    my $match = $self->routes->match( $req->path, method => $req->method );
+    my $match = $self->routes->match( $req->path, $req->method );
 
     # None found? Show 404 ...
     if ( !@$match ) {
@@ -176,7 +174,7 @@ sub param { shift->req->param(@_) }
 
 sub stash {
     my $self = shift;
-    @_ ? $self->res->stash->{$_[0]} : $self->res->stash;
+    @_ ? $self->req->stash->{$_[0]} : $self->req->stash;
 }
 
 sub named {
@@ -187,12 +185,6 @@ sub named {
 #----------------------------------------------------------------
 # Utility
 #----------------------------------------------------------------
-
-sub dump {
-    my ( $self, $item, $depth ) = @_;
-    $Data::Dumper::Maxdepth = $depth // 2;
-    return Dumper($item);
-}
 
 sub url_for {
     my ( $self, $name, @args ) = @_;
@@ -213,9 +205,133 @@ sub _croak {
     my $self = shift;
     my $message = shift // return;
     if ( $self->can('logger') ) {
-        $self->logger->critical($message);
+        $self->logger('critical', $message);
     }
     croak $message;
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 TITLE
+
+Kelp - A web framework light, yet rich in nutrients.
+
+=head1 SYNOPSIS
+
+File C<MyWebApp.pm>:
+
+    package MyWebApp;
+    use base 'Kelp';
+
+    sub build {
+        my $self = shift;
+        my $r = $self->routes;
+        $r->add( "/hello", sub { "Hello, world!" } );
+        $r->add( '/hello/:name', 'greet' );
+    }
+
+    sub greet {
+        my ( $self, $name ) = @_;
+        "Hello, $name!";
+    }
+
+    1;
+
+File C<app.psgi>:
+
+    use MyWebApp;
+    my $app = MyWebApp->new;
+    $app->run;
+
+
+Or, for quick prototyping use L<Kelp::Less>:
+
+    use Kelp::Less;
+
+    get '/hello/?name' => sub {
+        my ( $self, $name ) = @_;
+        "Hello " . $name // 'world';
+    };
+
+    run;
+
+=head1 DESCRIPTION
+
+If you're going to be deploying a Perl based web application, chances are that
+you will be using Plack. Plack has almost all necessary tools to create and
+maintain a healthy web app. It has tons of middleware, and several very well
+tested high performance preforking servers, such as Starman.
+
+Plack, however, is not a web framework, hence its creators have intentionally
+omitted adding certain components. This is where Kelp gets to shine. It provides
+a layer on top of Plack and puts everything together into a complete web
+framework.
+
+Kelp provides:
+
+=over
+
+=item
+
+B<Advanced Routing>. Create intricate, yet simple ways to capture HTTP requests
+and route them to their designated code. Use explicit and optional named
+placeholders, wildcards, or just regular expressions.
+
+=cut
+
+=item
+
+B<Flexible Configuration>. Use different config for each environment, e.g.
+development, deployment, etc. Merge a temporary configuration into your current
+one for testing and debugging purposes.
+
+=cut
+
+=item
+
+B<Enhanced Logging>. Log messages at different levels of emergency. Log to a
+file, screen, or anything supported by Log::Dispatcher.
+
+=cut
+
+=item
+
+B<Powerful Rendering>. Use the bult-in auto-rendering logic, or the template
+module of your choice to return rich text, html and JSON responses.
+
+=cut
+
+=item
+
+B<JSON encoder/decoder>. If you're serious about your back-end code. Kelp comes
+with JSON, but you can easily plug in JSON::XS or any decoder of your choice.
+
+=cut
+
+=item
+
+B<Extendable Core>. Kelp uses pluggable modules for everything. This allows
+anyone to add a module for a custom interface. Writing Kelp modules is a
+pleasant and fulfilling activity.
+
+=cut
+
+=item
+
+B<Sleek Testing>. Kelp takes Plack::Test and wraps it in an object oriented
+class of convenience methods. Testing is done via sending requests to your
+routes, then analyzing the response.
+
+=cut
+
+=back
+
+=head1 WHY KELP?
+
+What makes Kelp different from the other micro frameworks?
+
+=cut

@@ -46,8 +46,40 @@ sub param {
     return $self->SUPER::param(@_);
 }
 
-no Kelp::Base;
-
 1;
 
+__END__
+
+=pod
+
+=head1 NAME
+
+Kelp::Request - Request class for a Kelp app
+
+=head1 SYNOPSIS
+
+    my $request = Kelp::Request( app => $app, env => $env );
+
+=head1 DESCRIPTION
+
+    This module provides a convenience layer on top of L<Plack::Request>. It
+    inherits all of of its methods and adds some more.
+
+=head1 ATTRIBUTES
+
+=head2 app
+
+A reference to the Kelp application.
+
+=head2 stash
+
+An all use, utility hash to use to pass information between routes.
+
+=head2 named
+
+This hash is initialized with the named placeholders of the path that the
+current route is processing.
+
+
+=end
 

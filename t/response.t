@@ -5,7 +5,7 @@ use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
 
-my $app = Kelp->new( mode => 'test', modules => ['JSON', 'Template'] );
+my $app = Kelp->new( mode => 'test' );
 my $t = Kelp::Test->new( app => $app );
 
 # Bare render

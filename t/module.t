@@ -16,7 +16,7 @@ my %types = (
     code => sub { "Moo!" }
 );
 
-my $app = Kelp->new( modules => [] );
+my $app = Kelp->new( mode => 'test' );
 my $m = Kelp::Module->new( app => $app );
 isa_ok $m, 'Kelp::Module';
 
