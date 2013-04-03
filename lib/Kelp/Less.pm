@@ -57,7 +57,7 @@ sub put {
     route ref($path) ? $path : [ PUT => $path ], $to;
 }
 
-sub run      { $app->psgi }
+sub run      { $app->run }
 sub app      { $app }
 sub attr     { Kelp::Base::attr( ref($app), @_ ) }
 sub param    { $app->param(@_) }
@@ -98,7 +98,7 @@ it easier and less verbose to create a quick web app.
 It's called C<Less>, because there is less typing involved with it, and also
 because it is suited for smaller, less complicated web projects. We encourage
 you to use it anywhere you see fit, however for mid-size and big applications we
-recomend that you use the fully structured L<Kelp>. This way you can take
+recommend that you use the fully structured L<Kelp>. This way you can take
 advantage of the powerful router and initialization.
 
 =head1 QUICK START
@@ -296,7 +296,7 @@ currently loaded template module.
 
 =head2 run
 
-Creates and returns a PSGI readu subroutine, and makes the app ready for C<Plack>.
+Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
 =head1 SEE ALSO
 

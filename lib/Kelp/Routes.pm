@@ -217,22 +217,26 @@ Routing is at the core of each web application. It provides the connection
 between each HTTP request and the code.
 
 Kelp provides a simple, yet sophisticated router. It utilizes Perl 5.10's
-regular expressions, whish makes it fast, robust and reliable.
+regular expressions, which makes it fast, robust and reliable.
 
 The routing process can roughly be broken down into three steps:
 
-B<1. Adding routes>
+=over
+
+=item B<Adding routes>
 
 First you create a router object:
 
-    my $r = Kelp::Routers->new();
+    my $r = Kelp::Routes->new();
 
 Then you add your application's routes and their descriptions:
 
     $r->add( '/path' => 'Module::function' );
     ...
 
-B<2. Matching>
+=cut
+
+=item B<Matching>
 
 Once you have your routes added, you can match with the L</match> subroutine.
 
@@ -242,7 +246,9 @@ The Kelp framework already does matching for you, so you may never
 have to do your own matching. The above example is provided only for
 reference.
 
-B<3. Building URLs from routes>
+=cut
+
+=item B<Building URLs from routes>
 
 You can name each of your routes and use that later to build a URL:
 
@@ -252,12 +258,16 @@ You can name each of your routes and use that later to build a URL:
 This can be used in views and other places where you need the full URL of
 a route.
 
+=cut
+
+=back
+
 =head1 PLACEHOLDERS
 
 Each route is matched via a regular expression. You can write your own regular
 expressions or you can use Kelp's I<placeholders>. Placeholders are variables
 you place in the route path. They are identified by a prefix character and
-their names must abide to the rules of a regular perl variable. If necessary,
+their names must abide to the rules of a regular Perl variable. If necessary,
 curly braces can be used to separate placeholders from the rest of the path.
 
 There are three types of place holders: explicit, optional and wildcards.
@@ -512,7 +522,7 @@ The above can be shortened with like this:
 
 =head4 name
 
-Give the route a name, that can be used to build a url later via the L</url>
+Give the route a name, that can be used to build a URL later via the L</url>
 subroutine.
 
     $r->add(

@@ -14,7 +14,7 @@ attr res      => sub { die "res is not initialized" };
 sub request {
     my ( $self, $req ) = @_;
     $self->note($req->method . ' ' . $req->uri);
-    $self->res( test_psgi( $self->app->psgi, sub { shift->($req) } ) );
+    $self->res( test_psgi( $self->app->run, sub { shift->($req) } ) );
     return $self;
 }
 
@@ -111,11 +111,11 @@ Kelp::Test - Automated tests for a Kelp web app
 
 =head1 SYNOPSIS
 
-    use MyWebApp;
+    use MyApp;
     use Kelp::Test;
     use HTTP::Request::Common;
 
-    my $app = MyWebApp->new;
+    my $app = MyApp->new;
     my $t = Kelp::Test->new( app => $app );
 
     $t->request( GET '/path' )
@@ -129,7 +129,7 @@ Kelp::Test - Automated tests for a Kelp web app
 
 This module provides basic tools for testing a Kelp based web application. It
 is object oriented, and all methods return C<$self>, so they can be chained
-togehter.
+together.
 Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the L</request>
 method, which takes a single L<HTTP::Request> parameter. It sends the request to
@@ -208,7 +208,7 @@ name of the test can be added as a second parameter.
 
 C<content_type_is( $value, $test_name )>
 
-Tests if the last response's content-type header is equeal to C<$value>. An optional
+Tests if the last response's content-type header is equal to C<$value>. An optional
 name of the test can be added as a second parameter.
 
     $t->request( GET '/path' )->content_type_is("text/plain");

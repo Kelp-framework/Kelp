@@ -179,7 +179,7 @@ If no name is provided for the route, the C<pattern> is used.
 =head2 check
 
 A hashref with placeholder names as keys and regular expressions as values. It
-is used to match the values of the placeholders agains the provided regular
+is used to match the values of the placeholders against the provided regular
 expressions.
 
     my $p = Kelp::Routes::Patters->new(
@@ -212,7 +212,7 @@ of them, it will be used in case the placeholder value is missing.
 
 =head2 bridge
 
-A True/False falue. Specifies if the route is a bridge. For more information
+A True/False value. Specifies if the route is a bridge. For more information
 about bridges, please see L<Kelp::Routes/BRIDGES>
 
 =head2 regex
@@ -240,12 +240,12 @@ C<pattern>.
 
 =head2 named
 
-A hashref which will be initialized by the L</match> function. After matching,
+A HashRef which will be initialized by the L</match> function. After matching,
 it will contain placeholder names and values for the matched route.
 
 =head2 param
 
-An arrayref which will be initialized by the L</match> function. After matching,
+An ArrayRef which will be initialized by the L</match> function. After matching,
 it will contain all placeholder values in the order they were specified in the
 pattern.
 

@@ -16,7 +16,7 @@ use Kelp::Response;
 attr -host => hostname;
 attr -mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
-attr -name => 'Kelp';
+attr -name => sub { ref(shift) };
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
@@ -81,13 +81,13 @@ sub response {
     return Kelp::Response->new( app => $self );
 }
 
-# Override this to wrap middleware arround the app
-sub psgi {
+# Override this to wrap middleware around the app
+sub run {
     my $self = shift;
-    return sub { $self->run( @_ ) }
+    return sub { $self->psgi( @_ ) }
 }
 
-sub run {
+sub psgi {
     my ( $self, $env ) = @_;
 
     # Create the request and response objects
@@ -112,7 +112,7 @@ sub run {
             $self->_croak('Invalid destination for ' . $req->path);
         }
 
-        # Check if the destination finction exists
+        # Check if the destination function exists
         if ( !ref($to) && !exists &$to ) {
             $self->_croak(sprintf('Route not found %s for %s', $to, $req->path));
         }
@@ -151,7 +151,7 @@ sub run {
         # If the route returned something, then analyze it and render it
         if ( defined $data ) {
 
-            # Handle delayed reponse if CODE
+            # Handle delayed response if CODE
             return $data if ref($data) eq 'CODE';
             $res->render($data) unless $res->is_rendered;
         }
@@ -285,9 +285,9 @@ placeholders, wildcards, or just regular expressions.
 
 =item
 
-B<Flexible Configuration>. Use different config for each environment, e.g.
-development, deployment, etc. Merge a temporary configuration into your current
-one for testing and debugging purposes.
+B<Flexible Configuration>. Use different configuration file for each
+environment, e.g. development, deployment, etc. Merge a temporary configuration
+into your current one for testing and debugging purposes.
 
 =cut
 
@@ -300,7 +300,7 @@ file, screen, or anything supported by Log::Dispatcher.
 
 =item
 
-B<Powerful Rendering>. Use the bult-in auto-rendering logic, or the template
+B<Powerful Rendering>. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.
 
 =cut
@@ -332,6 +332,581 @@ routes, then analyzing the response.
 
 =head1 WHY KELP?
 
-What makes Kelp different from the other micro frameworks?
+What makes Kelp different from the other Perl micro frameworks? There are a
+number of fine web frameworks on CPAN and most of them provide a complete
+platform for web app building. While those other frameworks bring their own
+deployment code, Kelp is heavily I<Plack>-centric. It uses Plack as its foundation
+layer, and it builds the web framework on top of it. C<Kelp::Request> is an
+extension of C<Plack::Request>, C<Kelp::Response> is an extension of
+C<Plack::Response>.
+This approach of extending current CPAN code, puts familiar and well tested
+tools in the hands of the Kelp user.
+
+Kelp is a team player and it uses several popular, trusted CPAN modules for its
+internals. At the same time it doesn't include modules that it doesn't need,
+just because they are considered trendy. It does its best to keep a lean profile
+and a small footprint, and it's completely object manager agnostic.
+
+=head1 CREATING A NEW WEB APP
+
+=head2 Directory structure
+
+Before you begin writing the internals of your app, you need to create the
+directory structure.
+
+     .
+     |--/lib
+     |   |--MyApp.pm
+     |   |--/MyApp
+     |
+     |--/conf
+     |   |--myapp.conf
+     |   |--myapp_test.conf
+     |   |--myapp_deployment.conf
+     |
+     |--/view
+     |--/log
+     |--/t
+     |--app.psgi
+
+=over
+
+=item B</lib>
+
+The C<lib> folder contains your application modules and any local modules
+that you want your app to use.
+
+=cut
+
+=item B</conf>
+
+The C<conf> folder is where Kelp will look for configuration files. You need one
+main file, named exactly as your app, with the extension of C<.conf>. You can
+also add other files that define different running environments.
+To change the running environment, you can specify the app C<mode>, or you can
+set the C<KELP_ENV> environment variable.
+
+    my $app = MyApp->new( mode => 'development' );
+
+or
+
+    % KELP_ENV=development plackup app.psgi
+
+=cut
+
+=item B</view>
+
+This is where the C<Template> module will look for template files.
+
+=cut
+
+=item B</log>
+
+This is where the C<Logger> module will create C<error.log>, C<debug.log> and
+any other log files that were defined in the configuration.
+
+=cut
+
+=item B</t>
+
+The C<t> folder is traditionally used to hold test files. It is up to you to use
+it or not, although we strongly recommend that you write some automated test
+units for your web app.
+
+=cut
+
+=item B<app.psgi>
+
+This is the L<PSGI> file, of the app, which you will deploy. In it's most basic
+form it should look like this:
+
+    use lib '../lib';
+    use MyApp;
+
+    my $app = MyApp->new;
+    $app->run;
+
+=cut
+
+=back
+
+=head2 The application modules
+
+Your application's modules should be put in the C<lib/> folder. The main module,
+in our example C<MyApp.pm>, initializes any modules and variables that your
+app will use. Here is an example that uses C<Moose> to create lazy attributes
+and initialize a database connection:
+
+    package MyApp;
+    use Moose;
+
+    has dbh => (
+        is      => 'ro',
+        isa     => 'DBI' lazy => 1,
+        default => sub {
+            my $self   = shift;
+            my @config = @{ $self->config('dbi') };
+            return DBI->connect(@config);
+        }
+    );
+
+    sub build {
+        my $self = shift;
+        $self->route->add("/read/:id", "read");
+    }
+
+    sub read {
+        my ( $self, $id ) = @_;
+        $self->dbh->selectrow_array(q[
+            SELECT * FROM problems
+            WHERE id = ?
+        ], $id);
+    }
+
+    1;
+
+What is happening here?
+
+=over
+
+=item
+
+First, we create a lazy attribute and instruct it to connect to DBI. Notice that
+we have access to the current app and all of its internals via the C<$self>
+variable. Notice also that the reason we define C<dbh> as a I<lazy> attribute
+is that C<config> will not yet be initialized. All modules are initialized upon
+the creation of the object instance, e.g. when we call C<MyApp-E<gt>new>;
+
+=cut
+
+=item
+
+Then, we override Kelp's L</build> subroutine to create a single route
+C</read/:id>, which is assigned to the subroutine C<read> in the current module.
+
+=cut
+
+=item
+
+The C<read> subroutine, takes C<$self> and C<$id> (the named placeholder from the
+path), and uses C<$self-E<gt>dbh> to retrieve data.
+
+=cut
+
+=back
+
+I<A note about object managers:> The above example uses L<Moose>. It is entirely
+up to you to use Moose, another object manager, or no object manager at all.
+The above example will be just as successful if you used our own little
+L<Kelp::Base>:
+
+    package MyApp;
+    use Kelp::Base 'Kelp';
+
+    attr dbi => sub {
+        ...
+    };
+
+    1;
+
+=head2 Routing
+
+Kelp uses a powerful and very flexible router. Traditionally, it is also light
+and consists of less than 300 lines of loose code (commends included). You are
+encouraged to read L<Kelp::Routes>, but here are some key points. All examples
+are assumed to be inside the L</build> method and C<$r> is equal to
+C<$self-E<gt>routes>:
+
+=head3 Destinations
+
+You can direct HTTP paths to subroutines in your modules or, you can use inline
+code.
+
+    $r->add( "/home", "home" );  # goes to sub home
+    $r->add( "/legal", "legal#view" ); # goes to MyApp::Legal::view
+    $r->add( "/about", sub { "Content for about" }); # inline
+
+=head3 Restrict HTTP methods
+
+Make a route only catch a specific HTTP method:
+
+    $r->add( [ POST => '/update' ], "update_user" );
+
+=head3 Named captures
+
+Using regular expressions is so Perl. Sometimes, however, it gets a little
+overwhelming. Use named paths if you anticipate that you or someone else will
+ever want to maintain your code.
+
+=head4 Explicit
+
+    $r->add( "/update/:id", "update" );
+
+    # Later
+    sub update {
+        my ( $self, $id ) = @_;
+        # Do something with $id
+    }
+
+=head4 Optional
+
+    $r->add( "/person/?name", sub {
+        my ( $self, $name ) = @_;
+        return "I am " . $name // "nobody";
+    });
+
+This will handle C</person>, C</person/> and C</person/jack>.
+
+=head4 Wildcards
+
+    $r->add( '/*article/:id', 'articles#view' );
+
+This will handle C</bar/foo/baz/500> and send it to C<MyApp::Articles::view>
+with parameters C<$article> equal to C<bar/foo/baz> and C<$id> equal to 500.
+
+=head3 Placeholder restrictions
+
+Paths' named placeholders can be restricted by providing regular expressions.
+
+    $r->add( '/user/:id', {
+        check => { id => '\d+' },
+        to    => "users#get"
+    });
+
+    # Matches /user/1000, but not /user/abc
+
+=head3 Placeholder defaults
+
+This only applies to optional placeholders, or those prefixed with a question mark.
+If a default value is provided for any of them, it will be used in case the
+placeholder value is missing.
+
+    $r->add( '/:id/?other', defaults => { other => 'info' } );
+
+    # GET /100;
+    # { id => 100, other => 'info' }
+
+    # GET /100/delete;
+    # { id => 100, other => 'delete' }
+
+=head3 Bridges
+
+A I<bridge> is a route that has to return a true value in order for the next
+route in line to be processed.
+
+    $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
+    $r->add( '/users/:action' => 'Users::dispatch' );
+
+See L<Kelp::Routes/BRIDGES> for more information.
+
+=head3 URL building
+
+Each path can be given a name and later a URL can be build using that name and
+the necessary arguments.
+
+    $r->add( "/update/:id", { name => 'update', to => 'user#update' } );
+
+    # Later
+
+    my $url = $self->route->url('update', id => 1000); # /update/1000
+
+=head2 Quick development using Kelp::Less
+
+For writing quick experimental web apps and to reduce the boiler plate, one
+could use L<Kelp::Less>. In this case all of the code can be put in C<app.psgi>:
+Look up the POD for C<Kelp::Less> for many examples.
+
+=head2 Adding middleware
+
+Kelp, being Plack-centric, will let you easily add middleware. There are two
+ways to add middleware:
+
+In C<app.psgi>:
+
+    use MyApp;
+    use Plack::Builder;
+
+    my $app = MyApp->new();
+
+    builder {
+        enable "Plack::Middleware::ContentLength";
+        $app->run;
+    };
+
+By overloading the L</run> subroutine in C<lib/MyApp.pm>:
+
+    sub run {
+        my $self = shift;
+        my $app = $self->SUPER::run(@_);
+        Plack::Middleware::ContentLength->wrap($app);
+    }
+
+=head2 Deploying
+
+Deploying a Kelp application is done the same way one would deploy any Plack
+app.
+
+    % plackup -E deployment -s Starman app.psgi
+
+=head2 Testing
+
+Kelp provides a test module called C<Kelp::Test>. It is object oriented, and all
+methods return the C<Kelp::Test> object, so they can be chained together.
+Testing is done by sending HTTP requests to an already built application and
+analyzing the response. Therefore, each test usually begins with the
+L<Kelp::Test/request> method, which takes a single L<HTTP::Request> parameter.
+It sends the request to the web app and saves the response as an
+L<HTTP::Response> object.
+
+    # file t/test.t
+
+    use MyApp;
+    use Kelp::Test;
+    use Test::More;
+    use HTTP::Request::Common;
+
+    my $app = MyApp->new( mode => 'test' );
+    my $t = Kelp::Test->new( app => $app );
+
+    $t->request( GET '/path' )
+      ->code_is(200)
+      ->content_is("It works");
+
+    $t->request( POST '/api' )
+      ->json_cmp({auth => 1});
+
+    done_testing;
+
+What is happening here?
+
+=over
+
+=item
+
+First, we create an instance of the web application module, which we have
+previously built and placed in the C<lib/> folder. We set the mode of the app to
+C<test>, so that file C<conf/myapp_test.conf> overrides the main configuration.
+The test configuration can contain anything you see fit. Perhaps you want to
+disable certain modules, or maybe you want to make DBI connect to a different
+database.
+
+=cut
+
+=item
+
+Second, we create an instance of the C<Kelp::Test> class and tell it that it
+will perform all tests using our C<$app> instance.
+
+=cut
+
+=item
+
+At this point we are ready to send requests to the app via the
+L<request|Kelp::Test/request> method. It takes only one argument, an
+HTTP::Request object. It is very convenient to use the L<HTTP::Request::Common>
+module here, because you can create common requests using abridged syntax,
+i.e. C<GET>, C<POST>, etc.  The line C<$t-E<gt>request( GET '/path' )> fist
+creates a HTTP::Request GET object, and then passes it to the C<request> method.
+
+=cut
+
+=item
+
+After we send the request, we can test the response using any of the C<Test::>
+modules, or via the methods provided by L<Kelp::Test>.
+In the above example, we test if we got a code 200 back from C</path> and if the
+returned content was C<It works>.
+
+=cut
+
+=back
+
+Run the rest as usual, using C<prove>:
+
+    % prove -l t/test.t
+
+Take a look at the L<Kelp::Test> for details and more examples.
+
+=head1 ATTRIBUTES
+
+=head2 host
+
+Gets the current hostname.
+
+    sub some_route {
+        my $self = shift;
+        if ( $self->hostname eq 'prod-host' ) {
+            ...
+        }
+    }
+
+=head2 mode
+
+Sets or gets the current mode. The mode is important for the app to know what
+configuration file to merge into the main configuration. See
+L<Kelp::Module::Config> for more information.
+
+    my $app = MyApp->new( mode => 'development' );
+    # conf/myapp.conf and conf/myapp_development.conf are merged with priority
+    # given to the second one.
+
+=head2 path
+
+Gets the current path of the application. That would be the path to C<app.psgi>
+
+=head2 name
+
+Gets or sets the name of the application. If not set, the name of the main
+module will be used.
+
+    my $app = MyApp->new( name => 'Twittar' );
+
+The C<name> is used to look for configuration files. In the above example, the
+app will look for C<conf/twittar.conf> and C<conf/twittar_*.conf> files.
+
+=head2 charset
+
+Sets of gets the encoding charset of the app. It will be C<UTF-8>, if not set to
+anything else. The charset could also be changed in the config files.
+
+=head2 req
+
+This attribute only makes sense if called within a route definition. It will
+contain a reference to the current L<Kelp::Request> instance.
+
+    sub some_route {
+        my $self = shift;
+        if ( $self->req->is_json ) {
+            ...
+        }
+    }
+
+=head2 res
+
+This attribute only makes sense if called within a route definition. It will
+contain a reference to the current L<Kelp::Response> instance.
+
+    sub some_route {
+        my $self = shift;
+        $self->res->json->render( { success => 1 } );
+    }
+
+=head1 METHODS
+
+=head2 build
+
+On it's own the C<build> method doesn't do anything. It is called by the
+constructor, so it can be overridden to add route destinations and
+initializations.
+
+    package MyApp;
+
+    sub build {
+        my $self = shift;
+        my $r = $self->routes;
+
+        # Load some modules
+        $self->load_module("MongoDB");
+        $self->load_module("Validate");
+
+        # Add all route destinations
+        $r->add("/one", "one");
+        ...
+
+    }
+
+=head2 load_module
+
+Used to load a module. All modules must be under the C<Kelp::Module::>
+namespace.
+
+    $self->load_module("Redis");
+    # Will look for an load Kelp::Module::Redis
+
+See L<Kelp::Module> for more information on making and using modules.
+
+=head2 request
+
+This method is used to create the request object for each HTTP request. It
+returns and instance of L<Kelp::Request>, initialized with the current requests
+environment. You can override this method to use a custom request module.
+
+    package MyApp;
+    use MyApp::Request;
+
+    sub request {
+        my ( $self, $env ) = @_;
+        return MyApp::Requst->new( app => $app, env => $env );
+    }
+
+    # Now each request will be handled by MyApp::Request
+
+=head2 response
+
+This method creates the response object, e.g. what an HTTP request will return.
+By default the object created is L<Kelp::Response>. Much like L</request>, the
+response can also be overridden to use a custom response object.
+
+=head2 run
+
+This method builds and returns the PSGI app. You can override it in order to
+include middleware. See L</Adding middleware> for an example.
+
+=head2 param
+
+A shortcut to C<$self-E<gt>req-E<gt>param>:
+
+    sub some_route {
+        my $self = shift;
+        if ( $self->param('age') > 18 ) {
+            $self->can_watch_south_path(1);
+        }
+    }
+
+See L<Kelp::Request> for more information and examples.
+
+=head2 stash
+
+Provides safe access to C<$self-E<gt>req-E<gt>stash>. When called without
+arguments, it will return the stash hash. If called with a single argument, it
+will return the value of the corresponding key in the stash.
+See L<Kelp::Request/stash> for more information and examples.
+
+=head2 named
+
+Provides safe access to C<$self-E<gt>req-E<gt>named>. When called without
+arguments, it will return the named hash. If called with a single argument, it
+will return the value of the corresponding key in the named hash.
+See L<Kelp::Request/named> for more information and examples.
+
+=head2 url_for
+
+A safe shortcut to C<$self-E<gt>routes-E<gt>url>. Builds a URL from path and
+arguments.
+
+    sub build {
+        my $self = shift;
+        $self->routes->add("/:name/:id", { name => 'name', to => sub {
+            ...
+        }});
+    }
+
+    sub check {
+        my $self = shift;
+        my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
+        $self->res->redirect_to();
+    }
+
+=head1 SEE ALSO
+
+L<Kelp>
+
+=head1 CREDITS
+
+Author: minimalist - minimal@cpan.org
+
+=head1 LICENSE
+
+Same as Perl itself.
 
 =cut

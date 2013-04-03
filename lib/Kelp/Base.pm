@@ -113,7 +113,7 @@ are perfectly fine with L<Moo> or L<Mo>, for example.
 
     use Kelp::Base;
 
-The above will automaticaly include C<strict>, C<warnings> and C<v5.10>. It will
+The above will automatically include C<strict>, C<warnings> and C<v5.10>. It will
 also inject a new sub in the current class called C<attr>.
 
     attr name1 => 1;         # Fixed value
