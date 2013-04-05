@@ -221,7 +221,7 @@ __END__
 
 =pod
 
-=head1 TITLE
+=head1 NAME
 
 Kelp - A web framework light, yet rich in nutrients.
 
@@ -268,8 +268,8 @@ Or, for quick prototyping use L<Kelp::Less>:
 
 If you're going to be deploying a Perl based web application, chances are that
 you will be using Plack. Plack has almost all necessary tools to create and
-maintain a healthy web app. It has tons of middleware, and several very well
-tested high performance preforking servers, such as Starman.
+maintain a healthy web app. There is tons of middleware written for it, and
+several very well tested high performance preforking servers, such as Starman.
 
 Plack, however, is not a web framework, hence its creators have intentionally
 omitted adding certain components. This is where Kelp gets to shine. It provides
@@ -337,15 +337,15 @@ routes, then analyzing the response.
 
 =head1 WHY KELP?
 
-What makes Kelp different from the other Perl micro frameworks? There are a
-number of fine web frameworks on CPAN and most of them provide a complete
+What makes Kelp different from the other Perl micro web frameworks? There are a
+number of fine web frameworks on CPAN, and most of them provide a complete
 platform for web app building. While those other frameworks bring their own
 deployment code, Kelp is heavily I<Plack>-centric. It uses Plack as its foundation
 layer, and it builds the web framework on top of it. C<Kelp::Request> is an
 extension of C<Plack::Request>, C<Kelp::Response> is an extension of
 C<Plack::Response>.
 This approach of extending current CPAN code, puts familiar and well tested
-tools in the hands of the Kelp user.
+tools in the hands of the application developer.
 
 Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,

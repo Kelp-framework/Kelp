@@ -116,7 +116,7 @@ __END__
 
 =pod
 
-=head1 TITLE
+=head1 NAME
 
 Kelp::Response - Format an HTTP response
 

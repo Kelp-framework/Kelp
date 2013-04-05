@@ -81,7 +81,7 @@ __END__
 
 =pod
 
-=head1 TITLE
+=head1 NAME
 
 Kelp::Less - Quick prototyping with Kelp
 
