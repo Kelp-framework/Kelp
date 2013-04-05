@@ -10,6 +10,7 @@ our @EXPORT = qw/
   get
   post
   put
+  del
   run
   param
   stash
@@ -55,6 +56,11 @@ sub post {
 sub put {
     my ( $path, $to ) = @_;
     route ref($path) ? $path : [ PUT => $path ], $to;
+}
+
+sub del {
+    my ( $path, $to ) = @_;
+    route ref($path) ? $path : [ DELETE => $path ], $to;
 }
 
 sub run      { $app->run }
@@ -119,10 +125,15 @@ to a database or setup cache. C<Kelp::Less> exports L<attr|Kelp::Base/attr>,
 so you can use it to register attributes to your app.
 
     # Connect to DBI and CHI right away
-    attr dbh   => DBI->connect(...);
-    attr cache => CHI->new(...);
+    attr dbh => sub {
+        DBI->connect( @{ app->config('database') } );
+    };
 
-    # Lazy attribute. The code will be executed when app->version is called.
+    attr cache => sub {
+        CHI->new( @{ app->config('cache') } );
+    };
+
+    # Another lazy attribute.
     attr version => sub {
         app->dbh->selectrow_array("SELECT version FROM vars");
     };
@@ -133,12 +144,12 @@ so you can use it to register attributes to your app.
     if ( app->version ) { ... }
 
 Now is a good time to add routes. Routes are added via the L</route> keyword and
-they are automatically registered in your app. A route needs to parameters -
+they are automatically registered in your app. A route needs two parameters -
 C<path> and C<destination>. These are exactly equivalent to L<Kelp::Routes/add>,
-and you are encouraged to read its POD to get familiar with how to add routes.
+and you are encouraged to read its POD to get familiar with how to define routes.
 Here are a few examples for the impatient:
 
-    # Add a 'catch-all methods' route and send it to an anonymous sub
+    # Add a 'catch-all-methods' route and send it to an anonymous sub
     route '/hello/:name' => sub {
         return "Hello " . named('name');
     };
@@ -154,8 +165,7 @@ Here are a few examples for the impatient:
         ...
     }
 
-Each route subroutine receives C<$self> and all named placeholders, so one could
-use them, if it makes it easier to understand where it all comes from.
+Each route subroutine receives C<$self> and all named placeholders.
 
     route '/:id/:page' => sub {
         my ( $self, $id, $page ) = @_;
@@ -171,7 +181,7 @@ via a single command:
 
     run;
 
-It returns PSGI ready structure, so you can immediately deploy your new app via
+It returns PSGI ready subroutine, so you can immediately deploy your new app via
 Plack:
 
     % plackup myapp.psgi
@@ -206,13 +216,14 @@ the exact same parameters. See L<Kelp::Routes> for enlightenment.
 
     route '/get' => sub { "got" };
 
-=head2 get, post, put
+=head2 get, post, put, del
 
 These are shortcuts to C<route> restricted to the corresponding HTTP method.
 
     get '/data'  => sub { "Only works with GET" };
     post '/data' => sub { "Only works with POST" };
     put '/data'  => sub { "Only works with PUT" };
+    del '/data'  => sub { "Only works with DELETE" };
 
 =head2 param
 
@@ -304,7 +315,7 @@ L<Kelp>
 
 =head1 CREDITS
 
-Author: minimalist - minimal@cpan.org
+Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 ACKNOWLEDGEMENTS
 

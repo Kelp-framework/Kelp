@@ -111,3 +111,193 @@ sub template {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 TITLE
+
+Kelp::Response - Format an HTTP response
+
+=head1 SYNOPSIS
+
+Examples of route definitions make a lot more sense when showing how to use this
+module. Note that in the below examples C<$self-E<gt>res> is an instance of
+C<Kelp::Response>:
+
+    # Render simple text
+    sub text {
+        my $self = shift;
+        $self->res->text->render("It works!");
+    }
+
+    # Render advanced HTML
+    sub html {
+        my $self = shift;
+        $self->res->html->render("<h1>It works!</h1>");
+    }
+
+    # Render a mysterious JSON structure
+    sub json {
+        my $self = shift;
+        $self->res->json->render({ why => 'no' });
+    }
+
+    # Render the stock 404
+    sub missing {
+        my $self = shift;
+        $self->res->render_404;
+    }
+
+    # Render a template
+    sub view {
+        my $self = shift;
+        $self->res->template('view.tt', { name => 'Rick James' } );
+    }
+
+=head1 DESCRIPTION
+
+The L<PSGI> specification requires that each route returns an array with status
+code, headers and body. C<Plack::Response> already provides many useful methods
+that deal with that. This module extends C<Plack::Response> to add the tools we
+need to write graceful PSGI compliant responses. Some methods return C<$self>,
+which makes them easy to chain.
+
+=head1 ATTRIBUTES
+
+=head2 render
+
+This method tries to act smart, without being a control freak. It will will out
+the blanks, unless they were previously filled out by someone else. Here is what
+is does:
+
+=over
+
+=item
+
+If the response code was not previously set, this method will set it to 200.
+
+=cut
+
+=item
+
+If no content-type is previously set, C<render> will set is based on the type of
+the data rendered. If it's a reference, then the content-type will be set to
+C<application/json>, otherwise it will be set to C<text/html>.
+
+    # Will set the content-type to json
+    $res->render( { numbers => [ 1, 2, 3 ] } );
+
+=cut
+
+=item
+
+Last, the data will be encoded with the charset specified by the app.
+
+=cut
+
+=back
+
+=head2 set_content_type
+
+Sets the content type of the response and returns C<$self>.
+
+    # Inside a route definition
+    $self->res->set_content_type('image/png');
+
+=head2 text, html, json, xml
+
+These methods are shortcuts for C<set_content_type> with the corresponding type.
+All of them set the content-type header and return C<$self> so they can be
+chained.
+
+    $self->res->text->render("word");
+    $self->res->html->render("<p>word</p>");
+    $self->res->json->render({ word => \1 });
+
+=head2 set_header
+
+Sets response headers. This is a wrapper around L<Plack::Response/header>, which
+returns C<$self> to allow for chaining.
+
+    $self->res->set_header('X-Something' => 'Value')->text->render("Hello");
+
+=head2 no_cache
+
+A convenience method that sets several response headers instructing most
+browsers to not cache the response.
+
+    $self->res->no_cache->json->render({ epoch => time });
+
+The above response will contain headers that disable caching.
+
+=head2 set_code
+
+Set the response code.
+
+    $self->res->set_code(401)->render("Access denied");
+
+=head2 render_404
+
+A convenience method that sets code 404 and returns "File Not Found".
+
+    sub some_route {
+        if ( not $self->req->param('ok') ) {
+            return $self->res->render_404;
+        }
+    }
+
+If your application's tone is overly friendly or humorous, you will want to create a
+custom 404 page. The best way to do this is to subclass this module into your
+own class, for example C<MyApp::Response>. Then override the C<render_404> method.
+
+    package MyApp::Response;
+    use parent 'Kelp::Response';
+
+    sub render_404 {
+        my $self = shift;
+        $self->set_code(404)->template('errors/404.tt');
+    }
+
+You'll have to override the L<Kelp/response> method in your main module too, in
+order to instruct it to use your new class:
+
+    package MyApp;
+    use parent 'Kelp';
+
+    sub response {
+        my $self = shift;
+        return MyApp::Response->new( app => $self );
+    }
+
+=head2 render_500
+
+Renders the stock "500 - Server Error" message. See L</render_404> for examples
+on how to customize it.
+
+=head2 template
+
+This method renders a template. The template should be previously configured by
+you and included via a module. See L<Kelp::Module::Template> for a template
+module.
+
+    sub some_route {
+        my $self = shift;
+        $self->res->template('home.tt', { login => 'user' });
+    }
+
+
+=head1 SEE ALSO
+
+L<Kelp>
+
+=head1 CREDITS
+
+Author: Stefan Geneshky - minimal@cpan.org
+
+=head1 LICENSE
+
+Same as Perl itself.
+
+=cut

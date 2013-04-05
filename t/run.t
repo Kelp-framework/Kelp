@@ -107,6 +107,9 @@ $t->request( GET "/meth2" )->content_is("OK");
 $app->add_route( [ PUT => "/meth3" ] => sub { "OK" } );
 $t->request( PUT "/meth3" )->content_is("OK");
 
+# Before render
+$t->request( GET "/meth2" )->header_is('X-Framework', 'Perl Kelp');
+
 done_testing;
 
 sub bridge {

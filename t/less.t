@@ -1,6 +1,6 @@
 use Kelp::Test;
 use Kelp::Less mode => 'test';
-use HTTP::Request::Common;
+use HTTP::Request::Common qw/GET PUT POST DELETE/;
 use Test::More;
 
 my $t = Kelp::Test->new( app => app );
@@ -15,6 +15,7 @@ $t->request( PUT '/route' )->content_is("A");
 get '/get'   => sub { "B" };
 post '/post' => sub { "C" };
 put '/put'   => sub { "D" };
+del '/del'   => sub { "DD" };
 $t->request( GET '/get' )->content_is("B");
 $t->request( POST '/get' )->code_is(404);
 $t->request( GET '/post' )->code_is(404);
@@ -22,6 +23,8 @@ $t->request( POST '/post' )->content_is("C");
 $t->request( GET '/put' )->code_is(404);
 $t->request( POST '/put' )->code_is(404);
 $t->request( PUT '/put' )->content_is("D");
+$t->request( DELETE '/del' )->content_is("DD");
+$t->request( GET '/del' )->code_is(404);
 
 # param
 route '/param' => sub { [ param ] };

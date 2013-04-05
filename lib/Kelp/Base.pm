@@ -143,7 +143,7 @@ L<Kelp>, L<Moose>, L<Moo>, L<Mo>, L<Any::Moose>
 
 =head1 CREDITS
 
-Author: minimalist - minimal@cpan.org
+Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 LICENSE
 

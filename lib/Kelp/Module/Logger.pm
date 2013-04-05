@@ -26,7 +26,7 @@ sub build {
     # Register the log levels
     $self->register(%LEVELS);
 
-    # Also register the the message method as 'logger'
+    # Also register the message method as 'logger'
     $self->register( logger => sub {
         shift;
         $self->message(@_);

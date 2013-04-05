@@ -5,7 +5,6 @@ use Plack::Test;
 use Test::More import => ['!note'];
 use Test::Deep;
 use Carp;
-use Exporter;
 use Encode ();
 
 attr -app     => sub { die "app is required" };
@@ -31,10 +30,25 @@ sub code_is {
     return $self;
 }
 
+sub code_isnt {
+    my ( $self, $code, $test_name ) = @_;
+    $test_name ||= "Response code is not $code";
+    isnt $self->res->code, $code, $test_name;
+    return $self;
+}
+
 sub content_is {
     my ( $self, $value, $test_name ) = @_;
-    $test_name ||= "Content matches '$value'";
+    $test_name ||= "Content is '$value'";
     is Encode::decode( $self->app->charset, $self->res->content ), $value,
+      $test_name;
+    return $self;
+}
+
+sub content_isnt {
+    my ( $self, $value, $test_name ) = @_;
+    $test_name ||= "Content is not '$value'";
+    isnt Encode::decode( $self->app->charset, $self->res->content ), $value,
       $test_name;
     return $self;
 }
@@ -47,10 +61,25 @@ sub content_like {
     return $self;
 }
 
+sub content_unlike {
+    my ( $self, $regexp, $test_name ) = @_;
+    $test_name ||= "Content does not match $regexp";
+    unlike Encode::decode( $self->app->charset, $self->res->content ), $regexp,
+      $test_name;
+    return $self;
+}
+
 sub content_type_is {
     my ( $self, $value, $test_name ) = @_;
     $test_name ||= "Content-Type is '$value'";
     is $self->res->content_type, $value, $test_name;
+    return $self;
+}
+
+sub content_type_isnt {
+    my ( $self, $value, $test_name ) = @_;
+    $test_name ||= "Content-Type is not '$value'";
+    isnt $self->res->content_type, $value, $test_name;
     return $self;
 }
 
@@ -62,10 +91,18 @@ sub header_is {
     return $self;
 }
 
-sub header_like {
+sub header_isnt {
+    my ( $self, $header, $value, $test_name ) = @_;
+    $test_name ||= "Header '$header' is not '$value'";
+    isnt $self->res->header($header), $value, $test_name
+      || $self->diag_headers();
+    return $self;
+}
+
+sub header_unlike {
     my ( $self, $header, $regexp, $test_name ) = @_;
-    $test_name ||= "Header '$header' =~ $regexp";
-    like $self->res->header($header), $regexp, $test_name
+    $test_name ||= "Header '$header' !~ $regexp";
+    unlike $self->res->header($header), $regexp, $test_name
       || $self->diag_headers();
     return $self;
 }
@@ -174,62 +211,71 @@ you can take advantage of the simplified syntax for creating a HTTP request.
 
 This method returns C<$self>, so other methods can be chained after it.
 
-=head2 code_is
+=head2 code_is, code_isnt
 
 C<code_is( $code, $test_name )>
+C<code_isnt( $code, $test_name )>
 
-Tests if the last response returned a status code equal to C<$code>. An optional
-name of the test can be added as a second parameter.
-
-    $t->request( GET '/path' )->code_is(200);
-
-If the returned code is 500 and another code was expected, this method will
-C<fail> with the contents of the response, showing the error message.
-
-=head2 content_is
-
-C<content_is( $value, $test_name )>
-
-Tests if the last response returned content equal to C<$value>. An optional
-name of the test can be added as a second parameter.
-
-    $t->request( GET '/path' )->content_is("Ok.");
-
-=head2 content_like
-
-C<content_like( $regexp, $test_name )>
-
-Tests if the last response returned content that matches C<$regexp>. An optional
-name of the test can be added as a second parameter.
-
-    $t->request( GET '/path' )->content_like(qr{Amsterdam});
-
-=head2 content_type_is
-
-C<content_type_is( $value, $test_name )>
-
-Tests if the last response's content-type header is equal to C<$value>. An optional
-name of the test can be added as a second parameter.
-
-    $t->request( GET '/path' )->content_type_is("text/plain");
-
-=head2 header_is
-
-C<header_is( $header, $value, $test_name )>
-
-Tests if the last response returned a header C<$header> that is equal to
-C<$value>. An optional name of the test can be added as a second parameter.
-
-    $t->request( GET '/path' )->header_is( "Pragma", "no-cache" );
-
-=head2 header_like
-
-C<header_like( $header, $regexp, $test_name )>
-
-Tests if the last response returned a header C<$header> that matches C<$regexp>.
+Tests if the last response returned a status code equal or not equal to C<$code>.
 An optional name of the test can be added as a second parameter.
 
-    $t->request( GET '/path' )->header_is( "Content-Type", qr/json/ );
+    $t->request( GET '/path' )->code_is(200);
+    $t->request( GET '/path' )->code_isnt(500);
+
+=head2 content_is, content_isnt
+
+C<content_is( $value, $test_name )>
+C<content_isnt( $value, $test_name )>
+
+Tests if the last response returned content equal or not equal to C<$value>.
+An optional name of the test can be added as a second parameter.
+
+    $t->request( GET '/path' )->content_is("Ok.");
+    $t->request( GET '/path' )->content_isnt("Fail.");
+
+=head2 content_like, content_unlike
+
+C<content_like( $regexp, $test_name )>
+C<content_unlike( $regexp, $test_name )>
+
+Tests if the last response returned content that matches or doesn't match C<$regexp>.
+An optional name of the test can be added as a second parameter.
+
+    $t->request( GET '/path' )->content_like(qr{Amsterdam});
+    $t->request( GET '/path' )->content_unlike(qr{Rotterdam});
+
+=head2 content_type_is, content_type_isnt
+
+C<content_type_is( $value, $test_name )>
+C<content_type_isnt( $value, $test_name )>
+
+Tests if the last response's content-type header is equal or not eual to C<$value>.
+An optional name of the test can be added as a second parameter.
+
+    $t->request( GET '/path' )->content_type_is("text/plain");
+    $t->request( GET '/path' )->content_type_isnt("text/html");
+
+=head2 header_is, header_isnt
+
+C<header_is( $header, $value, $test_name )>
+C<header_isnt( $header, $value, $test_name )>
+
+Tests if the last response returned a header C<$header> that is equal or not
+equal to C<$value>. An optional name of the test can be added as a second parameter.
+
+    $t->request( GET '/path' )->header_is( "Pragma", "no-cache" );
+    $t->request( GET '/path' )->header_isnt( "X-Check", "yes" );
+
+=head2 header_like, header_unlike
+
+C<header_like( $header, $regexp, $test_name )>
+C<header_unlike( $header, $regexp, $test_name )>
+
+Tests if the last response returned a header C<$header> that matches or doesn't
+match C<$regexp>. An optional name of the test can be added as a second parameter.
+
+    $t->request( GET '/path' )->header_like( "Content-Type", qr/json/ );
+    $t->request( GET '/path' )->header_unlike( "Content-Type", qr/image/ );
 
 =head2 json_cmp
 
@@ -283,7 +329,7 @@ L<Kelp>
 
 =head1 CREDITS
 
-Author: minimalist - minimal@cpan.org
+Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 LICENSE
 

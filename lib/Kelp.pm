@@ -12,6 +12,8 @@ use Plack::Util;
 use Kelp::Request;
 use Kelp::Response;
 
+our $VERSION = 0.10;
+
 # Basic attributes
 attr -host => hostname;
 attr -mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
@@ -37,14 +39,10 @@ sub new {
 
     # Load the modules from the config
     $self->load_module($_)
-      for ( qw(Config Routes), @{ $self->config('modules') } );
+      for (  @{ $self->config('modules') } );
 
     $self->build();
     return $self;
-}
-
-# Override this one to add custom initializations
-sub build {
 }
 
 sub load_module {
@@ -65,9 +63,9 @@ sub load_module {
     return $module;
 }
 
-#----------------------------------------------------------------
-# Methods
-#----------------------------------------------------------------
+# Override this one to add custom initializations
+sub build {
+}
 
 # Override to use a custom request object
 sub request {
@@ -79,6 +77,12 @@ sub request {
 sub response {
     my $self = shift;
     return Kelp::Response->new( app => $self );
+}
+
+# Override to manipulate the end response
+sub before_render {
+    my $self = shift;
+    $self->res->header('X-Framework' => 'Perl Kelp');
 }
 
 # Override this to wrap middleware around the app
@@ -164,6 +168,7 @@ sub psgi {
 
     }
 
+    $self->before_render;
     $res->finalize;
 }
 
@@ -442,7 +447,8 @@ and initialize a database connection:
 
     has dbh => (
         is      => 'ro',
-        isa     => 'DBI' lazy => 1,
+        isa     => 'DBI',
+        lazy    => 1,
         default => sub {
             my $self   = shift;
             my @config = @{ $self->config('dbi') };
@@ -727,6 +733,93 @@ Run the rest as usual, using C<prove>:
 
 Take a look at the L<Kelp::Test> for details and more examples.
 
+=head2 Building an HTTP response
+
+Kelp contains an elegant module, called L<Kelp::Response>, which extends
+C<Plack::Response> with several useful methods. Most methods return C<$self>
+after they do the required job.
+For the sake of the examples below, let's assume that all of the code is located
+inside a route definition.
+
+=head3 Automatic content type
+
+Your routes don't always have to set the C<response> object. You could just
+return a simple scalar value or a reference to a hash, array or anything that
+can be converted to JSON.
+
+    # Content-type automatically set to "text/html"
+    sub text_route {
+        return "There, there ...";
+    }
+
+    # Content-type automatically set to "application/json"
+    sub json_route {
+        return { error => 1,  message => "Fail" };
+    }
+
+
+=head3 Rendering text
+
+    # Render simple text
+    $self->res->text->render("It works!");
+
+=head3 Rendering HTML
+
+    $self->res->html->render("<h1>It works!</h1>");
+
+=head3 Custom content type
+
+    $self->res->set_content_type('image/png');
+
+=head3 Return 404 or 500 errors
+
+    sub some_route {
+        my $self = shift;
+        if ($missing) {
+            return $self->res->render_404;
+        }
+        if ($broken) {
+            return $self->res->render_500;
+        }
+    }
+
+=head3 Templates
+
+    sub hello {
+        my ( $self, $name ) = @_;
+        $self->res->template( 'hello.tt', { name => $name } );
+    }
+
+The above example will render the contents of C<hello.tt>, and it will set the
+content-type to C<text/html>. To set a different content-type, use
+C<set_content_type> or any of its aliases:
+
+    sub hello_txt {
+        my ( $self, $name ) = @_;
+        $self->res->text->template( 'hello_txt.tt', { name => $name } );
+    }
+
+=head3 Headers
+
+    $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
+
+=head3 Delayed responses
+
+To send a delayed response, have your route return a subroutine.
+
+    sub delayed {
+        my $self = shift;
+        return sub {
+            my $responder = shift;
+            $self->res->code(200);
+            $self->res->text->body("Better late than never.");
+            $responder->($self->res->finalize);
+        };
+    }
+
+See the L<PSGI|PSGI/Delayed-Response-and-Streaming-Body> pod for more
+information and examples.
+
 =head1 ATTRIBUTES
 
 =head2 host
@@ -841,6 +934,23 @@ environment. You can override this method to use a custom request module.
 
     # Now each request will be handled by MyApp::Request
 
+=head2 before_render
+
+Override this method, to modify the response object just before it gets
+rendered.
+
+    package MyApp;
+
+    sub before_render {
+        my $self = shift;
+        $self->res->set_header("X-App-Name", "MyApp");
+    }
+
+    ...
+
+The above is an example of how to insert a custom header into the response of
+every route.
+
 =head2 response
 
 This method creates the response object, e.g. what an HTTP request will return.
@@ -903,7 +1013,7 @@ L<Kelp>
 
 =head1 CREDITS
 
-Author: minimalist - minimal@cpan.org
+Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 LICENSE
 

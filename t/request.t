@@ -34,6 +34,9 @@ $app->add_route('/param/:n', sub {
         my %h = map { $_ => $self->param($_) } $self->param;
         return \%h;
     }
+    elsif ($n == 3) {
+        return scalar($self->param);
+    }
 });
 $t->request( POST '/param/1',
     'Content-Type' => 'application/json',
@@ -47,7 +50,14 @@ $t->request( POST '/param/2',
     'Content' => '{"a":"bar","b":"foo"}'
     )
   ->code_is(200)
-  ->json_cmp({a => "bar", b => "foo"}, "Get JSON struct of params");
+  ->json_cmp({a => "bar", b => "foo"}, "JSON array context");
+
+$t->request( POST '/param/3',
+    'Content-Type' => 'application/json',
+    'Content' => '{"a":"bar","b":"foo"}'
+    )
+  ->code_is(200)
+  ->json_cmp({a => "bar", b => "foo"}, "JSON scalar context");
 
 $t->request( POST '/param/1', [a => "bar", b => "foo"])
   ->code_is(200)
@@ -55,6 +65,6 @@ $t->request( POST '/param/1', [a => "bar", b => "foo"])
 
 $t->request( POST '/param/2', [a => "bar", b => "foo"])
   ->code_is(200)
-  ->json_cmp({a => "bar", b => "foo"}, "Get POST struct of params");
+  ->json_cmp({a => "bar", b => "foo"}, "POST array context");
 
 done_testing;

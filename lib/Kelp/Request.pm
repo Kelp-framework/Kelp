@@ -40,7 +40,7 @@ sub param {
         croak "No JSON decoder" unless $self->app->can('json');
         my $hash = $self->app->json->decode( $self->content );
         croak "JSON hash expected" unless ref($hash) eq 'HASH';
-        return @_ ? $hash->{$_[0]} : keys %$hash;
+        return @_ ? $hash->{$_[0]} : (wantarray ? keys %$hash : $hash);
     }
 
     return $self->SUPER::param(@_);
@@ -54,7 +54,7 @@ __END__
 
 =head1 NAME
 
-Kelp::Request - Request class for a Kelp app
+Kelp::Request - Request class for a Kelp application
 
 =head1 SYNOPSIS
 
@@ -62,8 +62,8 @@ Kelp::Request - Request class for a Kelp app
 
 =head1 DESCRIPTION
 
-    This module provides a convenience layer on top of L<Plack::Request>. It
-    inherits all of of its methods and adds some more.
+This module provides a convenience layer on top of L<Plack::Request>. It extends
+it to add several convenience methods.
 
 =head1 ATTRIBUTES
 
@@ -80,6 +80,58 @@ An all use, utility hash to use to pass information between routes.
 This hash is initialized with the named placeholders of the path that the
 current route is processing.
 
+=head2 param
 
-=end
+Returns the HTTP parameters of the request. This method delegates all the work
+to L<Plack::Request/param>, except when the content type of the request is
+C<application/json>. In that case, it will decode the JSON body and return as
+follows:
+
+=over
+
+=item
+
+If no arguments are passed, then it will return the names of the HTTP parameters
+when called in array contest, and a reference to the entire JSON hash when
+called in scalar context.
+
+    # JSON body = { bar => 1, foo => 2 }
+    my @names = $self->param;   # @names = ('bar', 'foo')
+    my $json = $self->param;    # $json = { bar => 1, foo => 2 }
+
+
+=cut
+
+=item
+
+If a single argument is passed, then the corresponding value in the JSON
+document is returned.
+
+    my $bar = $self->param('bar');  # $bar = 1
+
+=cut
+
+=back
+
+=head2 is_ajax
+
+Returns true if the request was called with C<XMLHttpRequest>.
+
+=head2 is_json
+
+Returns true if the request's content type was C<application/json>.
+
+=head1 SEE ALSO
+
+L<Kelp>
+
+=head1 CREDITS
+
+Author: Stefan Geneshky - minimal@cpan.org
+
+=head1 LICENSE
+
+Same as Perl itself.
+
+=cut
 

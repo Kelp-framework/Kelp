@@ -600,7 +600,7 @@ L<Kelp>, L<Routes::Tiny>, L<Forward::Routes>
 
 =head1 CREDITS
 
-Author: minimalist - minimal@cpan.org
+Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 ACKNOWLEDGEMENTS
 
