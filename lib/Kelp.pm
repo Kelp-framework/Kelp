@@ -756,7 +756,6 @@ can be converted to JSON.
         return { error => 1,  message => "Fail" };
     }
 
-
 =head3 Rendering text
 
     # Render simple text

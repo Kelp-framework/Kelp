@@ -23,7 +23,6 @@ sub greet {
 }
 
 1;
-
 ```
 
 File `app.psgi`:
@@ -32,7 +31,6 @@ File `app.psgi`:
 use MyWebApp;
 my $app = MyWebApp->new;
 $app->run;
-
 ```
 
 Or, for quick prototyping use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less):
@@ -46,7 +44,6 @@ get '/hello/?name' => sub {
 };
 
 run;
-
 ```
 
 # DESCRIPTION
@@ -106,7 +103,7 @@ and a small footprint, and it's completely object manager agnostic.
 Before you begin writing the internals of your app, you need to create the
 directory structure.
 
-```
+```none
  .
  |--/lib
  |   |--MyApp.pm
@@ -121,7 +118,6 @@ directory structure.
  |--/log
  |--/t
  |--app.psgi
-
 ```
 
 - __/lib__
@@ -144,7 +140,7 @@ directory structure.
 
     or
 
-    ```bash
+    ```none
     % KELP_ENV=development plackup app.psgi
 
     ```
@@ -214,7 +210,6 @@ sub read {
 }
 
 1;
-
 ```
 
 What is happening here?
@@ -243,7 +238,6 @@ attr dbi => sub {
 };
 
 1;
-
 ```
 
 ## Routing
@@ -263,7 +257,6 @@ code.
 $r->add( "/home", "home" );  # goes to sub home
 $r->add( "/legal", "legal#view" ); # goes to MyApp::Legal::view
 $r->add( "/about", sub { "Content for about" }); # inline
-
 ```
 
 ### Restrict HTTP methods
@@ -272,7 +265,6 @@ Make a route only catch a specific HTTP method:
 
 ```perl
 $r->add( [ POST => '/update' ], "update_user" );
-
 ```
 
 ### Named captures
@@ -291,7 +283,6 @@ sub update {
     my ( $self, $id ) = @_;
     # Do something with $id
 }
-
 ```
 
 #### Optional
@@ -301,7 +292,6 @@ $r->add( "/person/?name", sub {
     my ( $self, $name ) = @_;
     return "I am " . $name // "nobody";
 });
-
 ```
 
 This will handle `/person`, `/person/` and `/person/jack`.
@@ -310,7 +300,6 @@ This will handle `/person`, `/person/` and `/person/jack`.
 
 ```perl
 $r->add( '/*article/:id', 'articles#view' );
-
 ```
 
 This will handle `/bar/foo/baz/500` and send it to `MyApp::Articles::view`
@@ -327,7 +316,6 @@ $r->add( '/user/:id', {
 });
 
 # Matches /user/1000, but not /user/abc
-
 ```
 
 ### Placeholder defaults
@@ -344,7 +332,6 @@ $r->add( '/:id/?other', defaults => { other => 'info' } );
 
 # GET /100/delete;
 # { id => 100, other => 'delete' }
-
 ```
 
 ### Bridges
@@ -355,7 +342,6 @@ route in line to be processed.
 ```perl
 $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
 $r->add( '/users/:action' => 'Users::dispatch' );
-
 ```
 
 See ["BRIDGES" in Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes#BRIDGES) for more information.
@@ -371,7 +357,6 @@ $r->add( "/update/:id", { name => 'update', to => 'user#update' } );
 # Later
 
 my $url = $self->route->url('update', id => 1000); # /update/1000
-
 ```
 
 ## Quick development using Kelp::Less
@@ -397,7 +382,6 @@ builder {
     enable "Plack::Middleware::ContentLength";
     $app->run;
 };
-
 ```
 
 By overloading the ["run"](#run) subroutine in `lib/MyApp.pm`:
@@ -408,7 +392,6 @@ sub run {
     my $app = $self->SUPER::run(@_);
     Plack::Middleware::ContentLength->wrap($app);
 }
-
 ```
 
 ## Deploying
@@ -416,9 +399,8 @@ sub run {
 Deploying a Kelp application is done the same way one would deploy any Plack
 app.
 
-```bash
+```none
 % plackup -E deployment -s Starman app.psgi
-
 ```
 
 ## Testing
@@ -450,7 +432,6 @@ $t->request( POST '/api' )
   ->json_cmp({auth => 1});
 
 done_testing;
-
 ```
 
 What is happening here?
@@ -476,9 +457,8 @@ returned content was `It works`.
 
 Run the rest as usual, using `prove`:
 
-```bash
+```none
 % prove -l t/test.t
-
 ```
 
 Take a look at the [Kelp::Test](http://search.cpan.org/perldoc?Kelp::Test) for details and more examples.
@@ -507,9 +487,6 @@ sub text_route {
 sub json_route {
     return { error => 1,  message => "Fail" };
 }
-
-
-
 ```
 
 ### Rendering text
@@ -517,21 +494,18 @@ sub json_route {
 ```perl
 # Render simple text
 $self->res->text->render("It works!");
-
 ```
 
 ### Rendering HTML
 
 ```perl
 $self->res->html->render("<h1>It works!</h1>");
-
 ```
 
 ### Custom content type
 
 ```perl
 $self->res->set_content_type('image/png');
-
 ```
 
 ### Return 404 or 500 errors
@@ -546,7 +520,6 @@ sub some_route {
         return $self->res->render_500;
     }
 }
-
 ```
 
 ### Templates
@@ -556,7 +529,6 @@ sub hello {
     my ( $self, $name ) = @_;
     $self->res->template( 'hello.tt', { name => $name } );
 }
-
 ```
 
 The above example will render the contents of `hello.tt`, and it will set the
@@ -568,14 +540,12 @@ sub hello_txt {
     my ( $self, $name ) = @_;
     $self->res->text->template( 'hello_txt.tt', { name => $name } );
 }
-
 ```
 
 ### Headers
 
 ```perl
 $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
-
 ```
 
 ### Delayed responses
@@ -592,7 +562,6 @@ sub delayed {
         $responder->($self->res->finalize);
     };
 }
-
 ```
 
 See the [PSGI](http://search.cpan.org/perldoc?PSGI#Delayed-Response-and-Streaming-Body) pod for more
@@ -611,7 +580,6 @@ sub some_route {
         ...
     }
 }
-
 ```
 
 ## mode
@@ -624,7 +592,6 @@ configuration file to merge into the main configuration. See
 my $app = MyApp->new( mode => 'development' );
 # conf/myapp.conf and conf/myapp_development.conf are merged with priority
 # given to the second one.
-
 ```
 
 ## path
@@ -638,7 +605,6 @@ module will be used.
 
 ```perl
 my $app = MyApp->new( name => 'Twittar' );
-
 ```
 
 The `name` is used to look for configuration files. In the above example, the
@@ -661,7 +627,6 @@ sub some_route {
         ...
     }
 }
-
 ```
 
 ## res
@@ -674,7 +639,6 @@ sub some_route {
     my $self = shift;
     $self->res->json->render( { success => 1 } );
 }
-
 ```
 
 # METHODS
@@ -701,7 +665,6 @@ sub build {
     ...
 
 }
-
 ```
 
 ## load\_module
@@ -712,7 +675,6 @@ namespace.
 ```perl
 $self->load_module("Redis");
 # Will look for an load Kelp::Module::Redis
-
 ```
 
 See [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module) for more information on making and using modules.
@@ -733,7 +695,6 @@ sub request {
 }
 
 # Now each request will be handled by MyApp::Request
-
 ```
 
 ## before\_render
@@ -750,7 +711,6 @@ sub before_render {
 }
 
 ...
-
 ```
 
 The above is an example of how to insert a custom header into the response of
@@ -778,7 +738,6 @@ sub some_route {
         $self->can_watch_south_path(1);
     }
 }
-
 ```
 
 See [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request) for more information and examples.
@@ -815,7 +774,6 @@ sub check {
     my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
     $self->res->redirect_to();
 }
-
 ```
 
 # SEE ALSO

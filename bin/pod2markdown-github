@@ -17,8 +17,7 @@ sub verbatim {
 
         # find the smallest indentation
         $indent = $1     if length($1) < length($indent);
-        $syntax = ''     if $line =~ /^\s*\|/;
-        $syntax = 'bash' if $line =~ /^\s*\%/;
+        $syntax = 'none' if $line =~ /^\s*(\||\%)/;
     }
 
     if( (my $smallest = length($indent)) < 4 ){
@@ -50,6 +49,13 @@ sub auto {
 
 sub command { shift->auto( @_) }
 sub textblock { shift->auto( @_) }
+
+sub as_markdown {
+    my $self = shift;
+    my $text = $self->SUPER::as_markdown(@_);
+    $text =~ s/\s+\n```$/\n```/gm;
+    return $text;
+}
 
 package main;
 use strict;
