@@ -135,15 +135,13 @@ directory structure.
 
     ```perl
     my $app = MyApp->new( mode => 'development' );
-
-    ```
+```
 
     or
 
     ```none
     % KELP_ENV=development plackup app.psgi
-
-    ```
+```
 
 - __/view__
 
@@ -171,8 +169,7 @@ directory structure.
 
     my $app = MyApp->new;
     $app->run;
-
-    ```
+```
 
 ## The application modules
 

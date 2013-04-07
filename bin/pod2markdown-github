@@ -53,7 +53,7 @@ sub textblock { shift->auto( @_) }
 sub as_markdown {
     my $self = shift;
     my $text = $self->SUPER::as_markdown(@_);
-    $text =~ s/\s+\n```$/\n```/gm;
+    $text =~ s/\s+```$/\n```/gm;
     return $text;
 }
 
