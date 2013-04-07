@@ -40,7 +40,7 @@
 
         <h1>SYNOPSIS</h1>
 
-<p>File <code>MyWebApp.pm</code>:</p>
+<p><code>lib/MyWebApp.pm</code>:</p>
 
 <div class="highlight"><pre><span class="nb">package</span> <span class="n">MyWebApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">base</span> <span class="s">'Kelp'</span><span class="p">;</span>
@@ -60,7 +60,7 @@
 <span class="mi">1</span><span class="p">;</span>
 </pre></div>
 
-<p>File <code>app.psgi</code>:</p>
+<p><code>app.psgi</code>:</p>
 
 <div class="highlight"><pre><span class="k">use</span> <span class="n">MyWebApp</span><span class="p">;</span>
 <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyWebApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
@@ -180,7 +180,7 @@ set the <code>KELP_ENV</code> environment variable.</p>
 
 <p>or</p>
 
-<pre lang="none"><code>% KELP_ENV=development plackup app.psgi
+<pre lang="none"><code>&gt; KELP_ENV=development plackup app.psgi
 </code></pre>
 </li>
 <li>
@@ -214,9 +214,9 @@ form it should look like this:</p>
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="n">run</span><span class="p">;</span>
 </pre></div>
 </li>
-</ul><h2>The application modules</h2>
+</ul><h2>The application classes</h2>
 
-<p>Your application's modules should be put in the <code>lib/</code> folder. The main module,
+<p>Your application's classes should be put in the <code>lib/</code> folder. The main class,
 in our example <code>MyApp.pm</code>, initializes any modules and variables that your
 app will use. Here is an example that uses <code>Moose</code> to create lazy attributes
 and initialize a database connection:</p>
@@ -260,7 +260,7 @@ variable. Notice also that the reason we define <code>dbh</code> as a <em>lazy</
 is that <code>config</code> will not yet be initialized. All modules are initialized upon
 the creation of the object instance, e.g. when we call <code>MyApp-&gt;new</code>;</li>
 <li>Then, we override Kelp's <a href="#build">"build"</a> subroutine to create a single route
-<code>/read/:id</code>, which is assigned to the subroutine <code>read</code> in the current module.</li>
+<code>/read/:id</code>, which is assigned to the subroutine <code>read</code> in the current class.</li>
 <li>The <code>read</code> subroutine, takes <code>$self</code> and <code>$id</code> (the named placeholder from the
 path), and uses <code>$self-&gt;dbh</code> to retrieve data.</li>
 </ul><p><em>A note about object managers:</em> The above example uses <a href="http://search.cpan.org/perldoc?Moose">Moose</a>. It is entirely
@@ -288,7 +288,7 @@ are assumed to be inside the <a href="#build">"build"</a> method and <code>$r</c
 
 <h3>Destinations</h3>
 
-<p>You can direct HTTP paths to subroutines in your modules or, you can use inline
+<p>You can direct HTTP paths to subroutines in your classes or, you can use inline
 code.</p>
 
 <div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/home"</span><span class="p">,</span> <span class="s">"home"</span> <span class="p">);</span>  <span class="c1"># goes to sub home</span>
@@ -426,12 +426,12 @@ ways to add middleware:</p>
 <p>Deploying a Kelp application is done the same way one would deploy any Plack
 app.</p>
 
-<pre lang="none"><code>% plackup -E deployment -s Starman app.psgi
+<pre lang="none"><code>&gt; plackup -E deployment -s Starman app.psgi
 </code></pre>
 
 <h2>Testing</h2>
 
-<p>Kelp provides a test module called <code>Kelp::Test</code>. It is object oriented, and all
+<p>Kelp provides a test class called <code>Kelp::Test</code>. It is object oriented, and all
 methods return the <code>Kelp::Test</code> object, so they can be chained together.
 Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the
@@ -462,7 +462,7 @@ It sends the request to the web app and saves the response as an
 <p>What is happening here?</p>
 
 <ul>
-<li>First, we create an instance of the web application module, which we have
+<li>First, we create an instance of the web application class, which we have
 previously built and placed in the <code>lib/</code> folder. We set the mode of the app to
 <code>test</code>, so that file <code>conf/myapp_test.conf</code> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
@@ -482,7 +482,7 @@ In the above example, we test if we got a code 200 back from <code>/path</code> 
 returned content was <code>It works</code>.</li>
 </ul><p>Run the rest as usual, using <code>prove</code>:</p>
 
-<pre lang="none"><code>% prove -l t/test.t
+<pre lang="none"><code>&gt; prove -l t/test.t
 </code></pre>
 
 <p>Take a look at the <a href="http://search.cpan.org/perldoc?Kelp::Test">Kelp::Test</a> for details and more examples.</p>
@@ -582,9 +582,55 @@ content-type to <code>text/html</code>. To set a different content-type, use
 <p>See the <a href="http://search.cpan.org/perldoc?PSGI#Delayed-Response-and-Streaming-Body">PSGI</a> pod for more
 information and examples.</p>
 
+<h2>Pluggable modules</h2>
+
+<p>Kelp can be extended using custom <em>modules</em>. Each new module must be a subclass
+of the <code>Kelp::Module</code> namespace. Modules' job is to initialize and register new
+methods into the web application class. The following is the full code of the
+<a href="http://search.cpan.org/perldoc?Kelp::Module::JSON">Kelp::Module::JSON</a> for example:</p>
+
+<div class="highlight"><pre><span class="nb">package</span> <span class="nn">Kelp::Module::</span><span class="n">JSON</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Base</span> <span class="s">'Kelp::Module'</span><span class="p">;</span>
+<span class="k">use</span> <span class="n">JSON</span><span class="p">;</span>
+
+<span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
+    <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">%args</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+    <span class="k">my</span> <span class="nv">$json</span> <span class="o">=</span> <span class="n">JSON</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
+    <span class="nv">$json</span><span class="o">-&gt;</span><span class="n">property</span><span class="p">(</span> <span class="nv">$_</span> <span class="o">=&gt;</span> <span class="nv">$args</span><span class="p">{</span><span class="nv">$_</span><span class="p">}</span> <span class="p">)</span> <span class="k">for</span> <span class="nb">keys</span> <span class="nv">%args</span><span class="p">;</span>
+    <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">register</span><span class="p">(</span> <span class="n">json</span> <span class="o">=&gt;</span> <span class="nv">$json</span> <span class="p">);</span>
+<span class="p">}</span>
+
+<span class="mi">1</span><span class="p">;</span>
+</pre></div>
+
+<p>What is happening here?</p>
+
+<ul>
+<li>First we create a class <code>Kelp::Module::JSON</code> which inherits <code>Kelp::Module</code>.</li>
+<li>Then, we override the <code>build</code> method (of <code>Kelp::Module</code>), create a new JSON
+object and register it into the web application via the <code>register</code> method.</li>
+</ul><p>If we instruct our web application to load the <code>JSON</code> module, it will have a
+new method <code>json</code> which will be a link to the <code>JSON</code> object initialized in the
+module.</p>
+
+<p>See more exampled and POD at <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a>.</p>
+
+<h3>How to load modules using the config</h3>
+
+<p>There are two modules that are <strong>always</strong> loaded by each application instance.
+Those are <code>Config</code> and <code>Routes</code>. The reason behind this is that each and every
+application always needs a router and configuration.
+All other modules must be loaded either using the <a href="#load_module">"load_module"</a> method, or
+using the <code>modules</code> key in the configuration. The default configuration already
+loads these modules: <code>Template</code>, <code>Logger</code> and <code>JSON</code>. Your configuration can
+remove some and/or add others. The configuration key <code>modules_init</code> may contain
+hashes with initialization arguments. See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for configuration
+examples.</p>
+
 <h1>ATTRIBUTES</h1>
 
-<h2>host</h2>
+<h2>hostname</h2>
 
 <p>Gets the current hostname.</p>
 
@@ -614,7 +660,7 @@ configuration file to merge into the main configuration. See
 <h2>name</h2>
 
 <p>Gets or sets the name of the application. If not set, the name of the main
-module will be used.</p>
+class will be used.</p>
 
 <div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'Twittar'</span> <span class="p">);</span>
 </pre></div>
@@ -779,6 +825,14 @@ arguments.</p>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">redirect_to</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
+
+<h1>CREDITS</h1>
+
+<p>Author: Stefan Geneshky - <a href="mailto:minimal@cpan.org">minimal@cpan.org</a></p>
+
+<h1>LICENSE</h1>
+
+<p>Same as Perl itself.</p>
       </section>
 
     </div>
