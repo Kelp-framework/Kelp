@@ -17,7 +17,7 @@ sub verbatim {
 
         # find the smallest indentation
         $indent = $1     if length($1) < length($indent);
-        $syntax = 'none' if $line =~ /^\s*(\||\%)/;
+        $syntax = 'none' if $line =~ /^\s*(\||\>)/;
     }
 
     if( (my $smallest = length($indent)) < 4 ){

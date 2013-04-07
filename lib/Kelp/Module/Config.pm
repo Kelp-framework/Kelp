@@ -82,7 +82,11 @@ sub defaults {
             },
 
             # JSON
-            JSON => {},
+            JSON => {
+                allow_blessed   => 1,
+                convert_blessed => 1,
+                utf8            => 1
+            },
         },
 
     };

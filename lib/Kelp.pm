@@ -227,7 +227,7 @@ Kelp - A web framework light, yet rich in nutrients.
 
 =head1 SYNOPSIS
 
-File C<MyWebApp.pm>:
+C<lib/MyWebApp.pm>:
 
     package MyWebApp;
     use base 'Kelp';
@@ -246,7 +246,7 @@ File C<MyWebApp.pm>:
 
     1;
 
-File C<app.psgi>:
+C<app.psgi>:
 
     use MyWebApp;
     my $app = MyWebApp->new;
@@ -394,7 +394,7 @@ set the C<KELP_ENV> environment variable.
 
 or
 
-    % KELP_ENV=development plackup app.psgi
+    > KELP_ENV=development plackup app.psgi
 
 =cut
 
@@ -434,9 +434,9 @@ form it should look like this:
 
 =back
 
-=head2 The application modules
+=head2 The application classes
 
-Your application's modules should be put in the C<lib/> folder. The main module,
+Your application's classes should be put in the C<lib/> folder. The main class,
 in our example C<MyApp.pm>, initializes any modules and variables that your
 app will use. Here is an example that uses C<Moose> to create lazy attributes
 and initialize a database connection:
@@ -487,7 +487,7 @@ the creation of the object instance, e.g. when we call C<MyApp-E<gt>new>;
 =item
 
 Then, we override Kelp's L</build> subroutine to create a single route
-C</read/:id>, which is assigned to the subroutine C<read> in the current module.
+C</read/:id>, which is assigned to the subroutine C<read> in the current class.
 
 =cut
 
@@ -524,7 +524,7 @@ C<$self-E<gt>routes>:
 
 =head3 Destinations
 
-You can direct HTTP paths to subroutines in your modules or, you can use inline
+You can direct HTTP paths to subroutines in your classes or, you can use inline
 code.
 
     $r->add( "/home", "home" );  # goes to sub home
@@ -651,11 +651,11 @@ By overloading the L</run> subroutine in C<lib/MyApp.pm>:
 Deploying a Kelp application is done the same way one would deploy any Plack
 app.
 
-    % plackup -E deployment -s Starman app.psgi
+    > plackup -E deployment -s Starman app.psgi
 
 =head2 Testing
 
-Kelp provides a test module called C<Kelp::Test>. It is object oriented, and all
+Kelp provides a test class called C<Kelp::Test>. It is object oriented, and all
 methods return the C<Kelp::Test> object, so they can be chained together.
 Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the
@@ -688,7 +688,7 @@ What is happening here?
 
 =item
 
-First, we create an instance of the web application module, which we have
+First, we create an instance of the web application class, which we have
 previously built and placed in the C<lib/> folder. We set the mode of the app to
 C<test>, so that file C<conf/myapp_test.conf> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
@@ -728,7 +728,7 @@ returned content was C<It works>.
 
 Run the rest as usual, using C<prove>:
 
-    % prove -l t/test.t
+    > prove -l t/test.t
 
 Take a look at the L<Kelp::Test> for details and more examples.
 
@@ -818,9 +818,67 @@ To send a delayed response, have your route return a subroutine.
 See the L<PSGI|PSGI/Delayed-Response-and-Streaming-Body> pod for more
 information and examples.
 
+=head2 Pluggable modules
+
+Kelp can be extended using custom I<modules>. Each new module must be a subclass
+of the C<Kelp::Module> namespace. Modules' job is to initialize and register new
+methods into the web application class. The following is the full code of the
+L<Kelp::Module::JSON> for example:
+
+    package Kelp::Module::JSON;
+
+    use Kelp::Base 'Kelp::Module';
+    use JSON;
+
+    sub build {
+        my ( $self, %args ) = @_;
+        my $json = JSON->new;
+        $json->property( $_ => $args{$_} ) for keys %args;
+        $self->register( json => $json );
+    }
+
+    1;
+
+What is happening here?
+
+=over
+
+=item
+
+First we create a class C<Kelp::Module::JSON> which inherits C<Kelp::Module>.
+
+=cut
+
+=item
+
+Then, we override the C<build> method (of C<Kelp::Module>), create a new JSON
+object and register it into the web application via the C<register> method.
+
+=cut
+
+=back
+
+If we instruct our web application to load the C<JSON> module, it will have a
+new method C<json> which will be a link to the C<JSON> object initialized in the
+module.
+
+See more exampled and POD at L<Kelp::Module>.
+
+=head3 How to load modules using the config
+
+There are two modules that are B<always> loaded by each application instance.
+Those are C<Config> and C<Routes>. The reason behind this is that each and every
+application always needs a router and configuration.
+All other modules must be loaded either using the L</load_module> method, or
+using the C<modules> key in the configuration. The default configuration already
+loads these modules: C<Template>, C<Logger> and C<JSON>. Your configuration can
+remove some and/or add others. The configuration key C<modules_init> may contain
+hashes with initialization arguments. See L<Kelp::Module> for configuration
+examples.
+
 =head1 ATTRIBUTES
 
-=head2 host
+=head2 hostname
 
 Gets the current hostname.
 
@@ -848,7 +906,7 @@ Gets the current path of the application. That would be the path to C<app.psgi>
 =head2 name
 
 Gets or sets the name of the application. If not set, the name of the main
-module will be used.
+class will be used.
 
     my $app = MyApp->new( name => 'Twittar' );
 
@@ -1004,10 +1062,6 @@ arguments.
         my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
         $self->res->redirect_to();
     }
-
-=head1 SEE ALSO
-
-L<Kelp>
 
 =head1 CREDITS
 

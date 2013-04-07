@@ -97,11 +97,11 @@ Kelp::Less - Quick prototyping with Kelp
 
 =head1 DESCRIPTION
 
-This modules exists to provide a way for quick and sloppy prototyping of a web
+This module exists to provide a way for quick and sloppy prototyping of a web
 application. It is a wrapper for L<Kelp>, which imports several keywords, making
 it easier and less verbose to create a quick web app.
 
-It's called C<Less>, because there is less typing involved with it, and also
+It's called C<Less>, because there is less typing involved, and also
 because it is suited for smaller, less complicated web projects. We encourage
 you to use it anywhere you see fit, however for mid-size and big applications we
 recommend that you use the fully structured L<Kelp>. This way you can take
@@ -184,7 +184,7 @@ via a single command:
 It returns PSGI ready subroutine, so you can immediately deploy your new app via
 Plack:
 
-    % plackup myapp.psgi
+    > plackup myapp.psgi
     HTTP::Server::PSGI: Accepting connections at http://0:5000/
 
 =head1 KEYWORDS

@@ -4,7 +4,7 @@ Kelp - A web framework light, yet rich in nutrients.
 
 # SYNOPSIS
 
-File `MyWebApp.pm`:
+`lib/MyWebApp.pm`:
 
 ```perl
 package MyWebApp;
@@ -25,7 +25,7 @@ sub greet {
 1;
 ```
 
-File `app.psgi`:
+`app.psgi`:
 
 ```perl
 use MyWebApp;
@@ -140,7 +140,7 @@ directory structure.
     or
 
     ```none
-    % KELP_ENV=development plackup app.psgi
+    > KELP_ENV=development plackup app.psgi
 ```
 
 - __/view__
@@ -171,9 +171,9 @@ directory structure.
     $app->run;
 ```
 
-## The application modules
+## The application classes
 
-Your application's modules should be put in the `lib/` folder. The main module,
+Your application's classes should be put in the `lib/` folder. The main class,
 in our example `MyApp.pm`, initializes any modules and variables that your
 app will use. Here is an example that uses `Moose` to create lazy attributes
 and initialize a database connection:
@@ -217,7 +217,7 @@ variable. Notice also that the reason we define `dbh` as a _lazy_ attribute
 is that `config` will not yet be initialized. All modules are initialized upon
 the creation of the object instance, e.g. when we call `MyApp->new`;
 - Then, we override Kelp's ["build"](#build) subroutine to create a single route
-`/read/:id`, which is assigned to the subroutine `read` in the current module.
+`/read/:id`, which is assigned to the subroutine `read` in the current class.
 - The `read` subroutine, takes `$self` and `$id` (the named placeholder from the
 path), and uses `$self->dbh` to retrieve data.
 
@@ -247,7 +247,7 @@ are assumed to be inside the ["build"](#build) method and `$r` is equal to
 
 ### Destinations
 
-You can direct HTTP paths to subroutines in your modules or, you can use inline
+You can direct HTTP paths to subroutines in your classes or, you can use inline
 code.
 
 ```perl
@@ -397,12 +397,12 @@ Deploying a Kelp application is done the same way one would deploy any Plack
 app.
 
 ```none
-% plackup -E deployment -s Starman app.psgi
+> plackup -E deployment -s Starman app.psgi
 ```
 
 ## Testing
 
-Kelp provides a test module called `Kelp::Test`. It is object oriented, and all
+Kelp provides a test class called `Kelp::Test`. It is object oriented, and all
 methods return the `Kelp::Test` object, so they can be chained together.
 Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the
@@ -433,7 +433,7 @@ done_testing;
 
 What is happening here?
 
-- First, we create an instance of the web application module, which we have
+- First, we create an instance of the web application class, which we have
 previously built and placed in the `lib/` folder. We set the mode of the app to
 `test`, so that file `conf/myapp_test.conf` overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
@@ -455,7 +455,7 @@ returned content was `It works`.
 Run the rest as usual, using `prove`:
 
 ```none
-% prove -l t/test.t
+> prove -l t/test.t
 ```
 
 Take a look at the [Kelp::Test](http://search.cpan.org/perldoc?Kelp::Test) for details and more examples.
@@ -564,9 +564,56 @@ sub delayed {
 See the [PSGI](http://search.cpan.org/perldoc?PSGI#Delayed-Response-and-Streaming-Body) pod for more
 information and examples.
 
+## Pluggable modules
+
+Kelp can be extended using custom _modules_. Each new module must be a subclass
+of the `Kelp::Module` namespace. Modules' job is to initialize and register new
+methods into the web application class. The following is the full code of the
+[Kelp::Module::JSON](http://search.cpan.org/perldoc?Kelp::Module::JSON) for example:
+
+```perl
+package Kelp::Module::JSON;
+
+use Kelp::Base 'Kelp::Module';
+use JSON;
+
+sub build {
+    my ( $self, %args ) = @_;
+    my $json = JSON->new;
+    $json->property( $_ => $args{$_} ) for keys %args;
+    $self->register( json => $json );
+}
+
+1;
+```
+
+What is happening here?
+
+- First we create a class `Kelp::Module::JSON` which inherits `Kelp::Module`.
+- Then, we override the `build` method (of `Kelp::Module`), create a new JSON
+object and register it into the web application via the `register` method.
+
+If we instruct our web application to load the `JSON` module, it will have a
+new method `json` which will be a link to the `JSON` object initialized in the
+module.
+
+See more exampled and POD at [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module).
+
+### How to load modules using the config
+
+There are two modules that are __always__ loaded by each application instance.
+Those are `Config` and `Routes`. The reason behind this is that each and every
+application always needs a router and configuration.
+All other modules must be loaded either using the ["load\_module"](#load\_module) method, or
+using the `modules` key in the configuration. The default configuration already
+loads these modules: `Template`, `Logger` and `JSON`. Your configuration can
+remove some and/or add others. The configuration key `modules_init` may contain
+hashes with initialization arguments. See [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module) for configuration
+examples.
+
 # ATTRIBUTES
 
-## host
+## hostname
 
 Gets the current hostname.
 
@@ -598,7 +645,7 @@ Gets the current path of the application. That would be the path to `app.psgi`
 ## name
 
 Gets or sets the name of the application. If not set, the name of the main
-module will be used.
+class will be used.
 
 ```perl
 my $app = MyApp->new( name => 'Twittar' );
@@ -772,10 +819,6 @@ sub check {
     $self->res->redirect_to();
 }
 ```
-
-# SEE ALSO
-
-[Kelp](http://search.cpan.org/perldoc?Kelp)
 
 # CREDITS
 
