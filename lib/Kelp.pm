@@ -252,7 +252,6 @@ File C<app.psgi>:
     my $app = MyWebApp->new;
     $app->run;
 
-
 Or, for quick prototyping use L<Kelp::Less>:
 
     use Kelp::Less;
@@ -268,7 +267,7 @@ Or, for quick prototyping use L<Kelp::Less>:
 
 If you're going to be deploying a Perl based web application, chances are that
 you will be using Plack. Plack has almost all necessary tools to create and
-maintain a healthy web app. There is tons of middleware written for it, and
+maintain a healthy web app. Tons of middleware is written for it, and there are
 several very well tested high performance preforking servers, such as Starman.
 
 Plack, however, is not a web framework, hence its creators have intentionally
