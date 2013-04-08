@@ -4,10 +4,10 @@ Kelp - A web framework light, yet rich in nutrients.
 
 # SYNOPSIS
 
-`lib/MyWebApp.pm`:
+`lib/MyApp.pm`:
 
 ```perl
-package MyWebApp;
+package MyApp;
 use base 'Kelp';
 
 sub build {
@@ -28,8 +28,8 @@ sub greet {
 `app.psgi`:
 
 ```perl
-use MyWebApp;
-my $app = MyWebApp->new;
+use MyApp;
+my $app = MyApp->new;
 $app->run;
 ```
 
@@ -110,9 +110,9 @@ directory structure.
  |   |--/MyApp
  |
  |--/conf
- |   |--myapp.conf
- |   |--myapp_test.conf
- |   |--myapp_deployment.conf
+ |   |--config.pl
+ |   |--config_test.pl
+ |   |--config_deployment.pl
  |
  |--/view
  |--/log
@@ -128,8 +128,9 @@ directory structure.
 - __/conf__
 
     The `conf` folder is where Kelp will look for configuration files. You need one
-    main file, named exactly as your app, with the extension of `.conf`. You can
-    also add other files that define different running environments.
+    main file, named `config.pl`. You can also add other files that define different
+    running environments, if you name them `config__environment_.pl`. Replace
+    _environment_ with the actual name of the environment.
     To change the running environment, you can specify the app `mode`, or you can
     set the `KELP_ENV` environment variable.
 
@@ -435,7 +436,7 @@ What is happening here?
 
 - First, we create an instance of the web application class, which we have
 previously built and placed in the `lib/` folder. We set the mode of the app to
-`test`, so that file `conf/myapp_test.conf` overrides the main configuration.
+`test`, so that file `conf/config_test.pl` overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.
@@ -634,7 +635,7 @@ configuration file to merge into the main configuration. See
 
 ```perl
 my $app = MyApp->new( mode => 'development' );
-# conf/myapp.conf and conf/myapp_development.conf are merged with priority
+# conf/config.pl and conf/config_development.pl are merged with priority
 # given to the second one.
 ```
 
@@ -650,9 +651,6 @@ class will be used.
 ```perl
 my $app = MyApp->new( name => 'Twittar' );
 ```
-
-The `name` is used to look for configuration files. In the above example, the
-app will look for `conf/twittar.conf` and `conf/twittar_*.conf` files.
 
 ## charset
 
