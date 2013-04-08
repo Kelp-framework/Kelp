@@ -10,7 +10,7 @@ use Test::More;
 
 # Basic
 {
-    my $app = Kelp->new( modules => [] );
+    my $app = Kelp->new( mode => 'test' );
     can_ok $app, $_ for qw/config config_hash/;
 }
 

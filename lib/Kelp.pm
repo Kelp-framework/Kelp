@@ -18,7 +18,7 @@ our $VERSION = 0.10;
 attr -host => hostname;
 attr -mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
-attr -name => sub { ref(shift) };
+attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
@@ -227,9 +227,9 @@ Kelp - A web framework light, yet rich in nutrients.
 
 =head1 SYNOPSIS
 
-C<lib/MyWebApp.pm>:
+C<lib/MyApp.pm>:
 
-    package MyWebApp;
+    package MyApp;
     use base 'Kelp';
 
     sub build {
@@ -248,8 +248,8 @@ C<lib/MyWebApp.pm>:
 
 C<app.psgi>:
 
-    use MyWebApp;
-    my $app = MyWebApp->new;
+    use MyApp;
+    my $app = MyApp->new;
     $app->run;
 
 Or, for quick prototyping use L<Kelp::Less>:
@@ -364,9 +364,9 @@ directory structure.
      |   |--/MyApp
      |
      |--/conf
-     |   |--myapp.conf
-     |   |--myapp_test.conf
-     |   |--myapp_deployment.conf
+     |   |--config.pl
+     |   |--config_test.pl
+     |   |--config_deployment.pl
      |
      |--/view
      |--/log
@@ -385,8 +385,9 @@ that you want your app to use.
 =item B</conf>
 
 The C<conf> folder is where Kelp will look for configuration files. You need one
-main file, named exactly as your app, with the extension of C<.conf>. You can
-also add other files that define different running environments.
+main file, named C<config.pl>. You can also add other files that define different
+running environments, if you name them C<config_I<environment>.pl>. Replace
+I<environment> with the actual name of the environment.
 To change the running environment, you can specify the app C<mode>, or you can
 set the C<KELP_ENV> environment variable.
 
@@ -690,7 +691,7 @@ What is happening here?
 
 First, we create an instance of the web application class, which we have
 previously built and placed in the C<lib/> folder. We set the mode of the app to
-C<test>, so that file C<conf/myapp_test.conf> overrides the main configuration.
+C<test>, so that file C<conf/config_test.pl> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.
@@ -896,7 +897,7 @@ configuration file to merge into the main configuration. See
 L<Kelp::Module::Config> for more information.
 
     my $app = MyApp->new( mode => 'development' );
-    # conf/myapp.conf and conf/myapp_development.conf are merged with priority
+    # conf/config.pl and conf/config_development.pl are merged with priority
     # given to the second one.
 
 =head2 path
@@ -909,9 +910,6 @@ Gets or sets the name of the application. If not set, the name of the main
 class will be used.
 
     my $app = MyApp->new( name => 'Twittar' );
-
-The C<name> is used to look for configuration files. In the above example, the
-app will look for C<conf/twittar.conf> and C<conf/twittar_*.conf> files.
 
 =head2 charset
 

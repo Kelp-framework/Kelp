@@ -4,33 +4,89 @@ use strict;
 use warnings;
 use v5.10;
 
-use File::Path 'make_path';
 use Getopt::Long;
+use File::Path 'make_path';
+use Template;
+use File::Basename;
+use File::Slurp 'write_file';
 
 my $path = '.';
 my $verbose = 1;
+my $less = 0;
+my $help = 0;
+my $name = $ARGV[0] || do { $help = 1; '' };
+
+GetOptions(
+    "path=s"  => \$path,
+    "verbose" => \$verbose,
+    "less"    => \$less,
+    "help"    => \$help
+);
+
+if ( $help ) {
+    my $usage = q[
+Usage: Kelp [options] <name>
+
+Options:
+    --path=s    Path where to create the files
+    --less      Create a Kelp::Less application files
+    --verbose   Display information
+    --help      This help screen
+];
+    say $usage;
+    exit;
+}
 
 # Remove the slash at the end
 $path =~ s{/$}{};
 
-sub create {
-    my ( $name ) = @_;
+# Get module path and name
+my @parts = split( /::/, $name );
+my $module_file = pop @parts;
+my $module_path = join( '/', @parts );
 
-    # Make the main folder
-    if ( ! -d $path ) {
-        _say("Creating $path");
-        make_path( $path );
+# Template
+my $files = do {
+    my $template = Template->new();
+    my $output;
+    $template->process(
+        \*DATA, {
+            module_file => $module_file,
+            module_path => $module_path,
+            path        => $path,
+            name        => $name,
+            less        => $less
+        },
+        \$output
+    );
+    my %result = ();
+    my $key;
+    for my $line (split(/\n/, $output)) {
+        if ( $line =~ /^\s*\:(.+)/ ) {
+            $key = $1;
+            $result{$key} = [];
+            next;
+        }
+        if ( defined $key ) {
+            push @{$result{$key}}, $line, "\n";
+        }
+        else {
+            die "No filename for line [$line]";
+        }
     }
 
-    # Make the sub folders
-    for my $sub (qw/bin lib t view conf/) {
-        _say("Creating $path/$sub");
-        make_path("$path/$sub");
+    \%result;
+};
+
+while ( my ( $filename, $lines ) = each %$files ) {
+    my $dir = $path . '/' . dirname($filename);
+    $filename = $path . '/' . $filename;
+    if ( !-d $dir ) {
+        _say("Creating folder: $dir");
+        make_path($dir);
     }
-
-    # Create the files
-
-
+    _say("Writing file: $filename");
+    write_file( $filename, $lines );
 }
 
 sub _say {
@@ -40,5 +96,122 @@ sub _say {
     }
 }
 
+__DATA__
+:app.psgi
+[% IF less -%]
+use Kelp::Less;
 
-# vim:syntax=perl
+get '/home' => sub {
+    template 'home.tt';
+};
+
+run;
+[% ELSE -%]
+use lib 'lib';
+use [% name %];
+
+my $app = [% name %]->new();
+$app->run;
+[% END -%]
+[% IF !less -%]
+:lib/[% module_path %]/[% module_file %].pm
+package [% name %];
+use Kelp::Base 'Kelp';
+
+sub build {
+    my $self = shift;
+    my $r = $self->routes;
+
+    $r->add('/home', 'home');
+}
+
+sub home {
+    my $self = shift;
+    $self->template('home.tt');
+}
+
+1;
+[% END -%]
+:conf/config.pl
+{
+    modules_init => {
+        Logger => {
+            outputs => [
+                [
+                    'File',
+                    name      => 'error',
+                    filename  => app()->path . '/log/error.log',
+                    min_level => 'error',
+                    mode      => '>>',
+                    newline   => 1,
+                    binmode   => ":encoding(UTF-8)"
+                ],
+            ]
+        },
+
+        JSON => {
+            allow_blessed   => 1,
+            convert_blessed => 1,
+            utf8            => 1,
+            pretty          => 0
+        },
+    }
+};
+:conf/config_development.pl
+{
+    modules_init => {
+
+        Logger => {
+            outputs => [
+                [
+                    'File',
+                    name      => 'debug',
+                    filename  => app()->path . '/log/debug.log',
+                    min_level => 'debug',
+                    mode      => '>>',
+                    newline   => 1,
+                    binmode   => ":encoding(UTF-8)"
+                ], [
+                    'File',
+                    name      => 'error',
+                    filename  => app()->path . '/log/error.log',
+                    min_level => 'error',
+                    mode      => '>>',
+                    newline   => 1,
+                    binmode   => ":encoding(UTF-8)"
+                ],
+            ]
+        },
+
+        JSON => {
+            pretty => 1
+        },
+    }
+};
+:conf/config_test.pl
+{
+    # No Logger while testing
+    modules => [qw/JSON Template/]
+}
+:views/home.tt
+Hello, world!
+:log/.keep
+keeper
+[% IF !less -%]
+:t/main.t
+use Kelp::Base -strict;
+use Kelp::Test;
+use Test::More;
+use [% name %];
+use HTTP::Request::Common;
+
+my $app = [% name %]->new( mode => 'test' );
+my $t = Kelp::Test->new( app => $app );
+
+$t->request( GET '/home' )
+  ->code_is(200)
+  ->content_type_is('text/html')
+  ->content_like(qr/Hello, world!/);
+
+done_testing;
+[% END -%]

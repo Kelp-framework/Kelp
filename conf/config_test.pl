@@ -2,5 +2,3 @@
     # No Logger while testing
     modules => [qw/JSON Template/]
 };
-
-# vim:syntax=perl

@@ -9,9 +9,18 @@ sub build {
     # Add a reference to the app in the config param hash
     $args{param}->{app} = $self->app;
 
+    # Look for the config file
+    my $filename = 'conf/config.pl';
+    for ("", "/..") {
+        my $path = $self->app->path . "${_}/conf";
+        if ( -r "$path/config.pl" ) {
+            $filename = "$path/config.pl";
+            last;
+        }
+    }
+
     # Create the config object with some default attributes,
     # but have %args at the end to trump all.
-    my $filename = $self->app->path . '/conf/' . lc( $self->app->name ) . '.conf';
     my $config   = Config::Hash->new(
         data     => $self->defaults,
         mode     => $self->app->mode,
@@ -55,7 +64,10 @@ sub defaults {
 
             # Template
             Template => {
-                INCLUDE_PATH => $self->app->path . '/views'
+                INCLUDE_PATH => [
+                    $self->app->path . '/views',
+                    $self->app->path . '/../views'
+                ]
             },
 
             # Logger - Default config is for developement
