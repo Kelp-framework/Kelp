@@ -343,15 +343,15 @@ routes, then analyzing the response.
 
 What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. Other frameworks bring their deployment code,
-and aim to write their own processing mechanisms. Kelp, on the other hand is heavily
+platform for web app building. Most of them, however, bring their deployment code,
+and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
 I<Plack>-centric. It uses Plack as its foundation layer, and it builds the web
 framework on top of it. C<Kelp::Request> is an extension of C<Plack::Request>,
 C<Kelp::Response> is an extension of C<Plack::Response>.
 
-This approach of extending current CPAN code, puts familiar and well tested
+This approach of extending current CPAN code puts familiar and well tested
 tools in the hands of the application developer, while keeping familiar syntax
-and workflow.
+and work flow.
 
 Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,
@@ -360,10 +360,31 @@ and a small footprint, and it's completely object manager agnostic.
 
 =head1 CREATING A NEW WEB APP
 
+=head2 Using the C<Kelp> script
+
+The easiest way to create the directory structure and a general application
+skeleton is by using the C<Kelp> script, which comes with this package.
+
+    > Kelp Destiny
+
+This will create C<lib/Destiny.pm>, C<app.psgi> and some other files (explained
+below).
+
+To create a L<Kelp::Less> app, use:
+
+    > Kelp --less Candy
+
+Get help by typing:
+
+    > Kelp --help
+
+Note: You should not use stripper names for your applications.
+
 =head2 Directory structure
 
 Before you begin writing the internals of your app, you need to create the
-directory structure.
+directory structure either by hand, or by using the above described C<Kelp>
+utility script.
 
      .
      |--/lib
@@ -393,7 +414,7 @@ that you want your app to use.
 
 The C<conf> folder is where Kelp will look for configuration files. You need one
 main file, named C<config.pl>. You can also add other files that define different
-running environments, if you name them C<config_I<environment>.pl>. Replace
+running environments, if you name them C<config_>I<environment>C<.pl>. Replace
 I<environment> with the actual name of the environment.
 To change the running environment, you can specify the app C<mode>, or you can
 set the C<KELP_ENV> environment variable.

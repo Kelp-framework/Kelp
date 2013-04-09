@@ -90,15 +90,15 @@ routes, then analyzing the response.
 
 What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. Other frameworks bring their deployment code,
-and aim to write their own processing mechanisms. Kelp, on the other hand is heavily
+platform for web app building. Most of them, however, bring their deployment code,
+and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
 _Plack_\-centric. It uses Plack as its foundation layer, and it builds the web
 framework on top of it. `Kelp::Request` is an extension of `Plack::Request`,
 `Kelp::Response` is an extension of `Plack::Response`.
 
-This approach of extending current CPAN code, puts familiar and well tested
+This approach of extending current CPAN code puts familiar and well tested
 tools in the hands of the application developer, while keeping familiar syntax
-and workflow.
+and work flow.
 
 Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,
@@ -107,10 +107,37 @@ and a small footprint, and it's completely object manager agnostic.
 
 # CREATING A NEW WEB APP
 
+## Using the `Kelp` script
+
+The easiest way to create the directory structure and a general application
+skeleton is by using the `Kelp` script, which comes with this package.
+
+```none
+> Kelp Destiny
+```
+
+This will create `lib/Destiny.pm`, `app.psgi` and some other files (explained
+below).
+
+To create a [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less) app, use:
+
+```none
+> Kelp --less Candy
+```
+
+Get help by typing:
+
+```none
+> Kelp --help
+```
+
+Note: You should not use stripper names for your applications.
+
 ## Directory structure
 
 Before you begin writing the internals of your app, you need to create the
-directory structure.
+directory structure either by hand, or by using the above described `Kelp`
+utility script.
 
 ```none
  .
@@ -138,7 +165,7 @@ directory structure.
 
     The `conf` folder is where Kelp will look for configuration files. You need one
     main file, named `config.pl`. You can also add other files that define different
-    running environments, if you name them `config__environment_.pl`. Replace
+    running environments, if you name them `config_`_environment_`.pl`. Replace
     _environment_ with the actual name of the environment.
     To change the running environment, you can specify the app `mode`, or you can
     set the `KELP_ENV` environment variable.
