@@ -121,17 +121,5 @@ Returns true if the request was called with C<XMLHttpRequest>.
 
 Returns true if the request's content type was C<application/json>.
 
-=head1 SEE ALSO
-
-L<Kelp>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-=head1 LICENSE
-
-Same as Perl itself.
-
 =cut
 

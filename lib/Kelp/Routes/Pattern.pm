@@ -272,22 +272,10 @@ Builds a URL from a pattern.
     my $p = Kelp::Routes::Patters->new( pattern  => '/:id/:line/:row' );
     $p->build( id => 100, line => 5, row => 8 ); # Returns '/100/5/8'
 
-=head1 SEE ALSO
-
-L<Kelp>, L<Kelp::Routes>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
 =head1 ACKNOWLEDGEMENTS
 
 This module was inspired by L<Routes::Tiny>.
 
 The concept of bridges was borrowed from L<Mojolicious>
-
-=head1 LICENSE
-
-Same as Perl itself.
 
 =cut

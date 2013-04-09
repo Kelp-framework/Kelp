@@ -38,7 +38,7 @@ for my $name ( keys %types ) {
 for my $name ( keys %types ) {
     my $type = $types{$name};
 
-    # Refefina 'em all one by one.
+    # Redefine 'em all one by one.
     for my $t ( values %types ) {
         dies_ok { $m->register( $name => $t ) }
         "Dies when redefining " . ref $t;

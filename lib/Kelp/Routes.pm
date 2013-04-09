@@ -594,22 +594,8 @@ Routes that used regular expressions instead of patterns will only initialize
 the C<param> array with the regex captures, unless those patterns are using
 named captures in which case the C<named> hash will also be initialized.
 
-=head1 SEE ALSO
-
-L<Kelp>, L<Routes::Tiny>, L<Forward::Routes>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
 =head1 ACKNOWLEDGEMENTS
 
 This module was inspired by L<Routes::Tiny>.
-
-The concept of bridges was borrowed from L<Mojolicious>
-
-=head1 LICENSE
-
-Same as Perl itself.
 
 =cut

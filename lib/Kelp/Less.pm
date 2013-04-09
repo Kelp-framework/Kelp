@@ -63,7 +63,14 @@ sub del {
     route ref($path) ? $path : [ DELETE => $path ], $to;
 }
 
-sub run      { $app->run }
+sub run {
+    my @caller = caller;
+    if ( $caller[0] =~ /Plack::Sandbox/ ) {
+        return $app;
+    }
+    $app->run;
+}
+
 sub app      { $app }
 sub attr     { Kelp::Base::attr( ref($app), @_ ) }
 sub param    { $app->param(@_) }
@@ -97,19 +104,19 @@ Kelp::Less - Quick prototyping with Kelp
 
 =head1 DESCRIPTION
 
-This module exists to provide a way for quick and sloppy prototyping of a web
+This class exists to provide a way for quick and sloppy prototyping of a web
 application. It is a wrapper for L<Kelp>, which imports several keywords, making
 it easier and less verbose to create a quick web app.
 
-It's called C<Less>, because there is less typing involved, and also
+It's called C<Less>, because there is less typing involved, and
 because it is suited for smaller, less complicated web projects. We encourage
 you to use it anywhere you see fit, however for mid-size and big applications we
 recommend that you use the fully structured L<Kelp>. This way you can take
-advantage of the powerful router and initialization.
+advantage of its powerful router, initialization and testing capabilities.
 
 =head1 QUICK START
 
-Each web app begins with C<use Kelp::Less;>. It automatically imports C<strict>,
+Each web app begins with C<use Kelp::Less;>. This automatically imports C<strict>,
 C<warnings>, C<v5.10> as well as several useful functions. You can pass any
 parameters to the constructor at the C<use> statement:
 
@@ -309,20 +316,30 @@ currently loaded template module.
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
 
-=head1 SEE ALSO
+=head1 TESTING
 
-L<Kelp>
+When writing a C<Kelp::Less> app, we don't have a separate class to initialize as we
+please, and feed into a L<Kelp::Test> object. In this case, the C<Kelp::Test>
+object can be initialized with the name of the C<PSGI> file in the C<psgi> argument.
 
-=head1 CREDITS
+    # t/main.t
+    use Kelp::Test;
 
-Author: Stefan Geneshky - minimal@cpan.org
+    my $t = Kelp::Test->new( psgi => 'app.psgi' );
+    # Do some tests ...
+
+Since you don't have control over the creation of the C<Kelp> object, if you
+need to specify a different mode for testing, you can use the C<PLACK_ENV>
+environmental variable:
+
+    > PLACK_ENV=test prove -l
+
+This will enable the C<conf/config_test.pl> configuration, which you should
+tailor to your testing needs.
 
 =head1 ACKNOWLEDGEMENTS
 
-This module's interface was inspired by L<Dancer>.
-
-=head1 LICENSE
-
-Same as Perl itself.
+This module's interface was inspired by L<Dancer>, which in its turn was
+inspired by Sinatra, so Viva La Open Source!
 
 =cut

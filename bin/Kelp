@@ -197,21 +197,29 @@ sub home {
 Hello, world!
 :log/.keep
 keeper
-[% IF !less -%]
 :t/main.t
 use Kelp::Base -strict;
 use Kelp::Test;
 use Test::More;
-use [% name %];
 use HTTP::Request::Common;
+[% IF !less -%]
+use [% name %];
 
+# Create an application object
 my $app = [% name %]->new( mode => 'test' );
-my $t = Kelp::Test->new( app => $app );
 
+# Feed it into a test object
+my $t = Kelp::Test->new( app => $app );
+[% ELSE -%]
+
+# Create a test object that runs app.psgi
+my $t = Kelp::Test->new( psgi => 'app.psgi' );
+[% END -%]
+
+# Send a GET request to /home and test the response
 $t->request( GET '/home' )
   ->code_is(200)
   ->content_type_is('text/html')
   ->content_like(qr/Hello, world!/);
 
 done_testing;
-[% END -%]

@@ -227,7 +227,7 @@ Kelp - A web framework light, yet rich in nutrients.
 
 =head1 SYNOPSIS
 
-C<lib/MyApp.pm>:
+    # lib/MyApp.pm
 
     package MyApp;
     use base 'Kelp';
@@ -246,7 +246,7 @@ C<lib/MyApp.pm>:
 
     1;
 
-C<app.psgi>:
+    # app.psgi
 
     use MyApp;
     my $app = MyApp->new;
@@ -254,6 +254,7 @@ C<app.psgi>:
 
 Or, for quick prototyping use L<Kelp::Less>:
 
+    # app.psgi
     use Kelp::Less;
 
     get '/hello/?name' => sub {
@@ -338,13 +339,15 @@ routes, then analyzing the response.
 
 What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. While those other frameworks bring their own
-deployment code, Kelp is heavily I<Plack>-centric. It uses Plack as its foundation
-layer, and it builds the web framework on top of it. C<Kelp::Request> is an
-extension of C<Plack::Request>, C<Kelp::Response> is an extension of
-C<Plack::Response>.
+platform for web app building. Other frameworks bring their deployment code,
+and aim to write their own processing mechanisms. Kelp, on the other hand is heavily
+I<Plack>-centric. It uses Plack as its foundation layer, and it builds the web
+framework on top of it. C<Kelp::Request> is an extension of C<Plack::Request>,
+C<Kelp::Response> is an extension of C<Plack::Response>.
+
 This approach of extending current CPAN code, puts familiar and well tested
-tools in the hands of the application developer.
+tools in the hands of the application developer, while keeping familiar syntax
+and workflow.
 
 Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,
@@ -665,7 +668,6 @@ It sends the request to the web app and saves the response as an
 L<HTTP::Response> object.
 
     # file t/test.t
-
     use MyApp;
     use Kelp::Test;
     use Test::More;
@@ -1067,6 +1069,7 @@ Author: Stefan Geneshky - minimal@cpan.org
 
 =head1 LICENSE
 
-Same as Perl itself.
+This module and all the modules in this package are governed by the same license
+as Perl itself.
 
 =cut

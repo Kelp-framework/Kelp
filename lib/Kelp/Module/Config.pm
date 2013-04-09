@@ -107,3 +107,70 @@ sub defaults {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Kelp::Module::Config - Configuration for Kelp applications
+
+=head1 DESCRIPTION
+
+This is one of the two modules which are automatically loaded for each and every
+Kelp application. It uses L<Config::Hash> to read Perl-style hashes from files
+and merge them depending on the value of the C<mode> attribute.
+
+The main configuration file name is C<config.pl>, and it will be searched in the
+current directory or the one above. The latter is convenient for running tests
+which use the same configuration settings as the main app.
+
+=head1 REGISTERED METHODS
+
+This module registers the following methods into the underlying app:
+
+=head2 config
+
+A wrapper for the C<get> method in L<Config::Hash>.
+
+    # Somewhere in the app
+    my $pos = $self->config('row.col.position');
+
+    # Gets {row}->{col}->{position} from the config hash
+
+=head2 config_hash
+
+A reference to the entire configuration hash.
+
+    my $pos = $self->config_hash->{row}->{col}->{position};
+
+Those of you who code in Java should be very satisfied by the
+verbosity of the above example.
+
+=head1 DEFAULTS
+
+This module sets certain default values. All of them may be overridden in any of
+the C<conf/> files. It probably pays to view the code of this module and look
+and the C<defaults> sub to see what is being set by default, but here is the
+short version:
+
+=head2 charset
+
+C<UTF-8>
+
+=head2 app_url
+
+C<http://localhost:5000>
+
+=head2 modules
+
+Specifies which modules to load on startup. The default value is
+C<JSON, Template, Logger>
+
+=head2 modules_init
+
+A hashref with initializations for each of the loaded modules, except this one,
+ironically.
+
+=cut

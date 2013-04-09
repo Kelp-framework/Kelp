@@ -287,17 +287,4 @@ module.
         $self->res->template('home.tt', { login => 'user' });
     }
 
-
-=head1 SEE ALSO
-
-L<Kelp>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-=head1 LICENSE
-
-Same as Perl itself.
-
 =cut

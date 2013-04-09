@@ -2,13 +2,22 @@ package Kelp::Test;
 
 use Kelp::Base;
 use Plack::Test;
+use Plack::Util;
 use Test::More import => ['!note'];
 use Test::Deep;
 use Carp;
 use Encode ();
 
-attr -app     => sub { die "app is required" };
-attr res      => sub { die "res is not initialized" };
+attr psgi => undef;
+
+attr -app => sub {
+    my $self = shift;
+    defined $self->psgi
+      ? Plack::Util::load_psgi( $self->psgi )
+      : die "Eiter 'app' or 'psgi' parameter is required";
+};
+
+attr res => sub { die "res is not initialized" };
 
 sub request {
     my ( $self, $req ) = @_;
@@ -179,10 +188,27 @@ the web app and saves the response as an L<HTTP::Response> object.
 The Kelp::Test object is instantiated with single attribute called C<app>. It
 is a reference to a Kelp based web app.
 
-    my $myapp = MyWebApp->new;
+    my $myapp = MyApp->new;
     my $t = Kelp::Test->new( app => $myapp );
 
 From this point on, all requests run with C<$t->request> will be sent to C<$app>.
+
+=head2 psgi
+
+This is only used when testing L<Kelp::Less> apps. Since we don't have an
+application class to load, we need to load the C<app.psgi> file.
+
+    my $t = Kelp::Test->new( psgi => 'app.psgi' );
+
+All testing methods work exactly the same way. Note that since we don't have
+control over how the C<Kelp> class is loaded, we may have to use the
+C<PLACK_ENV> environment variable to set different testing modes.
+
+    > PLACK_ENV=test prove -l
+
+The above is the same as:
+
+    use Kelp::Less mode => 'test';
 
 =head2 res
 
@@ -322,17 +348,5 @@ Prints the entire content for debugging purposes.
     $t->request( GET '/path' )
       ->content_is("Well")
       ->diag_content();
-
-=head1 SEE ALSO
-
-L<Kelp>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-=head1 LICENSE
-
-Same as Perl itself.
 
 =cut

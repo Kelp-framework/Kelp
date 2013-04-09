@@ -16,7 +16,7 @@ __END__
 
 =head1 NAME
 
-Kelp::Module::JSON - Simple json module for a Kelp application
+Kelp::Module::JSON - Simple JSON module for a Kelp application
 
 =head1 SYNOPSIS
 
@@ -28,16 +28,8 @@ Kelp::Module::JSON - Simple json module for a Kelp application
         return $self->json->encode( { yes => 1 } );
     }
 
-=head1 SEE ALSO
+=head1 REGISTERED METHODS
 
-L<Kelp>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-=head1 LICENSE
-
-Same as Perl itself.
+This module registers only one method into the application: C<json>.
 
 =cut

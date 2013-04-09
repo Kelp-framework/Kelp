@@ -173,16 +173,4 @@ Register one or many methods into the web application.
         yaml => YAML->new
     );
 
-=head1 SEE ALSO
-
-L<Kelp>
-
-=head1 CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-=head1 LICENSE
-
-Same as Perl itself.
-
 =cut
