@@ -4,9 +4,9 @@ Kelp - A web framework light, yet rich in nutrients.
 
 # SYNOPSIS
 
-`lib/MyApp.pm`:
-
 ```perl
+# lib/MyApp.pm
+
 package MyApp;
 use base 'Kelp';
 
@@ -23,11 +23,9 @@ sub greet {
 }
 
 1;
-```
 
-`app.psgi`:
+# app.psgi
 
-```perl
 use MyApp;
 my $app = MyApp->new;
 $app->run;
@@ -36,6 +34,7 @@ $app->run;
 Or, for quick prototyping use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less):
 
 ```perl
+# app.psgi
 use Kelp::Less;
 
 get '/hello/?name' => sub {
@@ -83,13 +82,15 @@ routes, then analyzing the response.
 
 What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. While those other frameworks bring their own
-deployment code, Kelp is heavily _Plack_\-centric. It uses Plack as its foundation
-layer, and it builds the web framework on top of it. `Kelp::Request` is an
-extension of `Plack::Request`, `Kelp::Response` is an extension of
-`Plack::Response`.
+platform for web app building. Other frameworks bring their deployment code,
+and aim to write their own processing mechanisms. Kelp, on the other hand is heavily
+_Plack_\-centric. It uses Plack as its foundation layer, and it builds the web
+framework on top of it. `Kelp::Request` is an extension of `Plack::Request`,
+`Kelp::Response` is an extension of `Plack::Response`.
+
 This approach of extending current CPAN code, puts familiar and well tested
-tools in the hands of the application developer.
+tools in the hands of the application developer, while keeping familiar syntax
+and workflow.
 
 Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,
@@ -413,7 +414,6 @@ It sends the request to the web app and saves the response as an
 
 ```perl
 # file t/test.t
-
 use MyApp;
 use Kelp::Test;
 use Test::More;
@@ -824,4 +824,5 @@ Author: Stefan Geneshky - minimal@cpan.org
 
 # LICENSE
 
-Same as Perl itself.
+This module and all the modules in this package are governed by the same license
+as Perl itself.
