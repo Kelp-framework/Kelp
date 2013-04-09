@@ -6,7 +6,6 @@ Kelp - A web framework light, yet rich in nutrients.
 
 ```perl
 # lib/MyApp.pm
-
 package MyApp;
 use base 'Kelp';
 
@@ -23,12 +22,21 @@ sub greet {
 }
 
 1;
+```
 
+Then ...
+
+```perl
 # app.psgi
-
 use MyApp;
 my $app = MyApp->new;
 $app->run;
+```
+
+Finally ...
+
+```none
+> plackup app.psgi
 ```
 
 Or, for quick prototyping use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less):
