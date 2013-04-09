@@ -38,11 +38,8 @@
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
 
-        <h1>SYNOPSIS</h1>
-
-<p><code>lib/MyWebApp.pm</code>:</p>
-
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyWebApp</span><span class="p">;</span>
+        <div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
+<span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">base</span> <span class="s">'Kelp'</span><span class="p">;</span>
 
 <span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
@@ -60,16 +57,23 @@
 <span class="mi">1</span><span class="p">;</span>
 </pre></div>
 
-<p><code>app.psgi</code>:</p>
+<p>Then ...</p>
 
-<div class="highlight"><pre><span class="k">use</span> <span class="n">MyWebApp</span><span class="p">;</span>
-<span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyWebApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
+<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
+<span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="n">run</span><span class="p">;</span>
 </pre></div>
 
+<p>Finally ...</p>
+
+<pre lang="none"><code>&gt; plackup app.psgi
+</code></pre>
+
 <p>Or, for quick prototyping use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>:</p>
 
-<div class="highlight"><pre><span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Less</span><span class="p">;</span>
+<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Less</span><span class="p">;</span>
 
 <span class="n">get</span> <span class="s">'/hello/?name'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
     <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$name</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
@@ -123,13 +127,15 @@ routes, then analyzing the response.</li>
 
 <p>What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. While those other frameworks bring their own
-deployment code, Kelp is heavily <em>Plack</em>-centric. It uses Plack as its foundation
-layer, and it builds the web framework on top of it. <code>Kelp::Request</code> is an
-extension of <code>Plack::Request</code>, <code>Kelp::Response</code> is an extension of
-<code>Plack::Response</code>.
-This approach of extending current CPAN code, puts familiar and well tested
-tools in the hands of the application developer.</p>
+platform for web app building. Most of them, however, bring their deployment code,
+and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
+<em>Plack</em>-centric. It uses Plack as its foundation layer, and it builds the web
+framework on top of it. <code>Kelp::Request</code> is an extension of <code>Plack::Request</code>,
+<code>Kelp::Response</code> is an extension of <code>Plack::Response</code>.</p>
+
+<p>This approach of extending current CPAN code puts familiar and well tested
+tools in the hands of the application developer, while keeping familiar syntax
+and work flow.</p>
 
 <p>Kelp is a team player and it uses several popular, trusted CPAN modules for its
 internals. At the same time it doesn't include modules that it doesn't need,
@@ -138,10 +144,34 @@ and a small footprint, and it's completely object manager agnostic.</p>
 
 <h1>CREATING A NEW WEB APP</h1>
 
+<h2>Using the <code>Kelp</code> script</h2>
+
+<p>The easiest way to create the directory structure and a general application
+skeleton is by using the <code>Kelp</code> script, which comes with this package.</p>
+
+<pre lang="none"><code>&gt; Kelp Destiny
+</code></pre>
+
+<p>This will create <code>lib/Destiny.pm</code>, <code>app.psgi</code> and some other files (explained
+below).</p>
+
+<p>To create a <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a> app, use:</p>
+
+<pre lang="none"><code>&gt; Kelp --less Candy
+</code></pre>
+
+<p>Get help by typing:</p>
+
+<pre lang="none"><code>&gt; Kelp --help
+</code></pre>
+
+<p>Note: You should not use stripper names for your applications.</p>
+
 <h2>Directory structure</h2>
 
 <p>Before you begin writing the internals of your app, you need to create the
-directory structure.</p>
+directory structure either by hand, or by using the above described <code>Kelp</code>
+utility script.</p>
 
 <pre lang="none"><code> .
  |--/lib
@@ -149,9 +179,9 @@ directory structure.</p>
  |   |--/MyApp
  |
  |--/conf
- |   |--myapp.conf
- |   |--myapp_test.conf
- |   |--myapp_deployment.conf
+ |   |--config.pl
+ |   |--config_test.pl
+ |   |--config_deployment.pl
  |
  |--/view
  |--/log
@@ -170,8 +200,9 @@ that you want your app to use.</p>
 <p><strong>/conf</strong></p>
 
 <p>The <code>conf</code> folder is where Kelp will look for configuration files. You need one
-main file, named exactly as your app, with the extension of <code>.conf</code>. You can
-also add other files that define different running environments.
+main file, named <code>config.pl</code>. You can also add other files that define different
+running environments, if you name them <code>config_</code>_environment_<code>.pl</code>. Replace
+<em>environment</em> with the actual name of the environment.
 To change the running environment, you can specify the app <code>mode</code>, or you can
 set the <code>KELP_ENV</code> environment variable.</p>
 
@@ -440,7 +471,6 @@ It sends the request to the web app and saves the response as an
 <a href="http://search.cpan.org/perldoc?HTTP::Response">HTTP::Response</a> object.</p>
 
 <div class="highlight"><pre><span class="c1"># file t/test.t</span>
-
 <span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Test</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Test::</span><span class="n">More</span><span class="p">;</span>
@@ -464,7 +494,7 @@ It sends the request to the web app and saves the response as an
 <ul>
 <li>First, we create an instance of the web application class, which we have
 previously built and placed in the <code>lib/</code> folder. We set the mode of the app to
-<code>test</code>, so that file <code>conf/myapp_test.conf</code> overrides the main configuration.
+<code>test</code>, so that file <code>conf/config_test.pl</code> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.</li>
@@ -649,7 +679,7 @@ configuration file to merge into the main configuration. See
 <a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information.</p>
 
 <div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
-<span class="c1"># conf/myapp.conf and conf/myapp_development.conf are merged with priority</span>
+<span class="c1"># conf/config.pl and conf/config_development.pl are merged with priority</span>
 <span class="c1"># given to the second one.</span>
 </pre></div>
 
@@ -664,9 +694,6 @@ class will be used.</p>
 
 <div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'Twittar'</span> <span class="p">);</span>
 </pre></div>
-
-<p>The <code>name</code> is used to look for configuration files. In the above example, the
-app will look for <code>conf/twittar.conf</code> and <code>conf/twittar_*.conf</code> files.</p>
 
 <h2>charset</h2>
 
@@ -832,7 +859,8 @@ arguments.</p>
 
 <h1>LICENSE</h1>
 
-<p>Same as Perl itself.</p>
+<p>This module and all the modules in this package are governed by the same license
+as Perl itself.</p>
       </section>
 
     </div>
