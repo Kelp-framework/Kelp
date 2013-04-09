@@ -228,7 +228,6 @@ Kelp - A web framework light, yet rich in nutrients.
 =head1 SYNOPSIS
 
     # lib/MyApp.pm
-
     package MyApp;
     use base 'Kelp';
 
@@ -246,11 +245,16 @@ Kelp - A web framework light, yet rich in nutrients.
 
     1;
 
-    # app.psgi
+Then ...
 
+    # app.psgi
     use MyApp;
     my $app = MyApp->new;
     $app->run;
+
+Finally ...
+
+    > plackup app.psgi
 
 Or, for quick prototyping use L<Kelp::Less>:
 
