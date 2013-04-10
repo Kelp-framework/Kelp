@@ -378,7 +378,7 @@ See ["BRIDGES" in Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes#BRID
 
 ### URL building
 
-Each path can be given a name and later a URL can be build using that name and
+Each path can be given a name and later a URL can be built using that name and
 the necessary arguments.
 
 ```perl
@@ -393,16 +393,56 @@ my $url = $self->route->url('update', id => 1000); # /update/1000
 
 For writing quick experimental web apps and to reduce the boiler plate, one
 could use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less). In this case all of the code can be put in `app.psgi`:
-Look up the POD for `Kelp::Less` for many examples.
+Look up the POD for `Kelp::Less` for many examples, but do get you started off,
+here is a quick one:
+
+```perl
+# app.psgi
+use Kelp:::Less;
+
+get '/api/:user/?action' => sub {
+    my ( $self, $user, $action ) = @_;
+    my $json = {
+        success => \1,
+        user    => $user,
+        action  => $action // 'ask'
+    };
+    return $json;
+};
+```
 
 ## Adding middleware
 
-Kelp, being Plack-centric, will let you easily add middleware. There are two
-ways to add middleware:
+Kelp, being Plack-centric, will let you easily add middleware. There are three
+possible ways to add middleware to your application, and all three ways can be
+used separately or together.
 
-In `app.psgi`:
+### Using the configuration
+
+Adding middleware in your configuration is probably the easiest and best way for
+you. This way you can load different middleware for each running mode, e.g.
+`Debug` in development only, etc.
+
+Add middleware names to the `middleware` array in your configuration file and
+the corresponding initializing arguments in the `middleware_init` hash:
 
 ```perl
+# conf/config_development.pl
+{
+    middleware      => [qw/Session Debug/],
+    middleware_init => {
+        Session => { store => 'File' }
+    }
+}
+```
+
+The middleware will be added in the order you specify in the `middleware`
+array.
+
+### In `app.psgi`:
+
+```perl
+# app.psgi
 use MyApp;
 use Plack::Builder;
 
@@ -414,9 +454,13 @@ builder {
 };
 ```
 
-By overloading the ["run"](#run) subroutine in `lib/MyApp.pm`:
+### By overriding the ["run"](#run) subroutine in `lib/MyApp.pm`:
+
+Make sure you call `SUPER` first, and then wrap new middleware around the
+returned app.
 
 ```perl
+# lib/MyApp.pm
 sub run {
     my $self = shift;
     my $app = $self->SUPER::run(@_);
@@ -424,10 +468,12 @@ sub run {
 }
 ```
 
+Note that any middleware defined in your config file will be added first.
+
 ## Deploying
 
-Deploying a Kelp application is done the same way one would deploy any Plack
-app.
+Deploying a Kelp application is done the same way any other Plack application is
+deployed:
 
 ```none
 > plackup -E deployment -s Starman app.psgi

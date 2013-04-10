@@ -38,28 +38,33 @@ sub new {
     $self->load_module($_) for ( qw/Config Routes/ );
 
     # Load the modules from the config
-    $self->load_module($_)
-      for (  @{ $self->config('modules') } );
+    if ( defined( my $modules = $self->config('modules') ) ) {
+        $self->load_module($_) for @$modules;
+    }
 
     $self->build();
     return $self;
 }
 
 sub load_module {
-    my $self = shift;
-    my $name = shift;
+    my ( $self, $name ) = @_;
 
     # Make sure the module was not already loaded
     return if $self->{_loaded_modules}->{$name}++;
 
-    my %args = ();
-    if ( $self->can('config')
-        && defined( my $c = $self->config("modules_init.$name") ) ) {
-        %args = %$c;
-    }
     my $class = Plack::Util::load_class( $name, 'Kelp::Module' );
     my $module = $class->new( app => $self );
-    $module->build(%args);
+
+    # When loading the Config module itself, we don't have
+    # access to $self->config yet. This is why we check if
+    # config is available, and if it is, then we pull the
+    # initialization hash.
+    my $args = {};
+    if ( $self->can('config') ) {
+        $args = $self->config("modules_init.$name") // {};
+    }
+
+    $module->build(%$args);
     return $module;
 }
 
@@ -85,10 +90,25 @@ sub before_render {
     $self->res->header('X-Framework' => 'Perl Kelp');
 }
 
-# Override this to wrap middleware around the app
+# Override this to wrap more middleware around the app
 sub run {
     my $self = shift;
-    return sub { $self->psgi( @_ ) }
+    my $app = sub { $self->psgi(@_) };
+
+    # Add middleware
+    if ( defined( my $middleware = $self->config('middleware') ) ) {
+        for my $class (@$middleware) {
+
+            # Make sure the middleware was not already loaded
+            next if $self->{_loaded_middleware}->{$class}++;
+
+            my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
+            my $args = $self->config("middleware_init.$class") // {};
+            $app = $mw->wrap( $app, %$args );
+        }
+    }
+
+    return $app;
 }
 
 sub psgi {

@@ -21,7 +21,8 @@ attr res => sub { die "res is not initialized" };
 
 sub request {
     my ( $self, $req ) = @_;
-    $self->note($req->method . ' ' . $req->uri);
+    croak "HTTP::Request object needed" unless ref($req) eq 'HTTP::Request';
+    $self->note( $req->method . ' ' . $req->uri );
     $self->res( test_psgi( $self->app->run, sub { shift->($req) } ) );
     return $self;
 }

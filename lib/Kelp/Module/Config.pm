@@ -101,6 +101,12 @@ sub defaults {
             },
         },
 
+        # List of the middleware to add
+        middleware => [],
+
+        # Initializations of the middleware
+        middleware_init => {},
+
     };
 
     return $result;
@@ -165,12 +171,21 @@ C<http://localhost:5000>
 
 =head2 modules
 
-Specifies which modules to load on startup. The default value is
-C<JSON, Template, Logger>
+An arrayrf with module names to load on startup. The default value is
+C<['JSON', 'Template', 'Logger']>
 
 =head2 modules_init
 
 A hashref with initializations for each of the loaded modules, except this one,
 ironically.
+
+=head2 middleware
+
+An arrayref with middleware to load on startup. The default value is an
+empty array.
+
+=head2 middleware_init
+
+A hashref with iitialization arguments for each of the loaded middleware.
 
 =cut

@@ -410,7 +410,7 @@ See L<Kelp::Routes/BRIDGES> for more information.
 
 =head3 URL building
 
-Each path can be given a name and later a URL can be build using that name and
+Each path can be given a name and later a URL can be built using that name and
 the necessary arguments.
 
     $r->add( "/update/:id", { name => 'update', to => 'user#update' } );
@@ -423,15 +423,51 @@ the necessary arguments.
 
 For writing quick experimental web apps and to reduce the boiler plate, one
 could use L<Kelp::Less>. In this case all of the code can be put in C<app.psgi>:
-Look up the POD for C<Kelp::Less> for many examples.
+Look up the POD for C<Kelp::Less> for many examples, but do get you started off,
+here is a quick one:
+
+    # app.psgi
+    use Kelp:::Less;
+
+    get '/api/:user/?action' => sub {
+        my ( $self, $user, $action ) = @_;
+        my $json = {
+            success => \1,
+            user    => $user,
+            action  => $action // 'ask'
+        };
+        return $json;
+    };
 
 =head2 Adding middleware
 
-Kelp, being Plack-centric, will let you easily add middleware. There are two
-ways to add middleware:
+Kelp, being Plack-centric, will let you easily add middleware. There are three
+possible ways to add middleware to your application, and all three ways can be
+used separately or together.
 
-In C<app.psgi>:
+=head3 Using the configuration
 
+Adding middleware in your configuration is probably the easiest and best way for
+you. This way you can load different middleware for each running mode, e.g.
+C<Debug> in development only, etc.
+
+Add middleware names to the C<middleware> array in your configuration file and
+the corresponding initializing arguments in the C<middleware_init> hash:
+
+    # conf/config_development.pl
+    {
+        middleware      => [qw/Session Debug/],
+        middleware_init => {
+            Session => { store => 'File' }
+        }
+    }
+
+The middleware will be added in the order you specify in the C<middleware>
+array.
+
+=head3 In C<app.psgi>:
+
+    # app.psgi
     use MyApp;
     use Plack::Builder;
 
@@ -442,18 +478,24 @@ In C<app.psgi>:
         $app->run;
     };
 
-By overloading the L</run> subroutine in C<lib/MyApp.pm>:
+=head3 By overriding the L</run> subroutine in C<lib/MyApp.pm>:
 
+Make sure you call C<SUPER> first, and then wrap new middleware around the
+returned app.
+
+    # lib/MyApp.pm
     sub run {
         my $self = shift;
         my $app = $self->SUPER::run(@_);
         Plack::Middleware::ContentLength->wrap($app);
     }
 
+Note that any middleware defined in your config file will be added first.
+
 =head2 Deploying
 
-Deploying a Kelp application is done the same way one would deploy any Plack
-app.
+Deploying a Kelp application is done the same way any other Plack application is
+deployed:
 
     > plackup -E deployment -s Starman app.psgi
 
