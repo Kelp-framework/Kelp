@@ -39,8 +39,8 @@
         </div>
 
         <h1>SYNOPSIS</h1>
-        
-<p>First ...</p>        
+
+<p>First ...</p>
 
 <div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
 <span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
@@ -411,7 +411,7 @@ route in line to be processed.</p>
 
 <h3>URL building</h3>
 
-<p>Each path can be given a name and later a URL can be build using that name and
+<p>Each path can be given a name and later a URL can be built using that name and
 the necessary arguments.</p>
 
 <div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/update/:id"</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'update'</span><span class="p">,</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="s">'user#update'</span> <span class="p">}</span> <span class="p">);</span>
@@ -425,16 +425,54 @@ the necessary arguments.</p>
 
 <p>For writing quick experimental web apps and to reduce the boiler plate, one
 could use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>. In this case all of the code can be put in <code>app.psgi</code>:
-Look up the POD for <code>Kelp::Less</code> for many examples.</p>
+Look up the POD for <code>Kelp::Less</code> for many examples, but do get you started off,
+here is a quick one:</p>
+
+<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<span class="k">use</span> <span class="nn">Kelp::</span><span class="n">:Less</span><span class="p">;</span>
+
+<span class="n">get</span> <span class="s">'/api/:user/?action'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$user</span><span class="p">,</span> <span class="nv">$action</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
+    <span class="k">my</span> <span class="nv">$json</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">success</span> <span class="o">=&gt;</span> <span class="o">\</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">user</span>    <span class="o">=&gt;</span> <span class="nv">$user</span><span class="p">,</span>
+        <span class="n">action</span>  <span class="o">=&gt;</span> <span class="nv">$action</span> <span class="sr">//</span> <span class="s">'ask'</span>
+    <span class="p">};</span>
+    <span class="k">return</span> <span class="nv">$json</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
 
 <h2>Adding middleware</h2>
 
-<p>Kelp, being Plack-centric, will let you easily add middleware. There are two
-ways to add middleware:</p>
+<p>Kelp, being Plack-centric, will let you easily add middleware. There are three
+possible ways to add middleware to your application, and all three ways can be
+used separately or together.</p>
 
-<p>In <code>app.psgi</code>:</p>
+<h3>Using the configuration</h3>
 
-<div class="highlight"><pre><span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
+<p>Adding middleware in your configuration is probably the easiest and best way for
+you. This way you can load different middleware for each running mode, e.g.
+<code>Debug</code> in development only, etc.</p>
+
+<p>Add middleware names to the <code>middleware</code> array in your configuration file and
+the corresponding initializing arguments in the <code>middleware_init</code> hash:</p>
+
+<div class="highlight"><pre><span class="c1"># conf/config_development.pl</span>
+<span class="p">{</span>
+    <span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Session Debug/</span><span class="p">],</span>
+    <span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="n">Session</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="n">store</span> <span class="o">=&gt;</span> <span class="s">'File'</span> <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>The middleware will be added in the order you specify in the <code>middleware</code>
+array.</p>
+
+<h3>In <code>app.psgi</code>:</h3>
+
+<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Plack::</span><span class="n">Builder</span><span class="p">;</span>
 
 <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">();</span>
@@ -445,19 +483,25 @@ ways to add middleware:</p>
 <span class="p">};</span>
 </pre></div>
 
-<p>By overloading the <a href="#run">"run"</a> subroutine in <code>lib/MyApp.pm</code>:</p>
+<h3>By overriding the <a href="#run">"run"</a> subroutine in <code>lib/MyApp.pm</code>:</h3>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">run</span> <span class="p">{</span>
+<p>Make sure you call <code>SUPER</code> first, and then wrap new middleware around the
+returned app.</p>
+
+<div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
+<span class="k">sub </span><span class="nf">run</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="nn">SUPER::</span><span class="n">run</span><span class="p">(</span><span class="nv">@_</span><span class="p">);</span>
     <span class="nn">Plack::Middleware::</span><span class="n">ContentLength</span><span class="o">-&gt;</span><span class="n">wrap</span><span class="p">(</span><span class="nv">$app</span><span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 
+<p>Note that any middleware defined in your config file will be added first.</p>
+
 <h2>Deploying</h2>
 
-<p>Deploying a Kelp application is done the same way one would deploy any Plack
-app.</p>
+<p>Deploying a Kelp application is done the same way any other Plack application is
+deployed:</p>
 
 <pre lang="none"><code>&gt; plackup -E deployment -s Starman app.psgi
 </code></pre>
