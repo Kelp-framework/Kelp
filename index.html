@@ -38,9 +38,11 @@
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
 
-        <div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
+        <h1>SYNOPSIS</h1>
+
+<div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
 <span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
-<span class="k">use</span> <span class="n">base</span> <span class="s">'Kelp'</span><span class="p">;</span>
+<span class="k">use</span> <span class="n">parent</span> <span class="s">'Kelp'</span><span class="p">;</span>
 
 <span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
@@ -149,23 +151,21 @@ and a small footprint, and it's completely object manager agnostic.</p>
 <p>The easiest way to create the directory structure and a general application
 skeleton is by using the <code>Kelp</code> script, which comes with this package.</p>
 
-<pre lang="none"><code>&gt; Kelp Destiny
+<pre lang="none"><code>&gt; Kelp MyApp
 </code></pre>
 
-<p>This will create <code>lib/Destiny.pm</code>, <code>app.psgi</code> and some other files (explained
+<p>This will create <code>lib/MyApp.pm</code>, <code>app.psgi</code> and some other files (explained
 below).</p>
 
 <p>To create a <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a> app, use:</p>
 
-<pre lang="none"><code>&gt; Kelp --less Candy
+<pre lang="none"><code>&gt; Kelp --less MyApp
 </code></pre>
 
 <p>Get help by typing:</p>
 
 <pre lang="none"><code>&gt; Kelp --help
 </code></pre>
-
-<p>Note: You should not use stripper names for your applications.</p>
 
 <h2>Directory structure</h2>
 
@@ -211,7 +211,7 @@ set the <code>KELP_ENV</code> environment variable.</p>
 
 <p>or</p>
 
-<pre lang="none"><code>&gt; KELP_ENV=development plackup app.psgi
+<pre lang="none"><code>&gt; PLACK_ENV=development plackup app.psgi
 </code></pre>
 </li>
 <li>
@@ -268,7 +268,7 @@ and initialize a database connection:</p>
 
 <span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
-    <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">route</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="s">"/read/:id"</span><span class="p">,</span> <span class="s">"read"</span><span class="p">);</span>
+    <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">routes</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="s">"/read/:id"</span><span class="p">,</span> <span class="s">"read"</span><span class="p">);</span>
 <span class="p">}</span>
 
 <span class="k">sub </span><span class="nf">read</span> <span class="p">{</span>
@@ -852,15 +852,6 @@ arguments.</p>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">redirect_to</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
-
-<h1>CREDITS</h1>
-
-<p>Author: Stefan Geneshky - <a href="mailto:minimal@cpan.org">minimal@cpan.org</a></p>
-
-<h1>LICENSE</h1>
-
-<p>This module and all the modules in this package are governed by the same license
-as Perl itself.</p>
       </section>
 
     </div>
