@@ -1,5 +1,7 @@
 # SYNOPSIS
 
+First ...
+
 ```perl
 # lib/MyApp.pm
 package MyApp;

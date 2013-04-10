@@ -2,6 +2,8 @@
 
 =head1 SYNOPSIS
 
+First ...
+
     # lib/MyApp.pm
     package MyApp;
     use parent 'Kelp';
