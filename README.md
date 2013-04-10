@@ -1,13 +1,7 @@
-# NAME
-
-Kelp - A web framework light, yet rich in nutrients.
-
-# SYNOPSIS
-
 ```perl
 # lib/MyApp.pm
 package MyApp;
-use base 'Kelp';
+use parent 'Kelp';
 
 sub build {
     my $self = shift;
@@ -113,16 +107,16 @@ The easiest way to create the directory structure and a general application
 skeleton is by using the `Kelp` script, which comes with this package.
 
 ```none
-> Kelp Destiny
+> Kelp MyApp
 ```
 
-This will create `lib/Destiny.pm`, `app.psgi` and some other files (explained
+This will create `lib/MyApp.pm`, `app.psgi` and some other files (explained
 below).
 
 To create a [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less) app, use:
 
 ```none
-> Kelp --less Candy
+> Kelp --less MyApp
 ```
 
 Get help by typing:
@@ -130,8 +124,6 @@ Get help by typing:
 ```none
 > Kelp --help
 ```
-
-Note: You should not use stripper names for your applications.
 
 ## Directory structure
 
@@ -177,7 +169,7 @@ utility script.
     or
 
     ```none
-    > KELP_ENV=development plackup app.psgi
+    > PLACK_ENV=development plackup app.psgi
 ```
 
 - __/view__
@@ -232,7 +224,7 @@ has dbh => (
 
 sub build {
     my $self = shift;
-    $self->route->add("/read/:id", "read");
+    $self->routes->add("/read/:id", "read");
 }
 
 sub read {
@@ -851,13 +843,3 @@ sub check {
     my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
     $self->res->redirect_to();
 }
-```
-
-# CREDITS
-
-Author: Stefan Geneshky - minimal@cpan.org
-
-# LICENSE
-
-This module and all the modules in this package are governed by the same license
-as Perl itself.
