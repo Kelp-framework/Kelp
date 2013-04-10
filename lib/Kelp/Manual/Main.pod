@@ -1,5 +1,7 @@
 =pod
 
+=head1 SYNOPSIS
+
     # lib/MyApp.pm
     package MyApp;
     use parent 'Kelp';
