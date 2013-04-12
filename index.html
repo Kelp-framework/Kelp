@@ -425,7 +425,7 @@ the necessary arguments.</p>
 
 <p>For writing quick experimental web apps and to reduce the boiler plate, one
 could use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>. In this case all of the code can be put in <code>app.psgi</code>:
-Look up the POD for <code>Kelp::Less</code> for many examples, but do get you started off,
+Look up the POD for <code>Kelp::Less</code> for many examples, but to get you started off,
 here is a quick one:</p>
 
 <div class="highlight"><pre><span class="c1"># app.psgi</span>
@@ -440,6 +440,8 @@ here is a quick one:</p>
     <span class="p">};</span>
     <span class="k">return</span> <span class="nv">$json</span><span class="p">;</span>
 <span class="p">};</span>
+
+<span class="n">run</span><span class="p">;</span>
 </pre></div>
 
 <h2>Adding middleware</h2>
@@ -452,7 +454,7 @@ used separately or together.</p>
 
 <p>Adding middleware in your configuration is probably the easiest and best way for
 you. This way you can load different middleware for each running mode, e.g.
-<code>Debug</code> in development only, etc.</p>
+<code>Debug</code> in development only.</p>
 
 <p>Add middleware names to the <code>middleware</code> array in your configuration file and
 the corresponding initializing arguments in the <code>middleware_init</code> hash:</p>
