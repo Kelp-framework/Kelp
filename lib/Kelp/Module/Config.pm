@@ -70,7 +70,7 @@ sub defaults {
                 ]
             },
 
-            # Logger - Default config is for developement
+            # Logger - Default config is for development
             Logger => {
                 outputs => [
                     [
@@ -124,12 +124,12 @@ Kelp::Module::Config - Configuration for Kelp applications
 
 =head1 DESCRIPTION
 
-This is one of the two modules which are automatically loaded for each and every
+This is one of the two modules that are automatically loaded for each and every
 Kelp application. It uses L<Config::Hash> to read Perl-style hashes from files
 and merge them depending on the value of the C<mode> attribute.
 
 The main configuration file name is C<config.pl>, and it will be searched in the
-current directory or the one above. The latter is convenient for running tests
+C<conf> directory or C<../conf>. The latter is convenient for running tests
 which use the same configuration settings as the main app.
 
 =head1 REGISTERED METHODS
@@ -151,8 +151,7 @@ A reference to the entire configuration hash.
 
     my $pos = $self->config_hash->{row}->{col}->{position};
 
-Those of you who code in Java should be very satisfied by the
-verbosity of the above example.
+Using this or C<config> is entirely up to the application developer.
 
 =head1 DEFAULTS
 

@@ -423,7 +423,7 @@ the necessary arguments.
 
 For writing quick experimental web apps and to reduce the boiler plate, one
 could use L<Kelp::Less>. In this case all of the code can be put in C<app.psgi>:
-Look up the POD for C<Kelp::Less> for many examples, but do get you started off,
+Look up the POD for C<Kelp::Less> for many examples, but to get you started off,
 here is a quick one:
 
     # app.psgi
@@ -439,6 +439,8 @@ here is a quick one:
         return $json;
     };
 
+    run;
+
 =head2 Adding middleware
 
 Kelp, being Plack-centric, will let you easily add middleware. There are three
@@ -449,7 +451,7 @@ used separately or together.
 
 Adding middleware in your configuration is probably the easiest and best way for
 you. This way you can load different middleware for each running mode, e.g.
-C<Debug> in development only, etc.
+C<Debug> in development only.
 
 Add middleware names to the C<middleware> array in your configuration file and
 the corresponding initializing arguments in the C<middleware_init> hash:

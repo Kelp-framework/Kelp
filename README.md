@@ -393,7 +393,7 @@ my $url = $self->route->url('update', id => 1000); # /update/1000
 
 For writing quick experimental web apps and to reduce the boiler plate, one
 could use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less). In this case all of the code can be put in `app.psgi`:
-Look up the POD for `Kelp::Less` for many examples, but do get you started off,
+Look up the POD for `Kelp::Less` for many examples, but to get you started off,
 here is a quick one:
 
 ```perl
@@ -409,6 +409,8 @@ get '/api/:user/?action' => sub {
     };
     return $json;
 };
+
+run;
 ```
 
 ## Adding middleware
@@ -421,7 +423,7 @@ used separately or together.
 
 Adding middleware in your configuration is probably the easiest and best way for
 you. This way you can load different middleware for each running mode, e.g.
-`Debug` in development only, etc.
+`Debug` in development only.
 
 Add middleware names to the `middleware` array in your configuration file and
 the corresponding initializing arguments in the `middleware_init` hash:

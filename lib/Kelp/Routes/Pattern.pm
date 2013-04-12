@@ -219,7 +219,7 @@ about bridges, please see L<Kelp::Routes/BRIDGES>
 
 We recommend that you stick to using patterns, because they are simpler and
 easier to read, but if you need to match a really complicated route, then
-you can use a Perl regex.
+you can use a regular expression.
 
     my $p = Kelp::Routes::Patters->new( regex => qr{^(\d+)/(\d+)$} );
     $p->match('/100/200');  # True. $p->param will be [ 100, 200 ]
@@ -240,12 +240,12 @@ C<pattern>.
 
 =head2 named
 
-A HashRef which will be initialized by the L</match> function. After matching,
+A hashref which will be initialized by the L</match> function. After matching,
 it will contain placeholder names and values for the matched route.
 
 =head2 param
 
-An ArrayRef which will be initialized by the L</match> function. After matching,
+An arrayref, which will be initialized by the L</match> function. After matching,
 it will contain all placeholder values in the order they were specified in the
 pattern.
 
@@ -264,7 +264,6 @@ was successful, this sub will return a true value and the L</named> and L</param
 attributes will be initialized with the names and values of the matched placeholders.
 
 =head2 build
-
 C<build( %args )>
 
 Builds a URL from a pattern.

@@ -168,7 +168,7 @@ which makes them easy to chain.
 
 =head2 render
 
-This method tries to act smart, without being a control freak. It will will out
+This method tries to act smart, without being a control freak. It will fill out
 the blanks, unless they were previously filled out by someone else. Here is what
 is does:
 

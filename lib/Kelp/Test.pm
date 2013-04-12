@@ -192,7 +192,7 @@ is a reference to a Kelp based web app.
     my $myapp = MyApp->new;
     my $t = Kelp::Test->new( app => $myapp );
 
-From this point on, all requests run with C<$t->request> will be sent to C<$app>.
+From this point on, all requests run with C<$t-E<gt>request> will be sent to C<$app>.
 
 =head2 psgi
 
@@ -228,11 +228,11 @@ C<res>.
 
 C<request( $http_request )>
 
-Takes a L<HTTP::Request> object and sends it to the application. When a
+Takes an L<HTTP::Request> object and sends it to the application. When the
 L<HTTP::Response> object is returned, it is initialized in the L</res>
 attribute.
 It is very convenient to use L<HTTP::Request::Common> in your test modules, so
-you can take advantage of the simplified syntax for creating a HTTP request.
+you can take advantage of the simplified syntax for creating an HTTP request.
 
     $t->request( POST '/api', [ user => 'jane' ] );
 
@@ -240,8 +240,7 @@ This method returns C<$self>, so other methods can be chained after it.
 
 =head2 code_is, code_isnt
 
-C<code_is( $code, $test_name )>
-C<code_isnt( $code, $test_name )>
+C<code_is( $code, $test_name )>, C<code_isnt( $code, $test_name )>
 
 Tests if the last response returned a status code equal or not equal to C<$code>.
 An optional name of the test can be added as a second parameter.
@@ -251,8 +250,7 @@ An optional name of the test can be added as a second parameter.
 
 =head2 content_is, content_isnt
 
-C<content_is( $value, $test_name )>
-C<content_isnt( $value, $test_name )>
+C<content_is( $value, $test_name )>, C<content_isnt( $value, $test_name )>
 
 Tests if the last response returned content equal or not equal to C<$value>.
 An optional name of the test can be added as a second parameter.
@@ -262,8 +260,7 @@ An optional name of the test can be added as a second parameter.
 
 =head2 content_like, content_unlike
 
-C<content_like( $regexp, $test_name )>
-C<content_unlike( $regexp, $test_name )>
+C<content_like( $regexp, $test_name )>, C<content_unlike( $regexp, $test_name )>
 
 Tests if the last response returned content that matches or doesn't match C<$regexp>.
 An optional name of the test can be added as a second parameter.
@@ -273,10 +270,9 @@ An optional name of the test can be added as a second parameter.
 
 =head2 content_type_is, content_type_isnt
 
-C<content_type_is( $value, $test_name )>
-C<content_type_isnt( $value, $test_name )>
+C<content_type_is( $value, $test_name )>, C<content_type_isnt( $value, $test_name )>
 
-Tests if the last response's content-type header is equal or not eual to C<$value>.
+Tests if the last response's content-type header is equal or not equal to C<$value>.
 An optional name of the test can be added as a second parameter.
 
     $t->request( GET '/path' )->content_type_is("text/plain");
@@ -284,8 +280,7 @@ An optional name of the test can be added as a second parameter.
 
 =head2 header_is, header_isnt
 
-C<header_is( $header, $value, $test_name )>
-C<header_isnt( $header, $value, $test_name )>
+C<header_is( $header, $value, $test_name )>, C<header_isnt( $header, $value, $test_name )>
 
 Tests if the last response returned a header C<$header> that is equal or not
 equal to C<$value>. An optional name of the test can be added as a second parameter.
@@ -295,8 +290,7 @@ equal to C<$value>. An optional name of the test can be added as a second parame
 
 =head2 header_like, header_unlike
 
-C<header_like( $header, $regexp, $test_name )>
-C<header_unlike( $header, $regexp, $test_name )>
+C<header_like( $header, $regexp, $test_name )>, C<header_unlike( $header, $regexp, $test_name )>
 
 Tests if the last response returned a header C<$header> that matches or doesn't
 match C<$regexp>. An optional name of the test can be added as a second parameter.

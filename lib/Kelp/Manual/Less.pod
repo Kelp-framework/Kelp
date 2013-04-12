@@ -130,10 +130,10 @@ initialize your application.
 
 =head2 route
 
-Adds a route to C<app>. It is an alias to C<$self->routes->add>, and requires
-the exact same parameters. See L<Kelp::Routes> for enlightenment.
+Adds a route to C<app>. It is an alias to C<$self-E<gt>routes-E<gt>add>, and requires
+the exact same parameters. See L<Kelp::Routes> for reference.
 
-    route '/get' => sub { "got" };
+    route '/get-it' => sub { "got it" };
 
 =head2 get, post, put, del
 
@@ -231,7 +231,7 @@ Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack
 =head1 TESTING
 
 When writing a C<Kelp::Less> app, we don't have a separate class to initialize as we
-please, and feed into a L<Kelp::Test> object. In this case, the C<Kelp::Test>
+please and feed into a L<Kelp::Test> object. In this case, the C<Kelp::Test>
 object can be initialized with the name of the C<PSGI> file in the C<psgi> argument.
 
     # t/main.t

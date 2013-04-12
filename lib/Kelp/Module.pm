@@ -73,8 +73,9 @@ web application. All the registrations are done in the L</build> subroutine.
 All types of values can be registered and then accessed as a read-only attribute
 from the web app. The simplest thing you can register is a scalar value:
 
-C<lib/Kelp/Module/Month.pm>:
+First...
 
+    # lib/Kelp/Module/Month.pm
     package Kelp::Module::Month;
     use Kelp::Base 'Kelp::Module';
 
@@ -83,8 +84,9 @@ C<lib/Kelp/Module/Month.pm>:
         $self->register( month => 'October' );
     }
 
-C<lib/MyApp.pm>:
+Then ...
 
+    # lib/MyApp.pm
     package MyApp;
     use parent 'Kelp';
 
@@ -159,14 +161,18 @@ of the module.
 
 =head1 METHODS
 
-=head2 build( %args )
+=head2 build
+
+C<build( %args )>
 
 Each module must override this one in order to register new methods. The
 C<%args> hash will be taken from the configuration.
 
-=head2 register( %items )
+=head2 register
 
-Register one or many methods into the web application.
+C<register( %items )>
+
+Registers one or many methods into the web application.
 
     $self->register(
         json => JSON->new,

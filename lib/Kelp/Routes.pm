@@ -157,66 +157,23 @@ Kelp::Routes - Routing for a Kelp app
 
 =head1 SYNOPSIS
 
+    use Kelp::Routes;
     my $r = Kelp::Routes->new( base => 'MyApp' );
-
-    # Simple
     $r->add( '/home', 'home' );
-
-    # With method
-    $r->add( [ POST => '/item' ], 'items#add' );
-
-    # Captures
-    $r->add( '/user/:id',     'user#view' );       # Required
-    $r->add( '/pages/?id',    'pages#view' );      # Optional
-    $r->add( '/*article/:id', 'articles#view' );   # Wildcard
-
-    # Extended options
-    $r->add(
-        '/resource/:id' => {
-            via   => 'GET',               # match only GET
-            to    => 'resources#view',    # send to MyApp::Resources::View
-            check => { id => '\d+' },     # match only id =~ /\d+/
-            name  => 'resource'           # name this route 'resource'
-        }
-    );
-
-    # URL building
-    say $r->url( 'resource', id => 100 );    # '/resource/100'
-
-    # Bridges
-    $r->add(
-        '/users', {
-            to     => 'users#auth',
-            bridge => 1
-        }
-    );
-    $r->add( '/users/edit' => 'user#edit' );
-    # Will go through the bridge code first
-
-    # Nested routes and bridges
-    $r->add(
-        '/users' => {
-            to   => 'users#auth',
-            tree => [
-                '/home' => 'users#home',
-                [ POST => '/edit' ] => 'users#edit',
-                '/prefs' => {
-                    to   => 'users#prefs',
-                    tree => [
-                        '/email' => 'users#prefs#email',
-                        '/login' => 'users#prefs#login'
-                    ]
-                }
-            ]
-        }
-    );
 
 =head1 DESCRIPTION
 
-Routing is at the core of each web application. It provides the connection
-between each HTTP request and the code.
+The router provides the connection between the HTTP requests and the web
+application code. It tells the application I<"If you see a request coming to
+*this* URI, send it to *that* subroutine for processing">. For example, if a
+request comes to C</home>, then send it to C<sub home> in the current
+namespace. The process of capturing URIs and sending them to their corresponding
+code is called routing.
 
-Kelp provides a simple, yet sophisticated router. It utilizes Perl 5.10's
+This router was specifically crafted as part of the C<Kelp> web framework. It
+is, however, possible to use it on its own, if needed.
+
+It provides a simple, yet sophisticated routing utilizing Perl 5.10's
 regular expressions, which makes it fast, robust and reliable.
 
 The routing process can roughly be broken down into three steps:
@@ -250,7 +207,7 @@ reference.
 
 =item B<Building URLs from routes>
 
-You can name each of your routes and use that later to build a URL:
+You can name each of your routes, and use that name later to build a URL:
 
     $r->add( '/begin' => { to => 'function', name => 'home' } );
     my $url = $r->url('home');    # /begin
@@ -264,13 +221,33 @@ a route.
 
 =head1 PLACEHOLDERS
 
-Each route is matched via a regular expression. You can write your own regular
-expressions or you can use Kelp's I<placeholders>. Placeholders are variables
-you place in the route path. They are identified by a prefix character and
-their names must abide to the rules of a regular Perl variable. If necessary,
-curly braces can be used to separate placeholders from the rest of the path.
+Often routes may get more complicated. They may contain variable parts. For
+example this one C</user/1000> is expected to do something with user ID 1000.
+So, in this case we need to capture a route that begins with C</user/> and then
+has something else after it.
 
-There are three types of place holders: explicit, optional and wildcards.
+Naturally, when it comes to capturing routes, the first instinct of the Perl
+programmer is to use regular expressions, like this:
+
+    qr{/user/(\d+)} -> "sub home"
+
+This module will let you do that, however regular expressions can get very
+complicated, and it won't be long before you lose track of what does what.
+
+This is why a good router (this one included) allows for I<named placeholders>.
+These are words prefixed with special symbols, which denote a variable piece in
+the URI. To use the above example:
+
+    "/user/:id" -> "sub home"
+
+It looks a little cleaner.
+
+Placeholders are variables you place in the route path. They are identified by
+a prefix character and their names must abide to the rules of a regular Perl
+variable. If necessary, curly braces can be used to separate placeholders from
+the rest of the path.
+
+There are three types of place holders:
 
 =head2 Explicit
 
@@ -358,15 +335,14 @@ path:
 
 The L</match> subroutine will stop and return the route that best matches the
 specified path. If that route is marked as a bridge, then L</match> will
-continue looking for a match and will eventually return an array of one or
-more routes. Bridges can be used for authentication or other route
-preprocessing.
+continue looking for another match, and will eventually return an array of one or
+more routes. Bridges can be used for authentication or other route preprocessing.
 
     $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
     $r->add( '/users/:action' => 'Users::dispatch' );
 
 The above example will require F</users/profile> to go through two
-controllers: C<Users::auth> and C<Users::dispatch>:
+subroutines: C<Users::auth> and C<Users::dispatch>:
 
     my $arr = $r->match('/users/view');
     # $arr is an array of two routes now, the bridge and the last one matched
@@ -401,7 +377,7 @@ The above call to C<add> causes the following to occur under the hood:
 
 =over
 
-=item *
+=item
 
 The paths of all routes inside the tree are joined to the path of their
 parent, so the following five new routes are created:
@@ -412,9 +388,11 @@ parent, so the following five new routes are created:
     /users/settings/email   -> MyApp::Users::email
     /users/settings/login   -> MyApp::Users::login
 
-=item *
+=cut
 
-The names of the routes are joined with C<_> to the name of their parent:
+=item
+
+The names of the routes are joined via C<_> with the name of their parent:
 
     /users                  -> 'users'
     /users/profile          -> 'users_profile'
@@ -422,10 +400,14 @@ The names of the routes are joined with C<_> to the name of their parent:
     /users/settings/email   -> 'users_settings_email'
     /users/settings/login   -> 'users_settings_login'
 
-=item *
+=cut
+
+=item
 
 The C</users> and C</users/settings> routes are automatically marked as
 bridges, because they contain a tree.
+
+=cut
 
 =back
 
@@ -443,9 +425,9 @@ This will prepend C<MyApp::> to all route destinations.
     $r->add( '/user' => 'user#home' );     # /user -> MyApp::User::home
     $r->add( '/view' => 'User::view' );    # /view -> MyApp::User::view
 
-By default this value is an empty string and it will not prepend anything.
-However, if it is set, then it will always be used. If you need to use
-a route located in another package, you'll have to wrap it in a local sub:
+A Kelp application will automatically set this value to the name of the main
+class. If you need to use a route located in another package, you'll have to
+wrap it in a local sub:
 
     # Problem:
 
@@ -472,13 +454,31 @@ Adds a new route definition to the routes array.
 C<$path> can be a path string, e.g. C<'/user/view'> or an ARRAY containing a
 method and a path, e.g. C<[ PUT =E<gt> '/item' ]>.
 
-C<$destination> can be a destination string, e.g. C<'Users::item'>, a hash
-containing more options or a CODE reference:
+The route destination is very flexible. It can be one of these three things:
 
-    my $r = Kelp::Routes->new( base => 'MyApp' );
+=over
 
-    # /home -> MyApp::User::home
+=item
+
+A string name of a subroutine, for example C<"Users::item">. Using a C<#> sign
+to replace C<::> is also allowed, in which case the name will get converted.
+C<"users#item"> becomes C<"Users::item">.
+
     $r->add( '/home' => 'user#home' );
+
+=cut
+
+=item
+
+A code reference.
+
+    $r->add( '/system' => sub { return \%ENV } );
+
+=cut
+
+=item
+
+A hashref with options.
 
     # GET /item/100 -> MyApp::Items::view
     $r->add(
@@ -488,20 +488,25 @@ containing more options or a CODE reference:
         }
     );
 
-    # /system -> CODE
-    $r->add( '/system' => sub { return \%ENV } );
+See L</Destination Options> for details.
+
+=cut
+
+=back
 
 =head3 Destination Options
+
+There are a number of options you can add to modify the behavior of the route,
+if you specify a hashref for a destination:
 
 =head4 to
 
 Sets the destination for the route. It should be a subroutine name or CODE
-reference. It could also be a shortcut, in which case it will get properly
-camelized.
+reference.
 
-    $r->add( '/user' => 'users#home' );       # /home -> MyApp::Users::home
-    $r->add( '/sys'  => sub { ... } );        # /sys -> execute code
-    $r->add( '/item' => 'Items::handle' );    # /item -> MyApp::Items::handle
+    $r->add( '/user' => { to => 'users#home' } ); # /home -> MyApp::Users::home
+    $r->add( '/sys' => { to => sub { ... } });    # /sys -> execute code
+    $r->add( '/item' => { to => 'Items::handle' } ) ;   # /item -> MyApp::Items::handle
     $r->add( '/item' => { to => 'Items::handle' } );    # Same as above
 
 =head4 via
@@ -516,13 +521,13 @@ Specifies an HTTP method to be considered by L</match> when matching a route.
         }
     );
 
-The above can be shortened with like this:
+A shortcut for the above is this:
 
     $r->add( [ POST => '/item' ] => 'items#add' );
 
 =head4 name
 
-Give the route a name, that can be used to build a URL later via the L</url>
+Give the route a name, and you can always use it to build a URL later via the L</url>
 subroutine.
 
     $r->add(
