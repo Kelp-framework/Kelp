@@ -1,0 +1,7 @@
+2012-04-13: Version 0.2
+            Complete rewrite of the Config module, allow for subclassing of it.
+            Write more tests.
+            Write more POD.
+
+2012-04-12: Version 0.1
+            First upload to CPAN

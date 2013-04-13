@@ -12,7 +12,7 @@ use Plack::Util;
 use Kelp::Request;
 use Kelp::Response;
 
-our $VERSION = 0.11;
+our $VERSION = 0.20;
 
 # Basic attributes
 attr -host => hostname;
@@ -25,6 +25,8 @@ attr -charset => sub {
     $_[0]->config("charset") // 'UTF-8';
 };
 
+attr config_module => 'Config';
+
 # Each route's request an response objects will
 # be put here:
 attr req => undef;
@@ -35,7 +37,8 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Always load these modules
-    $self->load_module($_) for ( qw/Config Routes/ );
+    $self->load_module( $self->config_module );
+    $self->load_module('Routes');
 
     # Load the modules from the config
     if ( defined( my $modules = $self->config('modules') ) ) {
@@ -413,8 +416,9 @@ utility script.
      |
      |--/conf
      |   |--config.pl
-     |   |--config_test.pl
-     |   |--config_deployment.pl
+     |   |--test.pl
+     |   |--development.pl
+     |   |--deployment.pl
      |
      |--/view
      |--/log
@@ -434,10 +438,10 @@ that you want your app to use.
 
 The C<conf> folder is where Kelp will look for configuration files. You need one
 main file, named C<config.pl>. You can also add other files that define different
-running environments, if you name them C<config_>I<environment>C<.pl>. Replace
+running environments, if you name them I<environment>C<.pl>. Replace
 I<environment> with the actual name of the environment.
 To change the running environment, you can specify the app C<mode>, or you can
-set the C<KELP_ENV> environment variable.
+set the C<PLACK_ENV> environment variable.
 
     my $app = MyApp->new( mode => 'development' );
 
@@ -701,7 +705,7 @@ C<Debug> in development only.
 Add middleware names to the C<middleware> array in your configuration file and
 the corresponding initializing arguments in the C<middleware_init> hash:
 
-    # conf/config_development.pl
+    # conf/development.pl
     {
         middleware      => [qw/Session Debug/],
         middleware_init => {
@@ -782,7 +786,7 @@ What is happening here?
 
 First, we create an instance of the web application class, which we have
 previously built and placed in the C<lib/> folder. We set the mode of the app to
-C<test>, so that file C<conf/config_test.pl> overrides the main configuration.
+C<test>, so that file C<conf/test.pl> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.
@@ -988,8 +992,15 @@ configuration file to merge into the main configuration. See
 L<Kelp::Module::Config> for more information.
 
     my $app = MyApp->new( mode => 'development' );
-    # conf/config.pl and conf/config_development.pl are merged with priority
+    # conf/config.pl and conf/development.pl are merged with priority
     # given to the second one.
+
+=head2 config_module
+
+Sets of gets the class of the configuration module to be loaded on startup. The
+default value is C<Config>, which will cause the C<Kelp::Module::Config> to get
+loaded. See the documentation for L<Kelp::Module::Config> for more information
+and for an example of how to create and use other config modules.
 
 =head2 path
 

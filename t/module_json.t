@@ -1,7 +1,9 @@
 
 # Allow the redefining of globs at Kelp::Module
 BEGIN {
+    use FindBin '$Bin';
     $ENV{KELP_REDEFINE} = 1;
+    $ENV{KELP_CONFIG_DIR} = "$Bin/../conf";
 }
 
 use Kelp::Base -strict;

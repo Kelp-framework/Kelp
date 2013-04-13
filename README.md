@@ -1,3 +1,7 @@
+# NAME
+
+Kelp - A web framework light, yet rich in nutrients.
+
 # SYNOPSIS
 
 First ...
@@ -143,8 +147,9 @@ utility script.
  |
  |--/conf
  |   |--config.pl
- |   |--config_test.pl
- |   |--config_deployment.pl
+ |   |--test.pl
+ |   |--development.pl
+ |   |--deployment.pl
  |
  |--/view
  |--/log
@@ -161,10 +166,10 @@ utility script.
 
     The `conf` folder is where Kelp will look for configuration files. You need one
     main file, named `config.pl`. You can also add other files that define different
-    running environments, if you name them `config_`_environment_`.pl`. Replace
+    running environments, if you name them _environment_`.pl`. Replace
     _environment_ with the actual name of the environment.
     To change the running environment, you can specify the app `mode`, or you can
-    set the `KELP_ENV` environment variable.
+    set the `PLACK_ENV` environment variable.
 
     ```perl
     my $app = MyApp->new( mode => 'development' );
@@ -429,7 +434,7 @@ Add middleware names to the `middleware` array in your configuration file and
 the corresponding initializing arguments in the `middleware_init` hash:
 
 ```perl
-# conf/config_development.pl
+# conf/development.pl
 {
     middleware      => [qw/Session Debug/],
     middleware_init => {
@@ -515,7 +520,7 @@ What is happening here?
 
 - First, we create an instance of the web application class, which we have
 previously built and placed in the `lib/` folder. We set the mode of the app to
-`test`, so that file `conf/config_test.pl` overrides the main configuration.
+`test`, so that file `conf/test.pl` overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.
@@ -714,9 +719,16 @@ configuration file to merge into the main configuration. See
 
 ```perl
 my $app = MyApp->new( mode => 'development' );
-# conf/config.pl and conf/config_development.pl are merged with priority
+# conf/config.pl and conf/development.pl are merged with priority
 # given to the second one.
 ```
+
+## config\_module
+
+Sets of gets the class of the configuration module to be loaded on startup. The
+default value is `Config`, which will cause the `Kelp::Module::Config` to get
+loaded. See the documentation for [Kelp::Module::Config](http://search.cpan.org/perldoc?Kelp::Module::Config) for more information
+and for an example of how to create and use other config modules.
 
 ## path
 
@@ -895,3 +907,18 @@ sub check {
     my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
     $self->res->redirect_to();
 }
+```
+
+# SUPPORT
+
+- GitHub: https://github.com/naturalist/kelp
+- Mailing list: https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp
+
+# AUTHOR
+
+Stefan Geneshky - minimal@cpan.org
+
+# LICENSE
+
+This module and all the modules in this package are governed by the same license
+as Perl itself.

@@ -121,8 +121,11 @@ use Kelp::Base 'Kelp';
 sub build {
     my $self = shift;
     my $r = $self->routes;
-
     $r->add('/home', 'home');
+    $r->add('/config', sub {
+        my $self = shift;
+        return $self->config_hash;
+    });
 }
 
 sub home {
@@ -132,41 +135,20 @@ sub home {
 
 1;
 [% END -%]
+[% IF !less -%]
 :conf/config.pl
+# Common settings
 {
-    modules_init => {
-        Logger => {
-            outputs => [
-                [
-                    'File',
-                    name      => 'error',
-                    filename  => app()->path . '/log/error.log',
-                    min_level => 'error',
-                    mode      => '>>',
-                    newline   => 1,
-                    binmode   => ":encoding(UTF-8)"
-                ],
-            ]
-        },
-
-        JSON => {
-            allow_blessed   => 1,
-            convert_blessed => 1,
-            utf8            => 1,
-            pretty          => 0
-        },
-    }
-};
-:conf/config_development.pl
-{
+    modules      => [qw/Template JSON Logger/],
     modules_init => {
 
+        # One log for errors and one for debug
         Logger => {
             outputs => [
                 [
                     'File',
                     name      => 'debug',
-                    filename  => app()->path . '/log/debug.log',
+                    filename  => 'log/debug.log',
                     min_level => 'debug',
                     mode      => '>>',
                     newline   => 1,
@@ -174,7 +156,7 @@ sub home {
                 ], [
                     'File',
                     name      => 'error',
-                    filename  => app()->path . '/log/error.log',
+                    filename  => 'log/error.log',
                     min_level => 'error',
                     mode      => '>>',
                     newline   => 1,
@@ -183,20 +165,55 @@ sub home {
             ]
         },
 
+        # JSON prints pretty
         JSON => {
             pretty => 1
         },
     }
 };
-:conf/config_test.pl
+:conf/deployment.pl
+# Options specific to deployment only
 {
-    # No Logger while testing
-    modules => [qw/JSON Template/]
+    modules_init => {
+
+        # In deployment, only log the errors
+        Logger => {
+            outputs => [
+                [
+                    'File',
+                    name      => 'error',
+                    filename  => 'log/error.log',
+                    min_level => 'error',
+                    mode      => '>>',
+                    newline   => 1,
+                    binmode   => ":encoding(UTF-8)"
+                ],
+            ]
+        },
+
+        # Compress JSON output in deployment
+        JSON => {
+            pretty => 0
+        },
+    }
+};
+:conf/development.pl
+# Options specific to development only
+{
+};
+:conf/test.pl
+# Options specific to testing only
+{
+    # No Logger when testing
+    modules      => [qw/JSON Template/]
 }
+[% END -%]
 :views/home.tt
 Hello, world!
-:log/.keep
+[% IF !less -%]
+:log/keep
 keeper
+[% END -%]
 :t/main.t
 use Kelp::Base -strict;
 use Kelp::Test;
