@@ -1,6 +1,7 @@
 package Kelp::Module::Config;
 use Kelp::Base 'Kelp::Module';
 use Carp;
+use Try::Tiny;
 
 # Extension to look for
 attr ext => 'pl';
@@ -8,7 +9,12 @@ attr ext => 'pl';
 # Directory where config files are
 attr path => sub {
     my $self = shift;
-    return $ENV{KELP_CONFIG_DIR} // ($self->app->path . '/conf');
+    return [
+        $ENV{KELP_CONFIG_DIR},
+        $self->app->path,
+        $self->app->path . '/conf',
+        $self->app->path . '../conf'
+    ]
 };
 
 attr separator => qr/\./;
@@ -110,25 +116,39 @@ sub load {
 sub build {
     my ( $self, %args ) = @_;
 
-    # Look for the main and mode config files
-    my $main_file = sprintf( '%s/config.%s', $self->path, $self->ext );
-    my $mode_file =
-      sprintf( '%s/%s.%s', $self->path, $self->app->mode, $self->ext );
-    if ( !-e $mode_file ) {
-        $mode_file = sprintf( '%s/config_%s.%s',
-            $self->path, $self->app->mode, $self->ext );
-    }
+    # Get an easy access reference to the data
+    my $data_ref = $self->data;
 
-    my $hash = $self->data;
+    # Create a private sub that searches for a file in all the paths
+    # specified in $self->path
+    my $find = sub {
+        my $name = shift;
+        my @paths = ref( $self->path ) ? @{ $self->path } : ( $self->path );
+        for my $path (@paths) {
+            next unless defined $path;
+            my $filename = sprintf( '%s/%s.%s', $path, $name, $self->ext );
+            return $filename if -r $filename;
+        }
+    };
 
-    # Merge the main config file
-    if ( -r $main_file ) {
-        $hash = _merge( $self->data, $self->load($main_file) );
-    }
+    # Create a private sub that parses a config file
+    my $process = sub {
+        my $name   = shift;
+        my $parsed = {};
+        try {
+            $parsed = $self->load($name);
+        }
+        catch {
+            croak "Parsing $name died with error: '${_}'";
+        };
+        $data_ref = _merge( $data_ref, $parsed );
+    };
 
-    # Merge the mode config file
-    if ( -r $mode_file ) {
-        $hash = _merge( $hash, $self->load($mode_file) );
+    # Find, parse and merge 'config' and mode files
+    for ( 'config', $self->app->mode ) {
+        if ( my $filename = $find->($_) ) {
+            $process->($filename);
+        }
     }
 
     # Register two methods: config and config_hash
@@ -173,18 +193,25 @@ Kelp::Module::Config - Configuration for Kelp applications
 =head1 DESCRIPTION
 
 This is one of the two modules that are automatically loaded for each and every
-Kelp application. It uses L<Config::Any::Perl> to read Perl-style hashes from files
-and merge them depending on the value of the C<mode> attribute.
+Kelp application. It reads configuration files containing Perl-style hashes,
+and merges them depending on the value of the application's C<mode> attribute.
 
 The main configuration file name is C<config.pl>, and it will be searched in the
-C<conf> directory. You can also set the C<KELP_CONFIG_DIR> environmental
+C<conf> and C<../conf> directories. You can also set the C<KELP_CONFIG_DIR> environmental
 variable with the path to the configuration files.
 
-This module brings a hash with default values, so if there are no configuration
-files found, those values will be used.
-If you create a configuration file C<conf/config.pl>, it will add to or override
-the default values. If in addition to that there is a I<mode>.pl file, then it
-will be merged to the config last.
+This module comes with some L<default values|/DEFAULTS>, so if there are no
+configuration files found, those values will be used.
+Any values from configuration files will add to or override the default values.
+
+=head1 ORDER
+
+First the module will look for C<conf/config.pl>, then for C<../conf/config.pl>.
+If found, they will be parsed and merged into the default values.
+The same order applies to the I<mode> file too, so if the application
+L<mode|Kelp/mode> is I<development>, then C<conf/development.pl> and
+C<../conf/development.pl> will be looked for. If found, they will also be merged
+to the config hash.
 
 =head1 REGISTERED METHODS
 
@@ -219,6 +246,12 @@ The file extension of the configuration files. Default is C<pl>.
 
 A regular expression for the value separator used by L</get>. The default is
 C<qr/\./>, i.e. a dot.
+
+=head2 path
+
+Specifies a path, or an array of paths where to look for configuration files.
+This is particularly useful when writing tests, because you can set a custom
+path to a peculiar configuration.
 
 =head2 data
 
@@ -312,5 +345,12 @@ Later ...
     run;
 
 The above example module will look for C<config/*.cus> to load as configuration.
+
+=head1 TESTING
+
+Since the config files are searched in both C<conf/> and C<../conf/>, you can
+use the same configuration set of files for your application and for your tests.
+Assuming the all of your test will reside in C<t/>, they should be able to load
+and find the config files at C<../conf/>.
 
 =cut

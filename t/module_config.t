@@ -42,12 +42,6 @@ $c->path("$Bin/conf/c");
 $c->build();
 is_deeply( $c->data, { B => 'new', C => 'baz' } );
 
-# Different name mode file
-$c->data({ C => 'baz' });
-$c->path("$Bin/conf/d");
-$c->build();
-is_deeply( $c->data, { B => 'new', C => 'baz' } );
-
 # Syntax error
 $c->data({ C => 'baz' });
 $c->path("$Bin/conf/e");

@@ -8,16 +8,8 @@ use Test::Deep;
 use Carp;
 use Encode ();
 
-attr psgi => undef;
-
-attr -app => sub {
-    my $self = shift;
-    defined $self->psgi
-      ? Plack::Util::load_psgi( $self->psgi )
-      : die "Eiter 'app' or 'psgi' parameter is required";
-};
-
-attr res => sub { die "res is not initialized" };
+attr -app => sub { die "'app' parameter is required"; };
+attr res  => sub { die "res is not initialized" };
 
 sub request {
     my ( $self, $req ) = @_;
@@ -193,23 +185,6 @@ is a reference to a Kelp based web app.
     my $t = Kelp::Test->new( app => $myapp );
 
 From this point on, all requests run with C<$t-E<gt>request> will be sent to C<$app>.
-
-=head2 psgi
-
-This is only used when testing L<Kelp::Less> apps. Since we don't have an
-application class to load, we need to load the C<app.psgi> file.
-
-    my $t = Kelp::Test->new( psgi => 'app.psgi' );
-
-All testing methods work exactly the same way. Note that since we don't have
-control over how the C<Kelp> class is loaded, we may have to use the
-C<PLACK_ENV> environment variable to set different testing modes.
-
-    > PLACK_ENV=test prove -l
-
-The above is the same as:
-
-    use Kelp::Less mode => 'test';
 
 =head2 res
 
