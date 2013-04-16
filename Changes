@@ -1,3 +1,8 @@
+2012-04-16: Version 0.21
+            Allow for using templates w/o extension.
+            Allow for subclassing the templates module.
+            Implement testing of a Less app, via the psgi attribute.
+
 2012-04-13: Version 0.2
             Complete rewrite of the Config module, allow for subclassing of it.
             Write more tests.

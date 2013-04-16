@@ -102,7 +102,7 @@ __DATA__
 use Kelp::Less;
 
 get '/home' => sub {
-    template 'home.tt';
+    template 'home';
 };
 
 run;
@@ -130,7 +130,7 @@ sub build {
 
 sub home {
     my $self = shift;
-    $self->template('home.tt');
+    $self->template('home');
 }
 
 1;
@@ -214,19 +214,25 @@ Hello, world!
 :log/keep
 keeper
 [% END -%]
-[% IF !less -%]
 :t/main.t
 use Kelp::Base -strict;
 use Kelp::Test;
 use Test::More;
 use HTTP::Request::Common;
+[% IF !less -%]
 use [% name %];
+[% END -%]
 
+[% IF less -%]
+# Create a test object using the app file
+my $t = Kelp::Test->new( psgi => 'app.psgi' );
+[% ELSE -%]
 # Create an application object
 my $app = [% name %]->new( mode => 'test' );
 
 # Feed it into a test object
 my $t = Kelp::Test->new( app => $app );
+[% END -%]
 
 # Send a GET request to /home and test the response
 $t->request( GET '/home' )
@@ -235,4 +241,3 @@ $t->request( GET '/home' )
   ->content_like(qr/Hello, world!/);
 
 done_testing;
-[% END -%]

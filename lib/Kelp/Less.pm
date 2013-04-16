@@ -64,7 +64,10 @@ sub del {
 }
 
 sub run {
-    $app->run;
+
+    # If we're running a test, then return the entire app,
+    # otherwise return the PSGI subroutine
+    return $ENV{KELP_TESTING} ? $app : $app->run;
 }
 
 sub app      { $app }
@@ -311,6 +314,28 @@ currently loaded template module.
 =head2 run
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
+
+=head1 TESTING
+
+When writing a C<Kelp::Less> app, we don't have a separate class to initialize and
+feed into a L<Kelp::Test> object, because all of our code is contained in the
+C<app.psgi> file. In this case, the C<Kelp::Test> object can be initialized
+with the name of the C<PSGI> file in the C<psgi> argument.
+
+    # t/main.t
+    use Kelp::Test;
+
+    my $t = Kelp::Test->new( psgi => 'app.psgi' );
+    # Do some tests ...
+
+Since you don't have control over the creation of the C<Kelp> object, if you
+need to specify a different mode for testing, you can use the C<PLACK_ENV>
+environmental variable:
+
+    > PLACK_ENV=test prove -l
+
+This will enable the C<conf/test.pl> configuration, which you should
+tailor to your testing needs.
 
 =head1 ACKNOWLEDGEMENTS
 

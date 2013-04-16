@@ -278,7 +278,7 @@ attr dbi => sub {
 ## Routing
 
 Kelp uses a powerful and very flexible router. Traditionally, it is also light
-and consists of less than 300 lines of loose code (commends included). You are
+and consists of less than 300 lines of code (comments included). You are
 encouraged to read [Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes), but here are some key points. All examples
 are assumed to be inside the ["build"](#build) method and `$r` is equal to
 `$self->routes`:

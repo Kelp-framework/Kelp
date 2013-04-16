@@ -8,7 +8,19 @@ use Test::Deep;
 use Carp;
 use Encode ();
 
-attr -app => sub { die "'app' parameter is required"; };
+BEGIN {
+    $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
+}
+
+attr -psgi => undef;
+
+attr -app => sub {
+    my $self = shift;
+    return defined $self->psgi
+      ? Plack::Util::load_psgi( $self->psgi )
+      : die "'app' or 'psgi' parameter is required";
+};
+
 attr res  => sub { die "res is not initialized" };
 
 sub request {
@@ -173,6 +185,12 @@ Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the L</request>
 method, which takes a single L<HTTP::Request> parameter. It sends the request to
 the web app and saves the response as an L<HTTP::Response> object.
+
+=head1 ENV VARIABLES
+
+=head2 KELP_TESTING
+
+This module sets the C<KELP_TESTING> envinronmental variable to a true value.
 
 =head1 ATTRIBUTES
 
