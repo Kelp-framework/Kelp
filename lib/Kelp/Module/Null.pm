@@ -1,11 +1,6 @@
 package Kelp::Module::Null;
+use Kelp::Base 'Kelp::Module';
 
-use strict;
-use warnings;
-use v5.10;
-
-use base 'Kelp::Module';
-
-sub init {}
+sub build {}
 
 1;
