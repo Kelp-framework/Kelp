@@ -182,8 +182,9 @@ utility script.</p>
  |
  |--/conf
  |   |--config.pl
- |   |--config_test.pl
- |   |--config_deployment.pl
+ |   |--test.pl
+ |   |--development.pl
+ |   |--deployment.pl
  |
  |--/view
  |--/log
@@ -203,10 +204,10 @@ that you want your app to use.</p>
 
 <p>The <code>conf</code> folder is where Kelp will look for configuration files. You need one
 main file, named <code>config.pl</code>. You can also add other files that define different
-running environments, if you name them <code>config_</code>_environment_<code>.pl</code>. Replace
+running environments, if you name them <em>environment</em><code>.pl</code>. Replace
 <em>environment</em> with the actual name of the environment.
 To change the running environment, you can specify the app <code>mode</code>, or you can
-set the <code>KELP_ENV</code> environment variable.</p>
+set the <code>PLACK_ENV</code> environment variable.</p>
 
 <div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
 </pre></div>
@@ -314,7 +315,7 @@ The above example will be just as successful if you used our own little
 <h2>Routing</h2>
 
 <p>Kelp uses a powerful and very flexible router. Traditionally, it is also light
-and consists of less than 300 lines of loose code (commends included). You are
+and consists of less than 300 lines of code (comments included). You are
 encouraged to read <a href="http://search.cpan.org/perldoc?Kelp::Routes">Kelp::Routes</a>, but here are some key points. All examples
 are assumed to be inside the <a href="#build">"build"</a> method and <code>$r</code> is equal to
 <code>$self-&gt;routes</code>:</p>
@@ -459,7 +460,7 @@ you. This way you can load different middleware for each running mode, e.g.
 <p>Add middleware names to the <code>middleware</code> array in your configuration file and
 the corresponding initializing arguments in the <code>middleware_init</code> hash:</p>
 
-<div class="highlight"><pre><span class="c1"># conf/config_development.pl</span>
+<div class="highlight"><pre><span class="c1"># conf/development.pl</span>
 <span class="p">{</span>
     <span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Session Debug/</span><span class="p">],</span>
     <span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
@@ -542,7 +543,7 @@ It sends the request to the web app and saves the response as an
 <ul>
 <li>First, we create an instance of the web application class, which we have
 previously built and placed in the <code>lib/</code> folder. We set the mode of the app to
-<code>test</code>, so that file <code>conf/config_test.pl</code> overrides the main configuration.
+<code>test</code>, so that file <code>conf/test.pl</code> overrides the main configuration.
 The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.</li>
@@ -727,9 +728,16 @@ configuration file to merge into the main configuration. See
 <a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information.</p>
 
 <div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
-<span class="c1"># conf/config.pl and conf/config_development.pl are merged with priority</span>
+<span class="c1"># conf/config.pl and conf/development.pl are merged with priority</span>
 <span class="c1"># given to the second one.</span>
 </pre></div>
+
+<h2>config_module</h2>
+
+<p>Sets of gets the class of the configuration module to be loaded on startup. The
+default value is <code>Config</code>, which will cause the <code>Kelp::Module::Config</code> to get
+loaded. See the documentation for <a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information
+and for an example of how to create and use other config modules.</p>
 
 <h2>path</h2>
 
@@ -900,6 +908,22 @@ arguments.</p>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">redirect_to</span><span class="p">();</span>
 <span class="p">}</span>
 </pre></div>
+
+<h1>SUPPORT</h1>
+
+<ul>
+<li>GitHub: <a href="https://github.com/naturalist/kelp">https://github.com/naturalist/kelp</a>
+</li>
+<li>Mailing list: <a href="https://groups.google.com/forum/?fromgroups%5C#!forum/perl-kelp">https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp</a>
+</li>
+</ul><h1>AUTHOR</h1>
+
+<p>Stefan Geneshky - <a href="mailto:minimal@cpan.org">minimal@cpan.org</a></p>
+
+<h1>LICENSE</h1>
+
+<p>This module and all the modules in this package are governed by the same license
+as Perl itself.</p>
       </section>
 
     </div>
