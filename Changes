@@ -1,3 +1,6 @@
+2012-04-17: Version 0.215
+            Revamp the Template module to allow for more standard subclassing
+
 2012-04-16: Version 0.21
             Allow for using templates w/o extension.
             Allow for subclassing the templates module.

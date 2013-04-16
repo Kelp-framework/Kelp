@@ -5,24 +5,42 @@ use Template;
 use Carp;
 
 attr ext => 'tt';
+attr engine => sub { die "'engine' must be initialized" };
 
 sub build {
     my ( $self, %args ) = @_;
-    my $tt = Template->new( \%args ) || croak $Template::ERROR, "\n";
+
+    # Build and initialize the engine attribute
+    $self->engine( $self->build_engine(%args) );
 
     # Register one method - template
     $self->register(
         template => sub {
             my ( $app, $template, $vars, @rest ) = @_;
-            if ( !ref($template) && $template !~ /\.(.+)$/ ) {
-                $template .= '.' . $self->ext;
-            }
-            my $output;
-            $tt->process( $template, $vars, \$output, binmode => ':utf8' )
-              || croak $tt->error(), "\n";
-            return $output;
+            return $self->render( $self->_rename($template), $vars, @rest );
         }
     );
+}
+
+sub build_engine {
+    my ( $self, %args ) = @_;
+    return Template->new( \%args ) || croak $Template::ERROR, "\n";
+}
+
+sub render {
+    my ( $self, $template, $vars, @rest ) = @_;
+    my $output;
+    $self->engine->process( $template, $vars, \$output, binmode => ':utf8' )
+      || croak $self->engine->error(), "\n";
+    return $output;
+}
+
+sub _rename {
+    my ( $self, $name ) = @_;
+    return unless $name;
+    return !ref($name) && $name !~ /\.(.+)$/
+      ? $name . '.' . $self->ext
+      : $name;
 }
 
 1;
@@ -81,10 +99,78 @@ C<tt>, so
 
 will look for C<home.tt>.
 
+=head2 engine
+
+This attribute will be initialized by the C<build_engine> method of this module,
+and it is available to all code that needs access to the template engine
+instance. See L</SUBCLASSING> for an example.
+
+=head1 METHODS
+
+=head2 build_engine
+
+C<build_engine(%args)>
+
+This method is responsible for creating, initializing and returning an instance
+of the template engine used, for example L<Template>. Override it to use a
+different template engine, for example L<Text::Haml>.
+
+=head2 render
+
+C<render($template, \%vars, @rest)>
+
+This method should return a rendered text. Override it if you're subclassing and
+using a different template engine.
+
 =head1 SUBCLASSING
 
-To use a different template engine, you can subclass this module. You only need
-to override C<ext> to set the new file extension. Then register the C<template>
-method with the following arguments: C<template( $filename, \%vars )>.
+To use a different template engine, you can subclass this module. You will need
+to make sure your new class does the following (for the sake of the example we
+will show you how to create a L<Text::Haml> rendering module):
+
+=over
+
+=item
+
+Overrides the L</ext> attribute and provides the file extension of the new
+template files.
+
+    attr ext => 'haml';
+
+=cut
+
+=item
+
+Overrides the L</build_engine> method and creates an instance of the new
+template engine.
+
+    sub build_engine {
+        my ( $self, %args ) = @_;
+        return Text::Haml->new;
+    }
+
+=cut
+
+=item
+
+Overrides the L</render> method and renders using C<$self-E<gt>engine>.
+
+    sub render {
+        my ( $self, $template, $vars, @rest ) = @_;
+
+        # Get the template engine instance
+        my $haml = $self->engine;
+
+        # If the $template is a reference, then render string,
+        # otherwise it's a file name.
+        return ref($template) eq 'SCALAR'
+          ? $haml->render( $$template, %$vars )
+          : $haml->render_file( $template, %$vars );
+    }
+
+=cut
+
+=back
+
 
 =cut
