@@ -1,5 +1,7 @@
-2012-04-17: Version 0.215
+2012-04-17: Version 0.217
+            Fix Github issue #1
             Revamp the Template module to allow for more standard subclassing
+            Remove Config::Hash from test units
 
 2012-04-16: Version 0.21
             Allow for using templates w/o extension.

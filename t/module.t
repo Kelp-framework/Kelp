@@ -5,14 +5,14 @@ use Kelp;
 use Kelp::Module;
 use Test::More;
 use Test::Exception;
-use Config::Hash;
+use Plack::Util;
 
 dies_ok { Kelp::Module->new() } "Dies when no app";
 
 my %types = (
     hash => { bar => 'foo' },
     array  => [ 9, 8, 7 ],
-    object => Config::Hash->new,
+    object => Plack::Util::inline_object( something => sub {1} ),
     code => sub { "Moo!" }
 );
 
