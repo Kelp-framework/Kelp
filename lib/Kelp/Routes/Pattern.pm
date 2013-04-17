@@ -7,12 +7,12 @@ use Kelp::Base;
 attr pattern  => sub { die "pattern is required" };
 attr via      => undef;
 attr name     => sub { $_[0]->pattern };
-attr check    => {};
-attr defaults => {};
+attr check    => sub { {} };
+attr defaults => sub { {} };
 attr bridge   => 0;
 attr regex    => sub { $_[0]->_build_regex };
-attr named    => {};
-attr param    => [];
+attr named    => sub { {} };
+attr param    => sub { [] };
 attr to       => undef;
 
 sub new {

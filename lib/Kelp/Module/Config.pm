@@ -17,7 +17,7 @@ attr path => sub {
     ]
 };
 
-attr separator => qr/\./;
+attr separator => sub { qr/\./ };
 
 # Defaults
 attr data => sub {

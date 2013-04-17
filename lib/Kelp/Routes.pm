@@ -6,9 +6,9 @@ use Kelp::Base;
 use Kelp::Routes::Pattern;
 
 attr base   => '';
-attr routes => [];
-attr cache  => {};
-attr names  => {};
+attr routes => sub { [] };
+attr cache  => sub { {} };
+attr names  => sub { {} };
 
 sub add {
     my ( $self, $pattern, $descr ) = @_;

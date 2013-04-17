@@ -9,10 +9,10 @@ use Try::Tiny;
 attr -app => sub { confess "app is required" };
 
 # The stash is used to pass values from one route to another
-attr stash => {};
+attr stash => sub { {} };
 
 # The named hash contains the values of the named placeholders
-attr named => {};
+attr named => sub { {} };
 
 sub new {
     my ( $class, %args ) = @_;

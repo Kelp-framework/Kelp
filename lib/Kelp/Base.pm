@@ -3,6 +3,7 @@ package Kelp::Base;
 use strict ();
 use warnings ();
 use feature ();
+use Carp;
 
 sub import {
     my $class = shift;
@@ -36,6 +37,10 @@ sub new {
 
 sub attr {
     my ( $class, $name, $default ) = @_;
+
+    if ( ref $default && ref $default ne 'CODE' ) {
+        croak "Default value for '$name' can not be a reference.";
+    }
 
     no strict 'refs';
     no warnings 'redefine';
@@ -116,11 +121,11 @@ are perfectly fine with L<Moo> or L<Mo>, for example.
 The above will automatically include C<strict>, C<warnings> and C<v5.10>. It will
 also inject a new sub in the current class called C<attr>.
 
-    attr name1 => 1;         # Fixed value
-    attr name2 => [1,2,3];   # Array
+    attr name1 => 1;                      # Fixed value
+    attr name2 => sub { [ 1, 2, 3 ] };    # Array
     attr name3 => sub {
-        $_[0]->other
-    }
+        $_[0]->other;
+      }
 
     ...
 

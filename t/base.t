@@ -3,8 +3,8 @@ package B1;
 use Kelp::Base;
 
 attr bar => 1;
-attr foo => { a => 1 };
-attr baz => [1,2,3,4];
+attr foo => sub{{ a => 1 }};
+attr baz => sub{[1,2,3,4]};
 attr bat => sub {
     $_[0]->bar( $_[0]->bar + 1 );
     $_[0]->bar;
@@ -91,5 +91,13 @@ is $r->color, "blue";
 
 my $pp = C1->new;
 ok !$pp->can('attr');
+
+# Instantiate 2 ojects of the same class
+{
+    my $x = B1->new;
+    my $y = B1->new;
+    $x->foo->{test} = 'present';
+    is $y->foo->{test}, undef;
+}
 
 done_testing;
