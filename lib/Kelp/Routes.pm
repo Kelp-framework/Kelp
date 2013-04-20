@@ -4,6 +4,7 @@ use Carp;
 
 use Kelp::Base;
 use Kelp::Routes::Pattern;
+use Plack::Util;
 
 attr base   => '';
 attr routes => sub { [] };
@@ -68,9 +69,7 @@ sub _parse_route {
             # the same file as 'package main'.
             my %symbol_table = eval "\%${class}::";
             if ( !%symbol_table ) {
-                local $@;
-                eval "use $class;";
-                croak "Error loading class '$class': $@" if $@;
+                Plack::Util::load_class($class);
             }
         }
     }
