@@ -57,6 +57,22 @@ sub _parse_route {
     # Format destination
     if ( !ref $val->{to} ) {
         $val->{to} = _camelize( $val->{to}, $self->base );
+
+        # Load the class, if there is one and it is not 'main'
+        if (   defined $val->{to}
+            && $val->{to} =~ /^(.+)::(\w+)$/
+            && ( my $class = $1 ) ne 'main' ) {
+
+            # Load the class' symbol table to see if it's already
+            # present. This will also detect classes that are defined in
+            # the same file as 'package main'.
+            my %symbol_table = eval "\%${class}::";
+            if ( !%symbol_table ) {
+                local $@;
+                eval "use $class;";
+                croak "Error loading class '$class': $@" if $@;
+            }
+        }
     }
 
     # Handle the value part

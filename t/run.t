@@ -18,7 +18,7 @@ $app->add_route("/not_found", sub {});
 $t->request( GET '/not_found' )->code_is(500);
 
 # Wrong route destination
-$app->add_route("/wrong_to1", "nobody#home");
+$app->add_route("/wrong_to1", "missing");
 $app->add_route("/wrong_to2", { to => [] });
 $app->add_route("/wrong_to3", { to => {} });
 $app->add_route("/wrong_to4", { to => undef });

@@ -16,6 +16,8 @@ sub build {
     my $self = shift;
     my $r    = $self->routes;
     $r->add( "/test", sub { "OK" } );
+    $r->add( "/greet/:name", "routes#greet");
+    $r->add( "/bye/:name", "Routes2::goodbye");
 }
 
 1;

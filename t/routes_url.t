@@ -1,4 +1,7 @@
+package A; sub b{} 1;
+package Ab; sub c{} 1;
 
+package main;
 use strict;
 use warnings;
 

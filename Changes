@@ -1,3 +1,6 @@
+2012-04-19: Version 0.218
+            Add auto load class when adding a route.
+
 2012-04-17: Version 0.217
             Fix Github issue #1
             Revamp the Template module to allow for more standard subclassing

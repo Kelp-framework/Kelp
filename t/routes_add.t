@@ -1,3 +1,6 @@
+package A; sub b{} 1;
+package Bar; sub foo{} 1;
+package Bar::Foo; sub baz{} 1;
 
 use strict;
 use warnings;
@@ -176,8 +179,8 @@ my $r = Kelp::Routes->new;
                     to   => 'bar#change',
                     name => 'change',
                     tree => [
-                        '/name' => { to => 'user#change_name', name => 'name' },
-                        [ PUT  => '/email' ] => { to => 'user#change_email', name => 'email' }
+                        '/name' => { to => 'bar#change_name', name => 'name' },
+                        [ PUT  => '/email' ] => { to => 'bar#change_email', name => 'email' }
                     ]
                 }
             ]
@@ -209,11 +212,11 @@ my $r = Kelp::Routes->new;
         }, {
             pattern => '/user/change/name',
             name    => 'user_change_name',
-            to      => 'User::change_name'
+            to      => 'Bar::change_name'
         }, {
             pattern => '/user/change/email',
             name    => 'user_change_email',
-            to      => 'User::change_email',
+            to      => 'Bar::change_email',
             via     => 'PUT'
         }
       ];
