@@ -5,6 +5,7 @@ use Carp;
 use Kelp::Base;
 use Kelp::Routes::Pattern;
 use Plack::Util;
+use Class::Inspector;
 
 attr base   => '';
 attr routes => sub { [] };
@@ -62,15 +63,9 @@ sub _parse_route {
         # Load the class, if there is one and it is not 'main'
         if (   defined $val->{to}
             && $val->{to} =~ /^(.+)::(\w+)$/
-            && ( my $class = $1 ) ne 'main' ) {
-
-            # Load the class' symbol table to see if it's already
-            # present. This will also detect classes that are defined in
-            # the same file as 'package main'.
-            my %symbol_table = eval "\%${class}::";
-            if ( !%symbol_table ) {
-                Plack::Util::load_class($class);
-            }
+            && $1 ne 'main'
+            && !Class::Inspector->loaded($1) ) {
+            Plack::Util::load_class($1);
         }
     }
 
