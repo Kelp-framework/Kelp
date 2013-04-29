@@ -30,7 +30,7 @@ sub build_engine {
 sub render {
     my ( $self, $template, $vars, @rest ) = @_;
     my $output;
-    $self->engine->process( $template, $vars, \$output, binmode => ':utf8' )
+    $self->engine->process( $template, $vars, \$output, @rest )
       || croak $self->engine->error(), "\n";
     return $output;
 }
@@ -75,7 +75,7 @@ Then ...
 
 =head1 DESCRIPTION
 
-This module provides interface for using templates in a Kelp web application. It
+This module provides an interface for using templates in a Kelp web application. It
 uses L<Template> by default, but it could be easily subclassed to use anything
 else.
 
@@ -121,6 +121,23 @@ C<render($template, \%vars, @rest)>
 
 This method should return a rendered text. Override it if you're subclassing and
 using a different template engine.
+
+=head1 PERKS
+
+=head2 UTF8
+
+L<Template> is sometimes unable to detect the correct encoding, so to ensure
+proper rendering, you may want to add C<ENCODING> to its configuration:
+
+    # conf/config.pl
+    {
+        modules      => ['Template'],
+        modules_init => {
+            Template => {
+                ENCODING => 'utf8'
+            }
+        }
+    };
 
 =head1 SUBCLASSING
 

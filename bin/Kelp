@@ -169,6 +169,11 @@ sub home {
         JSON => {
             pretty => 1
         },
+
+        # Enable UTF-8 in Template
+        Template => {
+            ENCODING => 'utf8'
+        }
     }
 };
 :conf/deployment.pl
