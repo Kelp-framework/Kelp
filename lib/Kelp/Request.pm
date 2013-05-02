@@ -30,7 +30,7 @@ sub is_ajax {
 sub is_json {
     my $self = shift;
     return unless $self->content_type;
-    return lc($self->content_type) eq 'application/json';
+    return lc($self->content_type) =~ qr[^application/json]i;
 }
 
 sub param {

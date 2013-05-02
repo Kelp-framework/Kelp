@@ -12,9 +12,16 @@ my $t = Kelp::Test->new( app => $app );
 $app->add_route('/json', sub {
     return $_[0]->req->is_json ? "ok" : "fail";
 });
-$t->request( GET '/json', Content_Type => 'application/json' )
-  ->code_is(200)
-  ->content_is('ok');
+for my $ct (
+    'application/json',
+    'application/json; charset=UTF-8',
+    'APPLICATION/json; charset=UTF-8',
+    'APPLICATION/JSON; somethin=blah'
+) {
+    $t->request( GET '/json', Content_Type => $ct )
+      ->code_is(200)
+      ->content_is('ok');
+}
 
 # is_ajax
 $app->add_route('/ajax', sub {
