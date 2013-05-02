@@ -1,3 +1,8 @@
+2013-05-02: Version 0.2182
+            Fix issue with content-type params
+            Set explicit utf8 encoding for module Template
+            Replace wizardly Perl code with Class::Inspector
+
 2013-04-20: Version 0.2181
             Fix test failing under Perl 5.10
 
