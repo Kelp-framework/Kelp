@@ -630,6 +630,47 @@ sub hello_txt {
 $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
 ```
 
+### Serving Static Files
+
+If you want to serve static pages, you can use the [Plack::Middleware::Static](http://search.cpan.org/perldoc?Plack::Middleware::Static)
+middleware that comes with Plack. Here is an example configuration that serves
+files in your `public` folder (under the Kelp root folder) from URLs that
+begin with `/public`:
+
+```perl
+middleware      => [qw/Static/],
+middleware_init => {
+    Static => {
+        path => qr{^/public/},
+        root => '.',
+    }
+}
+```
+
+### Uploading Files
+
+File uploads are handled by [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), which inherits Plack::Request
+and has its `uploads|Plack::Request/uploads` property. The uploads propery returns a
+reference to a hash containing all uploads.
+
+```perl
+sub upload {
+    my $self = shift;
+    my $uploads  = $self->req->uploads;
+
+    # Now $uploads is a hashref to all uploads
+    ...
+}
+```
+
+For [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less), then you can use the `req` reserved word:
+
+```perl
+get '/upload' => sub {
+    my $uploads = req->uploads;
+};
+```
+
 ### Delayed responses
 
 To send a delayed response, have your route return a subroutine.
@@ -917,6 +958,10 @@ sub check {
 # AUTHOR
 
 Stefan Geneshky - minimal@cpan.org
+
+# CONTRIBUTORS
+
+Gurunandan Bhat - gbhat@pobox.com
 
 # LICENSE
 

@@ -899,27 +899,24 @@ C<set_content_type> or any of its aliases:
 
 =head3 Serving Static Files
 
-If you want to serve static pages, you can use L<Plack::Middleware::Static> the 
-Static middleware that comes with Plack. Here is a configuration that serves 
-files in your C<public> folder (under the Kelp root folder) from URLs that 
+If you want to serve static pages, you can use the L<Plack::Middleware::Static>
+middleware that comes with Plack. Here is an example configuration that serves
+files in your C<public> folder (under the Kelp root folder) from URLs that
 begin with C</public>:
 
-    middleware      => [qw/Static Session/],
+    middleware      => [qw/Static/],
     middleware_init => {
         Static => {
-            path => qr{^/public/}, 
+            path => qr{^/public/},
             root => '.',
-        },
-        Session => { 
-            store => 'File',
-        },
+        }
     }
 
 =head3 Uploading Files
 
-File uploads are handled via L<Kelp::Request>. Since it inherits Plack::Request 
-and has its "uploads" property, which returns a reference to a hash containing 
-C<uploads>. See L<Plack::Request> for more information on C<uploads> property.
+File uploads are handled by L<Kelp::Request>, which inherits Plack::Request
+and has its C<uploads|Plack::Request/uploads> property. The uploads propery returns a
+reference to a hash containing all uploads.
 
     sub upload {
         my $self = shift;
@@ -929,7 +926,7 @@ C<uploads>. See L<Plack::Request> for more information on C<uploads> property.
         ...
     }
 
-For L<Kelp::Less>, then you can use the "req" reserved word:
+For L<Kelp::Less>, then you can use the C<req> reserved word:
 
     get '/upload' => sub {
         my $uploads = req->uploads;
@@ -1214,6 +1211,10 @@ arguments.
 =head1 AUTHOR
 
 Stefan Geneshky - minimal@cpan.org
+
+=head1 CONTRIBUTORS
+
+Gurunandan Bhat - gbhat@pobox.com
 
 =head1 LICENSE
 
