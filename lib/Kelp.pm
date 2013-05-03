@@ -904,13 +904,16 @@ middleware that comes with Plack. Here is an example configuration that serves
 files in your C<public> folder (under the Kelp root folder) from URLs that
 begin with C</public>:
 
-    middleware      => [qw/Static/],
-    middleware_init => {
-        Static => {
-            path => qr{^/public/},
-            root => '.',
+    # conf/config.pl
+    {
+        middleware      => [qw/Static/],
+        middleware_init => {
+            Static => {
+                path => qr{^/public/},
+                root => '.',
+            }
         }
-    }
+    };
 
 =head3 Uploading files
 
