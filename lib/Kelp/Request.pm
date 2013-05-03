@@ -14,6 +14,11 @@ attr stash => sub { {} };
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
 
+# nginx does not initialize REMOTE_ADDR and REMOTE_HOST properly
+# when connecting to Starman via a unix socket
+sub address     { $_[0]->env->{REMOTE_ADDR} // $_[0]->env->{HTTP_X_REAL_IP} }
+sub remote_host { $_[0]->env->{REMOTE_HOST} // $_[0]->env->{HTTP_X_FORWARDED_HOST} }
+
 sub new {
     my ( $class, %args ) = @_;
     my $self = $class->SUPER::new( delete $args{env} );
