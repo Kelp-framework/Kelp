@@ -897,7 +897,7 @@ C<set_content_type> or any of its aliases:
 
     $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
 
-=head3 Serving Static Files
+=head3 Serving static files
 
 If you want to serve static pages, you can use the L<Plack::Middleware::Static>
 middleware that comes with Plack. Here is an example configuration that serves
@@ -912,7 +912,7 @@ begin with C</public>:
         }
     }
 
-=head3 Uploading Files
+=head3 Uploading files
 
 File uploads are handled by L<Kelp::Request>, which inherits Plack::Request
 and has its C<uploads|Plack::Request/uploads> property. The uploads propery returns a
