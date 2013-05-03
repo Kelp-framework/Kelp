@@ -38,7 +38,11 @@
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="http://twitter.com/#!/michigangraham">mattgraham</a></span>
         </div>
 
-        <h1>SYNOPSIS</h1>
+        <h1>NAME</h1>
+
+<p>Kelp - A web framework light, yet rich in nutrients.</p>
+
+<h1>SYNOPSIS</h1>
 
 <p>First ...</p>
 
@@ -643,6 +647,44 @@ content-type to <code>text/html</code>. To set a different content-type, use
 <div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">set_header</span><span class="p">(</span> <span class="s">"X-Framework"</span><span class="p">,</span> <span class="s">"Kelp"</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span> <span class="p">{</span> <span class="n">success</span> <span class="o">=&gt;</span> <span class="o">\</span><span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
 </pre></div>
 
+<h3>Serving Static Files</h3>
+
+<p>If you want to serve static pages, you can use the <a href="http://search.cpan.org/perldoc?Plack::Middleware::Static">Plack::Middleware::Static</a>
+middleware that comes with Plack. Here is an example configuration that serves
+files in your <code>public</code> folder (under the Kelp root folder) from URLs that
+begin with <code>/public</code>:</p>
+
+<div class="highlight"><pre><span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Static/</span><span class="p">],</span>
+<span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="n">Static</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="n">path</span> <span class="o">=&gt;</span> <span class="sx">qr{^/public/}</span><span class="p">,</span>
+        <span class="n">root</span> <span class="o">=&gt;</span> <span class="s">'.'</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>Uploading Files</h3>
+
+<p>File uploads are handled by <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, which inherits Plack::Request
+and has its <code>uploads|Plack::Request/uploads</code> property. The uploads propery returns a
+reference to a hash containing all uploads.</p>
+
+<div class="highlight"><pre><span class="k">sub </span><span class="nf">upload</span> <span class="p">{</span>
+    <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
+    <span class="k">my</span> <span class="nv">$uploads</span>  <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">uploads</span><span class="p">;</span>
+
+    <span class="c1"># Now $uploads is a hashref to all uploads</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>For <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>, then you can use the <code>req</code> reserved word:</p>
+
+<div class="highlight"><pre><span class="n">get</span> <span class="s">'/upload'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
+    <span class="k">my</span> <span class="nv">$uploads</span> <span class="o">=</span> <span class="n">req</span><span class="o">-&gt;</span><span class="n">uploads</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
 <h3>Delayed responses</h3>
 
 <p>To send a delayed response, have your route return a subroutine.</p>
@@ -919,6 +961,10 @@ arguments.</p>
 </ul><h1>AUTHOR</h1>
 
 <p>Stefan Geneshky - <a href="mailto:minimal@cpan.org">minimal@cpan.org</a></p>
+
+<h1>CONTRIBUTORS</h1>
+
+<p>Gurunandan Bhat - <a href="mailto:gbhat@pobox.com">gbhat@pobox.com</a></p>
 
 <h1>LICENSE</h1>
 
