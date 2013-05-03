@@ -897,6 +897,44 @@ C<set_content_type> or any of its aliases:
 
     $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
 
+=head3 Serving Static Files
+
+If you want to serve static pages, you can use L<Plack::Middleware::Static> the 
+Static middleware that comes with Plack. Here is a configuration that serves 
+files in your C<public> folder (under the Kelp root folder) from URLs that 
+begin with C</public>:
+
+    middleware      => [qw/Static Session/],
+    middleware_init => {
+        Static => {
+            path => qr{^/public/}, 
+            root => '.',
+        },
+        Session => { 
+            store => 'File',
+        },
+    }
+
+=head3 Uploading Files
+
+File uploads are handled via L<Kelp::Request>. Since it inherits Plack::Request 
+and has its "uploads" property, which returns a reference to a hash containing 
+C<uploads>. See L<Plack::Request> for more information on C<uploads> property.
+
+    sub upload {
+        my $self = shift;
+        my $uploads  = $self->req->uploads;
+
+        # Now $uploads is a hashref to all uploads
+        ...
+    }
+
+For L<Kelp::Less>, then you can use the "req" reserved word:
+
+    get '/upload' => sub {
+        my $uploads = req->uploads;
+    };
+
 =head3 Delayed responses
 
 To send a delayed response, have your route return a subroutine.
