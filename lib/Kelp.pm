@@ -1198,7 +1198,7 @@ arguments.
     sub check {
         my $self = shift;
         my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
-        $self->res->redirect_to();
+        $self->res->redirect_to( $url_for_name );
     }
 
 =head1 SUPPORT
