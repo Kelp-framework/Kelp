@@ -643,23 +643,26 @@ content-type to <code>text/html</code>. To set a different content-type, use
 <div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">set_header</span><span class="p">(</span> <span class="s">"X-Framework"</span><span class="p">,</span> <span class="s">"Kelp"</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span> <span class="p">{</span> <span class="n">success</span> <span class="o">=&gt;</span> <span class="o">\</span><span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
 </pre></div>
 
-<h3>Serving Static Files</h3>
+<h3>Serving static files</h3>
 
 <p>If you want to serve static pages, you can use the <a href="http://search.cpan.org/perldoc?Plack::Middleware::Static">Plack::Middleware::Static</a>
 middleware that comes with Plack. Here is an example configuration that serves
 files in your <code>public</code> folder (under the Kelp root folder) from URLs that
 begin with <code>/public</code>:</p>
 
-<div class="highlight"><pre><span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Static/</span><span class="p">],</span>
-<span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
-    <span class="n">Static</span> <span class="o">=&gt;</span> <span class="p">{</span>
-        <span class="n">path</span> <span class="o">=&gt;</span> <span class="sx">qr{^/public/}</span><span class="p">,</span>
-        <span class="n">root</span> <span class="o">=&gt;</span> <span class="s">'.'</span><span class="p">,</span>
+<div class="highlight"><pre><span class="c1"># conf/config.pl</span>
+<span class="p">{</span>
+    <span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Static/</span><span class="p">],</span>
+    <span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
+        <span class="n">Static</span> <span class="o">=&gt;</span> <span class="p">{</span>
+            <span class="n">path</span> <span class="o">=&gt;</span> <span class="sx">qr{^/public/}</span><span class="p">,</span>
+            <span class="n">root</span> <span class="o">=&gt;</span> <span class="s">'.'</span><span class="p">,</span>
+        <span class="p">}</span>
     <span class="p">}</span>
-<span class="p">}</span>
+<span class="p">};</span>
 </pre></div>
 
-<h3>Uploading Files</h3>
+<h3>Uploading files</h3>
 
 <p>File uploads are handled by <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, which inherits Plack::Request
 and has its <code>uploads|Plack::Request/uploads</code> property. The uploads propery returns a
@@ -943,7 +946,7 @@ arguments.</p>
 <span class="k">sub </span><span class="nf">check</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">my</span> <span class="nv">$url_for_name</span> <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">url_for</span><span class="p">(</span><span class="s">'name'</span><span class="p">,</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'jake'</span><span class="p">,</span> <span class="n">id</span> <span class="o">=&gt;</span> <span class="mi">1003</span><span class="p">);</span>
-    <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">redirect_to</span><span class="p">();</span>
+    <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">redirect_to</span><span class="p">(</span> <span class="nv">$url_for_name</span> <span class="p">);</span>
 <span class="p">}</span>
 </pre></div>
 
