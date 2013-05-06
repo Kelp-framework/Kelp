@@ -7,7 +7,8 @@ use Carp;
 use Try::Tiny;
 
 attr -app => sub { confess "app is required" };
-attr is_rendered => 0;
+attr rendered => 0;
+attr partial  => 0;
 
 sub new {
     my ( $class, %args ) = @_;
@@ -35,6 +36,13 @@ sub json {
 
 sub xml {
     $_[0]->set_content_type('application/xml');
+}
+
+sub finalize {
+    my $self = shift;
+    my $arr  = $self->SUPER::finalize(@_);
+    pop @$arr if $self->partial;
+    return $arr;
 }
 
 sub set_header {
@@ -78,7 +86,7 @@ sub render {
     }
 
     $self->body( encode( $self->app->charset, $body ) );
-    $self->is_rendered(1);
+    $self->rendered(1);
     return $self;
 }
 
@@ -165,6 +173,45 @@ need to write graceful PSGI compliant responses. Some methods return C<$self>,
 which makes them easy to chain.
 
 =head1 ATTRIBUTES
+
+=head2 rendered
+
+Tells if the response has been rendered. This attribute is used internally and
+unless you know what you're doing, we recommend that you do not use it.
+
+=head2 partial
+
+Sets partial response. If this attribute is set to a true value, it will cause
+C<finalize> to return the HTTP status code and headers, but not the body. This is
+convenient if you intend to stream your content. It the following example, we
+set C<partial> to 1 and use C<finalize> to get a C<writer> object for streaming.
+
+    sub stream {
+        my $self = shift;
+        return sub {
+            my $responder = shift;
+
+            # Stream JSON
+            $self->res->set_code(200)->json->partial(1);
+
+            # finalize will now return only the status code and headers
+            my $writer = $responder->( $self->res->finalize );
+
+            # Stream JSON body using the writer object
+            for ( 1 .. 30 ) {
+                $writer->write(qq|{"id":$_}\n|);
+                sleep 1;
+            }
+
+            # Close the writer
+            $writer->close;
+        };
+    }
+
+For more information on how to stream, see the
+L<PSGI/Delayed-Response-and-Streaming-Body> docs.
+
+=head1 METHODS
 
 =head2 render
 

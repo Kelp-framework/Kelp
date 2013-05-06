@@ -180,7 +180,7 @@ sub psgi {
 
             # Handle delayed response if CODE
             return $data if ref($data) eq 'CODE';
-            $res->render($data) unless $res->is_rendered;
+            $res->render($data) unless $res->rendered;
         }
 
         # If no data returned at all, then croak with error.

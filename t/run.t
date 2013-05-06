@@ -110,6 +110,16 @@ $t->request( PUT "/meth3" )->content_is("OK");
 # Before render
 $t->request( GET "/meth2" )->header_is('X-Framework', 'Perl Kelp');
 
+# Manual render
+$app->add_route(
+    "/manual" => sub {
+        my $self = shift;
+        $self->res->render( { bar => 'foo' } );
+        return { this => 'will not render' };
+    }
+);
+$t->request( GET "/manual" )->json_cmp( { bar => 'foo' } );
+
 done_testing;
 
 sub bridge {
