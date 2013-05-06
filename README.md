@@ -630,7 +630,7 @@ sub hello_txt {
 $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
 ```
 
-### Serving Static Files
+### Serving static files
 
 If you want to serve static pages, you can use the [Plack::Middleware::Static](http://search.cpan.org/perldoc?Plack::Middleware::Static)
 middleware that comes with Plack. Here is an example configuration that serves
@@ -638,16 +638,19 @@ files in your `public` folder (under the Kelp root folder) from URLs that
 begin with `/public`:
 
 ```perl
-middleware      => [qw/Static/],
-middleware_init => {
-    Static => {
-        path => qr{^/public/},
-        root => '.',
+# conf/config.pl
+{
+    middleware      => [qw/Static/],
+    middleware_init => {
+        Static => {
+            path => qr{^/public/},
+            root => '.',
+        }
     }
-}
+};
 ```
 
-### Uploading Files
+### Uploading files
 
 File uploads are handled by [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), which inherits Plack::Request
 and has its `uploads|Plack::Request/uploads` property. The uploads propery returns a
@@ -946,7 +949,7 @@ sub build {
 sub check {
     my $self = shift;
     my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
-    $self->res->redirect_to();
+    $self->res->redirect_to( $url_for_name );
 }
 ```
 

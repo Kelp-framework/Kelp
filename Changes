@@ -1,3 +1,8 @@
+2013-05-05: Version 0.2190
+            Add property for partial rendering
+            Address an issue with nginx and headers
+            Add more pod
+
 2013-05-02: Version 0.2182
             Fix issue with content-type params
             Set explicit utf8 encoding for module Template
