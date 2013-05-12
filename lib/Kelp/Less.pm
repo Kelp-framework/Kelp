@@ -18,6 +18,7 @@ our @EXPORT = qw/
   req
   res
   template
+  module
   /;
 
 our $app;
@@ -80,6 +81,7 @@ sub res      { $app->res }
 sub template { $app->res->template(@_) }
 sub debug    { $app->debug(@_) }
 sub error    { $app->error(@_) }
+sub module   { $app->load_module(@_) }
 
 1;
 
@@ -314,6 +316,12 @@ currently loaded template module.
 =head2 run
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
+
+=head2 module
+
+Loads a Kelp module. The module options may be specified after the module name.
+
+    module 'JSON::XS', pretty => 1;
 
 =head1 TESTING
 

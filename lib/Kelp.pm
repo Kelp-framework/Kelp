@@ -50,7 +50,7 @@ sub new {
 }
 
 sub load_module {
-    my ( $self, $name ) = @_;
+    my ( $self, $name, %args ) = @_;
 
     # Make sure the module was not already loaded
     return if $self->{_loaded_modules}->{$name}++;
@@ -62,12 +62,12 @@ sub load_module {
     # access to $self->config yet. This is why we check if
     # config is available, and if it is, then we pull the
     # initialization hash.
-    my $args = {};
+    my $args_from_config = {};
     if ( $self->can('config') ) {
-        $args = $self->config("modules_init.$name") // {};
+        $args_from_config = $self->config("modules_init.$name") // {};
     }
 
-    $module->build(%$args);
+    $module->build(%$args_from_config, %args);
     return $module;
 }
 
@@ -1104,18 +1104,23 @@ initializations.
 
 =head2 load_module
 
+C<load_module($name, %options)>
+
 Used to load a module. All modules must be under the C<Kelp::Module::>
 namespace.
 
-    $self->load_module("Redis");
-    # Will look for an load Kelp::Module::Redis
+    $self->load_module("Redis", server => '127.0.0.1');
+    # Will look for and load Kelp::Module::Redis
 
+Options for the module may be specified after its name, or in the
+C<modules_init> hash in the config. The precedence is given to the
+inline options.
 See L<Kelp::Module> for more information on making and using modules.
 
 =head2 request
 
 This method is used to create the request object for each HTTP request. It
-returns and instance of L<Kelp::Request>, initialized with the current requests
+returns an instance of L<Kelp::Request>, initialized with the current request's
 environment. You can override this method to use a custom request module.
 
     package MyApp;

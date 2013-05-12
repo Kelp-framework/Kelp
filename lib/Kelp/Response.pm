@@ -183,7 +183,7 @@ unless you know what you're doing, we recommend that you do not use it.
 
 Sets partial response. If this attribute is set to a true value, it will cause
 C<finalize> to return the HTTP status code and headers, but not the body. This is
-convenient if you intend to stream your content. It the following example, we
+convenient if you intend to stream your content. In the following example, we
 set C<partial> to 1 and use C<finalize> to get a C<writer> object for streaming.
 
     sub stream {
