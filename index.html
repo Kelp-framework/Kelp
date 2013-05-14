@@ -848,19 +848,24 @@ initializations.</p>
 
 <h2>load_module</h2>
 
+<p><code>load_module($name, %options)</code></p>
+
 <p>Used to load a module. All modules must be under the <code>Kelp::Module::</code>
 namespace.</p>
 
-<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">load_module</span><span class="p">(</span><span class="s">"Redis"</span><span class="p">);</span>
-<span class="c1"># Will look for an load Kelp::Module::Redis</span>
+<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">load_module</span><span class="p">(</span><span class="s">"Redis"</span><span class="p">,</span> <span class="n">server</span> <span class="o">=&gt;</span> <span class="s">'127.0.0.1'</span><span class="p">);</span>
+<span class="c1"># Will look for and load Kelp::Module::Redis</span>
 </pre></div>
 
-<p>See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for more information on making and using modules.</p>
+<p>Options for the module may be specified after its name, or in the
+<code>modules_init</code> hash in the config. The precedence is given to the
+inline options.
+See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for more information on making and using modules.</p>
 
 <h2>request</h2>
 
 <p>This method is used to create the request object for each HTTP request. It
-returns and instance of <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, initialized with the current requests
+returns an instance of <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, initialized with the current request's
 environment. You can override this method to use a custom request module.</p>
 
 <div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
