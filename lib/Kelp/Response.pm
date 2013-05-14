@@ -130,9 +130,9 @@ Kelp::Response - Format an HTTP response
 
 =head1 SYNOPSIS
 
-Examples of route definitions make a lot more sense when showing how to use this
-module. Note that in the below examples C<$self-E<gt>res> is an instance of
-C<Kelp::Response>:
+Examples of how to use this module make a lot more sense when shown inside
+route definitions. Note that in the below examples C<$self-E<gt>res>
+is an instance of C<Kelp::Response>:
 
     # Render simple text
     sub text {

@@ -46,7 +46,7 @@ for ( 1 .. 10 ) {
 $app->add_route('/test3/:n', sub {
     my ( $self, $n ) = @_;
     if ($n == 1) {
-        [ $self->param ];
+        [ sort $self->param ];
     }
     elsif ($n == 2) {
         my %h = map { $_ => $self->param($_) } $self->param;
