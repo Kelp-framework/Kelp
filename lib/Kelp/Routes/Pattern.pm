@@ -30,10 +30,10 @@ sub _rep_regex {
 
     my ( $a, $b, $r ) = ( "(?<$token>", ')', undef );
     for ($switch) {
-        when ( [ ':', '?' ] ) {
+        if ( $_ eq ':' || $_ eq '?' ) {
             $r = $a . ( $self->check->{$token} // '[^\/]+' ) . $b
         }
-        when ('*') {
+        if ( $_ eq '*' ) {
             $r = $a . '.+' . $b
         }
     }

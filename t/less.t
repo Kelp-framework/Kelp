@@ -27,7 +27,7 @@ $t->request( DELETE '/del' )->content_is("DD");
 $t->request( GET '/del' )->code_is(404);
 
 # param
-route '/param' => sub { [ param ] };
+route '/param' => sub { [ sort(param()) ] };
 $t->request( GET '/param?a=bar&b=foo' )->json_cmp(['a','b']);
 route '/param2' => sub { param 'a' };
 $t->request( GET '/param2?a=bar&b=foo' )->content_is("bar");
