@@ -846,20 +846,25 @@ sub build {
 
 ## load\_module
 
+`load_module($name, %options)`
+
 Used to load a module. All modules must be under the `Kelp::Module::`
 namespace.
 
 ```perl
-$self->load_module("Redis");
-# Will look for an load Kelp::Module::Redis
+$self->load_module("Redis", server => '127.0.0.1');
+# Will look for and load Kelp::Module::Redis
 ```
 
+Options for the module may be specified after its name, or in the
+`modules_init` hash in the config. The precedence is given to the
+inline options.
 See [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module) for more information on making and using modules.
 
 ## request
 
 This method is used to create the request object for each HTTP request. It
-returns and instance of [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), initialized with the current requests
+returns an instance of [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), initialized with the current request's
 environment. You can override this method to use a custom request module.
 
 ```perl

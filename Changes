@@ -1,3 +1,7 @@
+2013-05-14: Version 0.2191
+            Add arguments to load_module
+            Fix tests and small issues
+
 2013-05-05: Version 0.2190
             Add property for partial rendering
             Address an issue with nginx and headers
