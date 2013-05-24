@@ -13,7 +13,7 @@ attr path => sub {
         $ENV{KELP_CONFIG_DIR},
         $self->app->path,
         $self->app->path . '/conf',
-        $self->app->path . '../conf'
+        $self->app->path . '/../conf'
     ]
 };
 
