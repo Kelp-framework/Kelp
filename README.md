@@ -792,6 +792,12 @@ my $app = MyApp->new( name => 'Twittar' );
 Sets of gets the encoding charset of the app. It will be `UTF-8`, if not set to
 anything else. The charset could also be changed in the config files.
 
+## long\_error
+
+When a route dies, Kelp will by default display a short error message. Set this
+attribute to a true value, if you need to see a full stack trace of the error.
+The `KELP_LONG_ERROR` environment variable can also set this attribute.
+
 ## req
 
 This attribute only makes sense if called within a route definition. It will
@@ -879,15 +885,15 @@ sub request {
 # Now each request will be handled by MyApp::Request
 ```
 
-## before\_render
+## before\_finalize
 
 Override this method, to modify the response object just before it gets
-rendered.
+finalized.
 
 ```perl
 package MyApp;
 
-sub before_render {
+sub before_finalize {
     my $self = shift;
     $self->res->set_header("X-App-Name", "MyApp");
 }

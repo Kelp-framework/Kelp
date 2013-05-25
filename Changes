@@ -1,3 +1,11 @@
+2013-05-25: Version 0.3001
+            Fix typo in test paths
+            Bridges accessed directly will now return 401 - Unathorized
+            Introduce "panic" and "finalize" methods
+            Add "long_error" attribute
+            Rename "before_render" to "before_finalize"
+            Change all _croak statements to return panic, improving the natural flow of the route logic
+
 2013-05-14: Version 0.2191
             Add arguments to load_module
             Fix tests and small issues
