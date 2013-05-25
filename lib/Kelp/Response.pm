@@ -95,7 +95,11 @@ sub render_404 {
 }
 
 sub render_500 {
-    $_[0]->set_code(500)->render("500 - Server Error");
+    $_[0]->set_code(500)->render("500 - Internal Server Error");
+}
+
+sub render_401 {
+    $_[0]->set_code(401)->render("401 - Unauthorized");
 }
 
 sub redirect_to {

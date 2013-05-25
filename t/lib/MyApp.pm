@@ -2,7 +2,7 @@ package MyApp;
 use Kelp::Base 'Kelp';
 use MyApp::Response;
 
-sub before_render {
+sub before_finalize {
     my $self = shift;
     $self->res->header( 'X-Test', 'MyApp' );
 }

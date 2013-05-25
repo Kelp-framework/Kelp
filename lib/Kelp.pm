@@ -2,7 +2,7 @@ package Kelp;
 
 use Kelp::Base;
 
-use Carp;
+use Carp 'longmess';
 use FindBin;
 use Encode;
 use Try::Tiny;
@@ -16,9 +16,12 @@ our $VERSION = 0.2191;
 
 # Basic attributes
 attr -host => hostname;
-attr -mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
+attr  mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
 attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
+
+# Debug
+attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
@@ -88,7 +91,7 @@ sub response {
 }
 
 # Override to manipulate the end response
-sub before_render {
+sub before_finalize {
     my $self = shift;
     $self->res->header('X-Framework' => 'Perl Kelp');
 }
@@ -127,7 +130,7 @@ sub psgi {
     # None found? Show 404 ...
     if ( !@$match ) {
         $res->render_404;
-        return $res->finalize;
+        return $self->finalize;
     }
 
     # Go over the entire route chain
@@ -136,12 +139,12 @@ sub psgi {
 
         # Check if the destination is valid
         if ( ref($to) && ref($to) ne 'CODE' || !$to ) {
-            $self->_croak('Invalid destination for ' . $req->path);
+            return $self->panic('Invalid destination for ' . $req->path);
         }
 
         # Check if the destination function exists
         if ( !ref($to) && !exists &$to ) {
-            $self->_croak(sprintf('Route not found %s for %s', $to, $req->path));
+            return $self->panic(sprintf('Route not found %s for %s', $to, $req->path));
         }
 
         # Log info about the route
@@ -162,14 +165,14 @@ sub psgi {
             $data = $code->($self, @{ $route->param });
         }
         catch {
-            $self->_croak($_);
+            return $self->panic($_);
         };
 
         # Is it a bridge? Bridges must return a true value
         # to allow the rest of the routes to run.
         if ( $route->bridge ) {
             if ( !$data ) {
-                $res->render_404 unless $res->code;
+                $res->render_401 unless $res->rendered;
                 last;
             }
             next;
@@ -182,18 +185,40 @@ sub psgi {
             return $data if ref($data) eq 'CODE';
             $res->render($data) unless $res->rendered;
         }
-
-        # If no data returned at all, then croak with error.
-        else {
-            $self->_croak(
-                $route->to . " did not render for method " . $req->method );
-        }
-
     }
 
-    $self->before_render;
-    $res->finalize;
+    # If nothing got rendered, die with error
+    if ( !$self->res->rendered ) {
+        return $self->panic(
+            $match->[-1]->to . " did not render for method " . $req->method );
+    }
+
+    $self->finalize;
 }
+
+sub panic {
+    my $self = shift;
+    my $message = shift // 'Something went wrong!';
+
+    # Log error
+    $self->logger( 'critical', $message ) if $self->can('logger');
+
+    # Set code 500
+    $self->res->render_500;
+
+    # Render appropriate error message, depending on the mode
+    $message = longmess($message) if $self->long_error;
+    $self->res->render($message) if $self->mode ne 'deployment';
+
+    $self->finalize;
+}
+
+sub finalize {
+    my $self = shift;
+    $self->before_finalize;
+    $self->res->finalize;
+}
+
 
 #----------------------------------------------------------------
 # Request and Response shortcuts
@@ -225,17 +250,6 @@ sub abs_url {
     my ( $self, $name, @args ) = @_;
     my $url = $self->url_for( $name, @args );
     return URI->new_abs( $url, $self->config('app_url') )->as_string;
-}
-
-# Internal
-
-sub _croak {
-    my $self = shift;
-    my $message = shift // return;
-    if ( $self->can('logger') ) {
-        $self->logger('critical', $message);
-    }
-    croak $message;
 }
 
 1;
@@ -1056,6 +1070,12 @@ class will be used.
 Sets of gets the encoding charset of the app. It will be C<UTF-8>, if not set to
 anything else. The charset could also be changed in the config files.
 
+=head2 long_error
+
+When a route dies, Kelp will by default display a short error message. Set this
+attribute to a true value, if you need to see a full stack trace of the error.
+The C<KELP_LONG_ERROR> environment variable can also set this attribute.
+
 =head2 req
 
 This attribute only makes sense if called within a route definition. It will
@@ -1133,14 +1153,14 @@ environment. You can override this method to use a custom request module.
 
     # Now each request will be handled by MyApp::Request
 
-=head2 before_render
+=head2 before_finalize
 
 Override this method, to modify the response object just before it gets
-rendered.
+finalized.
 
     package MyApp;
 
-    sub before_render {
+    sub before_finalize {
         my $self = shift;
         $self->res->set_header("X-App-Name", "MyApp");
     }
