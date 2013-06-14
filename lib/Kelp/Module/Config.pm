@@ -23,14 +23,11 @@ attr separator => sub { qr/\./ };
 attr data => sub {
     my $self = shift;
 
-    # Encoding
-    my $encoding = 'UTF-8';
-
     # Return a big hash with default values
     return {
 
         # Default charset is UTF-8
-        charset => $encoding,
+        charset => 'UTF-8',
 
         app_url => 'http://localhost:5000',
 
@@ -47,7 +44,7 @@ attr data => sub {
 
             # Template
             Template => {
-                INCLUDE_PATH => [
+                paths => [
                     $self->app->path . '/views',
                     $self->app->path . '/../views'
                 ]

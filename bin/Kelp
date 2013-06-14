@@ -6,7 +6,7 @@ use v5.10;
 
 use Getopt::Long;
 use File::Path 'make_path';
-use Template;
+use Kelp::Template;
 use File::Basename;
 use File::Slurp 'write_file';
 
@@ -47,17 +47,15 @@ my $module_path = join( '/', @parts );
 
 # Template
 my $files = do {
-    my $template = Template->new();
-    my $output;
-    $template->process(
+    my $template = Kelp::Template->new();
+    my $output = $template->process(
         \*DATA, {
             module_file => $module_file,
             module_path => $module_path,
             path        => $path,
             name        => $name,
             less        => $less
-        },
-        \$output
+        }
     );
     my %result = ();
     my $key;
@@ -169,7 +167,7 @@ sub home {
 
         # Enable UTF-8 in Template
         Template => {
-            ENCODING => 'utf8'
+            encoding => 'utf8'
         }
     }
 };

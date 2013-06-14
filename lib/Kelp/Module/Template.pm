@@ -1,8 +1,7 @@
 package Kelp::Module::Template;
 
 use Kelp::Base 'Kelp::Module';
-use Template;
-use Carp;
+use Kelp::Template;
 
 attr ext => 'tt';
 attr engine => sub { die "'engine' must be initialized" };
@@ -24,15 +23,12 @@ sub build {
 
 sub build_engine {
     my ( $self, %args ) = @_;
-    return Template->new( \%args ) || croak $Template::ERROR, "\n";
+    return Kelp::Template->new( %args );
 }
 
 sub render {
-    my ( $self, $template, $vars, @rest ) = @_;
-    my $output;
-    $self->engine->process( $template, $vars, \$output, @rest )
-      || croak $self->engine->error(), "\n";
-    return $output;
+    my ( $self, $template, $vars ) = @_;
+    return $self->engine->process( $template, $vars );
 }
 
 sub _rename {
@@ -76,8 +72,7 @@ Then ...
 =head1 DESCRIPTION
 
 This module provides an interface for using templates in a Kelp web application. It
-uses L<Template> by default, but it could be easily subclassed to use anything
-else.
+uses L<Kelp::Template>, but it could be easily subclassed to use anything else.
 
 =head1 REGISTERED METHODS
 
@@ -126,15 +121,14 @@ using a different template engine.
 
 =head2 UTF8
 
-L<Template> is sometimes unable to detect the correct encoding, so to ensure
-proper rendering, you may want to add C<ENCODING> to its configuration:
+To process templates in utf8, add the C<encoding> to the module configuration:
 
     # conf/config.pl
     {
         modules      => ['Template'],
         modules_init => {
             Template => {
-                ENCODING => 'utf8'
+                encoding => 'utf8'
             }
         }
     };
@@ -188,6 +182,5 @@ Overrides the L</render> method and renders using C<$self-E<gt>engine>.
 =cut
 
 =back
-
 
 =cut
