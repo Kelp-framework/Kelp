@@ -12,7 +12,7 @@ use Plack::Util;
 use Kelp::Request;
 use Kelp::Response;
 
-our $VERSION = 0.3001;
+our $VERSION = 0.3101;
 
 # Basic attributes
 attr -host => hostname;

@@ -1,3 +1,9 @@
+2013-06-13: Version 0.3101
+            Remove dependency of Template, replace it with Template::Tiny.
+            Reason being that Template does not pass its tests under Perl 5.18.
+            Use Kelp::Module::Template::Toolkit (available on CPAN) if your code
+            depends on Template.
+
 2013-05-25: Version 0.3001
             Fix typo in test paths
             Bridges accessed directly will now return 401 - Unathorized
