@@ -1,9 +1,6 @@
 #!/usr/bin/env perl
 
-use strict;
-use warnings;
-use v5.10;
-
+use Kelp::Base -strict;
 use Getopt::Long;
 use File::Path 'make_path';
 use Kelp::Template;
@@ -14,24 +11,25 @@ my $path = '.';
 my $verbose = 1;
 my $less = 0;
 my $help = 0;
-my $name = $ARGV[0] || do { $help = 1; '' };
 
 GetOptions(
-    "path=s"  => \$path,
-    "verbose" => \$verbose,
-    "less"    => \$less,
-    "help"    => \$help
+    "path=s"   => \$path,
+    "verbose!" => \$verbose,
+    "less"     => \$less,
+    "help"     => \$help
 );
+
+my $name = $ARGV[0] || do { $help = 1; '' };
 
 if ( $help ) {
     my $usage = q[
 Usage: Kelp [options] <name>
 
 Options:
-    --path=s    Path where to create the files
-    --less      Create a Kelp::Less application files
-    --verbose   Display information
-    --help      This help screen
+    --path=s        Path where to create the files
+    --less          Create a Kelp::Less application files
+    --(no)verbose   Display information
+    --help          This help screen
 ];
     say $usage;
     exit;
