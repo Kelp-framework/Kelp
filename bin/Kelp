@@ -111,7 +111,7 @@ use [% name %];
 my $app = [% name %]->new();
 $app->run;
 [% END -%]
-[% IF !less -%]
+[% UNLESS less -%]
 :lib/[% module_path %]/[% module_file %].pm
 package [% name %];
 use Kelp::Base 'Kelp';
@@ -130,7 +130,7 @@ sub home {
 
 1;
 [% END -%]
-[% IF !less -%]
+[% UNLESS less -%]
 :conf/config.pl
 # Common settings
 {
@@ -210,7 +210,7 @@ sub home {
 [% END -%]
 :views/home.tt
 Hello, world!
-[% IF !less -%]
+[% UNLESS less -%]
 :log/keep
 keeper
 [% END -%]
@@ -219,7 +219,7 @@ use Kelp::Base -strict;
 use Kelp::Test;
 use Test::More;
 use HTTP::Request::Common;
-[% IF !less -%]
+[% UNLESS less -%]
 use [% name %];
 [% END -%]
 
