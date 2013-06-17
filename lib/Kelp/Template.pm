@@ -3,6 +3,7 @@ package Kelp::Template;
 use Kelp::Base;
 use Template::Tiny;
 use File::Slurp;
+use Encode;
 
 attr paths => sub { [] };
 attr encoding => 'utf8';
@@ -11,29 +12,39 @@ attr tt => sub { Template::Tiny->new };
 sub process {
     my ( $self, $template, $vars ) = @_;
 
-    # If $template is not a ref, then it's a filename.  In that case, we
-    # will look for it in all specified paths and change it to its full
-    # pathname.
-    if ( !ref $template ) {
-        for my $p ( '.', @{ $self->paths } ) {
-            if ( -e ( my $fullpath = "$p/$template" ) ) {
-                $template = $fullpath;
-                last;
+    my $ref = ref $template;
+
+    # A GLOB or an IO object will be read and returned as a SCALAR template
+    # No reference means a file name
+    if ( $ref =~ /^IO/ || $ref eq 'GLOB' || !$ref ) {
+        if ( !$ref ) {
+            for my $p ( '.', @{ $self->paths } ) {
+                if ( -e ( my $fullpath = "$p/$template" ) ) {
+                    $template = $fullpath;
+                    last;
+                }
             }
         }
+        $template = $self->_read_file($template);
+    }
+    elsif ( $ref ne 'SCALAR' ) {
+        die "Template reference must be SCALAR, GLOB or an IO object";
     }
 
-    if ( ref($template) ne 'SCALAR' ) {
-        $template = read_file(
-            $template,
-            binmode    => ':' . $self->encoding,
-            scalar_ref => 1
-        );
-    }
+    my $encoded = encode( $self->encoding, $$template );
 
     my $output;
-    $self->tt->process( $template, $vars, \$output );
+    $self->tt->process( \$encoded, $vars, \$output );
     return $output;
+}
+
+sub _read_file {
+    my ( $self, $file ) = @_;
+    return read_file(
+        $file,
+        binmode    => ':' . $self->encoding,
+        scalar_ref => 1
+    );
 }
 
 1;
