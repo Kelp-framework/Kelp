@@ -303,6 +303,21 @@ C<['JSON', 'Template']>
 A hashref with initializations for each of the loaded modules, except this one,
 ironically.
 
+=head2 modules_disable
+
+An arrayref with names of modules to disable. Useful when you're using many
+modules, and you want to only disable a few for a certain mode.
+
+    # conf/config.pl
+    {
+        modules => [qw/Bar Foo Baz Bat Cat Matt/]
+    };
+
+    # conf/test.pl
+    {
+        modules_disable => ['Bat']  # Disable the 'Bat' module for tests
+    };
+
 =head2 middleware
 
 An arrayref with middleware to load on startup. The default value is an

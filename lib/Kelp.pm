@@ -43,9 +43,12 @@ sub new {
     $self->load_module( $self->config_module );
     $self->load_module('Routes');
 
-    # Load the modules from the config
+    # Load the modules from the config, skip the disabled
     if ( defined( my $modules = $self->config('modules') ) ) {
-        $self->load_module($_) for @$modules;
+        my @disabled = @{ $self->config('modules_disable') // [] };
+        for my $m (@$modules) {
+            $self->load_module($m) unless grep { $m eq $_ } @disabled;
+        }
     }
 
     $self->build();
