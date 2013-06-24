@@ -327,6 +327,11 @@ empty array.
 
 A hashref with initialization arguments for each of the loaded middleware.
 
+=head2 middleware_disable
+
+An optional arrayref with middleware to disable. See C<modules_disable> for
+and example and usage.
+
 =head1 SUBCLASSING
 
 You can subclass this module and use other types of configuration files

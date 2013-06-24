@@ -111,6 +111,10 @@ sub run {
             # Make sure the middleware was not already loaded
             next if $self->{_loaded_middleware}->{$class}++;
 
+            # See if the middleware is not disabled
+            my @disabled = @{ $self->config('middleware_disabled') // [] };
+            next if grep { $class eq $_ } @disabled;
+
             my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
             my $args = $self->config("middleware_init.$class") // {};
             $app = $mw->wrap( $app, %$args );
