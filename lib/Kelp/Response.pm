@@ -91,30 +91,44 @@ sub render {
 }
 
 sub render_error {
-    my $self = shift;
-    my $code = shift // 500;
-    my $text = shift // 'Internal Server Error';
+    my ( $self, $code, $error ) = @_;
+
+    $code  //= 500;
+    $error //= "$code - Internal Server Error";
 
     $self->set_code($code);
 
+    # Look for a template and if not found, then show a generic text
     try {
-        $self->template("error_$code");
+        my $filename = "error/$code";
+        $self->template(
+            $filename, {
+                app   => $self->app,
+                error => $error
+            }
+        );
     }
     catch {
-        $self->render("$code - $text");
+        $self->render($error);
     };
 }
 
 sub render_404 {
-    $_[0]->render_error( 404, "File Not Found" );
+    my ( $self, $error ) = @_;
+    $error //= "File Not Found";
+    $self->render_error( 404, $error );
 }
 
 sub render_500 {
-    $_[0]->render_error( 500, "Internal Server Error" );
+    my ( $self, $error ) = @_;
+    $error //= "Internal Server Error";
+    $self->render_error( 500, $error );
 }
 
 sub render_401 {
-    $_[0]->render_error( 401, "Unauthorized" );
+    my ( $self, $error ) = @_;
+    $error //= "Unauthorized";
+    $self->render_error( 401, $error );
 }
 
 sub redirect_to {

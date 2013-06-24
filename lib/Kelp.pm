@@ -205,19 +205,16 @@ sub psgi {
 }
 
 sub panic {
-    my $self = shift;
-    my $message = shift // 'Something went wrong!';
+    my ( $self, $message ) = @_;
+    $message //= 'Something went wrong!';
 
     # Log error
     $self->logger( 'critical', $message ) if $self->can('logger');
 
-    # Set code 500
-    $self->res->render_500;
+    # If not deployment, let Plack::Middleware handle the error
+    die $message unless $self->mode eq 'deployment';
 
-    # Render appropriate error message, depending on the mode
-    $message = longmess($message) if $self->long_error;
-    $self->res->render($message) if $self->mode ne 'deployment';
-
+    $self->res->render_500($message);
     $self->finalize;
 }
 
