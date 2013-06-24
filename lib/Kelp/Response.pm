@@ -90,16 +90,31 @@ sub render {
     return $self;
 }
 
+sub render_error {
+    my $self = shift;
+    my $code = shift // 500;
+    my $text = shift // 'Internal Server Error';
+
+    $self->set_code($code);
+
+    try {
+        $self->template("error_$code");
+    }
+    catch {
+        $self->render("$code - $text");
+    };
+}
+
 sub render_404 {
-    $_[0]->set_code(404)->render("404 - File Not Found");
+    $_[0]->render_error( 404, "File Not Found" );
 }
 
 sub render_500 {
-    $_[0]->set_code(500)->render("500 - Internal Server Error");
+    $_[0]->render_error( 500, "Internal Server Error" );
 }
 
 sub render_401 {
-    $_[0]->set_code(401)->render("401 - Unauthorized");
+    $_[0]->render_error( 401, "Unauthorized" );
 }
 
 sub redirect_to {
