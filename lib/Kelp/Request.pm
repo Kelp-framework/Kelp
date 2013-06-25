@@ -18,6 +18,7 @@ attr named => sub { {} };
 # when connecting to Starman via a unix socket
 sub address     { $_[0]->env->{REMOTE_ADDR} // $_[0]->env->{HTTP_X_REAL_IP} }
 sub remote_host { $_[0]->env->{REMOTE_HOST} // $_[0]->env->{HTTP_X_FORWARDED_HOST} }
+sub user        { $_[0]->env->{REMOTE_USER} // $_[0]->env->{HTTP_X_REMOTE_USER} }
 
 sub new {
     my ( $class, %args ) = @_;
