@@ -29,6 +29,7 @@ attr -charset => sub {
 };
 
 attr config_module => 'Config';
+attr -loaded_modules => sub { {} };
 
 # Each route's request an response objects will
 # be put here:
@@ -59,10 +60,10 @@ sub load_module {
     my ( $self, $name, %args ) = @_;
 
     # Make sure the module was not already loaded
-    return if $self->{_loaded_modules}->{$name}++;
+    return if $self->loaded_modules->{$name};
 
     my $class = Plack::Util::load_class( $name, 'Kelp::Module' );
-    my $module = $class->new( app => $self );
+    my $module = $self->loaded_modules->{$name} = $class->new( app => $self );
 
     # When loading the Config module itself, we don't have
     # access to $self->config yet. This is why we check if
@@ -73,7 +74,7 @@ sub load_module {
         $args_from_config = $self->config("modules_init.$name") // {};
     }
 
-    $module->build(%$args_from_config, %args);
+    $module->build( %$args_from_config, %args );
     return $module;
 }
 
@@ -1060,6 +1061,22 @@ Sets of gets the class of the configuration module to be loaded on startup. The
 default value is C<Config>, which will cause the C<Kelp::Module::Config> to get
 loaded. See the documentation for L<Kelp::Module::Config> for more information
 and for an example of how to create and use other config modules.
+
+=head2 loaded_modules
+
+A hashref containing the names and instances of all loaded modules. For example,
+if you have these two modules loaded: Template and JSON, then a dump of
+the C<loaded_modules> hash will look like this:
+
+    {
+        Template => Kelp::Module::Template=HASH(0x208f6e8),
+        JSON     => Kelp::Module::JSON=HASH(0x209d454)
+    }
+
+This can come handy if your module does more than just registering a new method
+into the application. Then, you can use its object instance to do access that
+additional functionality.
+
 
 =head2 path
 
