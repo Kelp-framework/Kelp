@@ -9,7 +9,6 @@ BEGIN {
 use Kelp::Base -strict;
 use Kelp;
 use Test::More;
-use Encode;
 use utf8;
 
 # Basic
@@ -17,7 +16,7 @@ my $app = Kelp->new( mode => 'nomod' );
 my $m = $app->load_module('Template');
 isa_ok $m, 'Kelp::Module::Template';
 can_ok $app, $_ for qw/template/;
-is $app->template( \"[% a %] ☃", { a => 4 } ), encode_utf8('4 ☃'), "Process";
+is $app->template( \"[% a %] ☃", { a => 4 } ), '4 ☃', "Process";
 
 done_testing;
 

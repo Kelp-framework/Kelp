@@ -2,8 +2,6 @@ package Kelp::Template;
 
 use Kelp::Base;
 use Template::Tiny;
-use File::Slurp;
-use Encode;
 
 attr paths => sub { [] };
 attr encoding => 'utf8';
@@ -31,20 +29,22 @@ sub process {
         die "Template reference must be SCALAR, GLOB or an IO object";
     }
 
-    my $encoded = encode( $self->encoding, $$template );
-
     my $output;
-    $self->tt->process( \$encoded, $vars, \$output );
+    $self->tt->process( $template, $vars, \$output );
     return $output;
 }
 
+# File::Slurp does not work well in OSX, so we go old school here
 sub _read_file {
     my ( $self, $file ) = @_;
-    return read_file(
-        $file,
-        binmode    => ':' . $self->encoding,
-        scalar_ref => 1
-    );
+    my $fh = ref $file ? $file : do {
+        open my $h, "<:encoding(" . $self->encoding . ")", $file or die $!;
+        $h;
+    };
+    local $/;
+    my $text = <$fh>;
+    close $fh unless ref $file;
+    return \$text;
 }
 
 1;
