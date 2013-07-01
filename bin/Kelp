@@ -198,12 +198,18 @@ sub home {
 :conf/development.pl
 # Options specific to development only
 {
+    middleware      => ['StackTrace'],
+    middleware_init => {
+        StackTrace => {
+            force => 1
+        }
+    }
 };
 :conf/test.pl
 # Options specific to testing only
 {
     # No Logger when testing
-    modules      => [qw/JSON Template/]
+    modules_disable => ['Logger']
 }
 [% END -%]
 :views/home.tt

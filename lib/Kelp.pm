@@ -141,81 +141,74 @@ sub psgi {
         return $self->finalize;
     }
 
-    # Go over the entire route chain
-    for my $route (@$match) {
-        my $to = $route->to;
+    try {
 
-        # Check if the destination is valid
-        if ( ref($to) && ref($to) ne 'CODE' || !$to ) {
-            return $self->panic('Invalid destination for ' . $req->path);
-        }
+        # Go over the entire route chain
+        for my $route (@$match) {
+            my $to = $route->to;
 
-        # Check if the destination function exists
-        if ( !ref($to) && !exists &$to ) {
-            return $self->panic(sprintf('Route not found %s for %s', $to, $req->path));
-        }
-
-        # Log info about the route
-        if ( $self->can('logger') ) {
-            $self->logger(
-                'info',
-                sprintf( "%s - %s %s - %s",
-                    $req->address, $req->method, $req->path, $to )
-            );
-        }
-
-        # Eval the destination code
-        my $code = ref $to eq 'CODE' ? $to : \&{$to};
-        $req->named( $route->named );
-
-        my $data;
-        try {
-            $data = $code->($self, @{ $route->param });
-        }
-        catch {
-            return $self->panic($_);
-        };
-
-        # Is it a bridge? Bridges must return a true value
-        # to allow the rest of the routes to run.
-        if ( $route->bridge ) {
-            if ( !$data ) {
-                $res->render_401 unless $res->rendered;
-                last;
+            # Check if the destination is valid
+            if ( ref($to) && ref($to) ne 'CODE' || !$to ) {
+                die 'Invalid destination for ' . $req->path;
             }
-            next;
+
+            # Check if the destination function exists
+            if ( !ref($to) && !exists &$to ) {
+                die sprintf( 'Route not found %s for %s', $to, $req->path );
+            }
+
+            # Log info about the route
+            if ( $self->can('logger') ) {
+                $self->logger(
+                    'info',
+                    sprintf( "%s - %s %s - %s",
+                        $req->address, $req->method, $req->path, $to )
+                );
+            }
+
+            # Eval the destination code
+            my $code = ref $to eq 'CODE' ? $to : \&{$to};
+            $req->named( $route->named );
+            my $data = $code->( $self, @{ $route->param } );
+
+            # Is it a bridge? Bridges must return a true value
+            # to allow the rest of the routes to run.
+            if ( $route->bridge ) {
+                if ( !$data ) {
+                    $res->render_401 unless $res->rendered;
+                    last;
+                }
+                next;
+            }
+
+            # If the route returned something, then analyze it and render it
+            if ( defined $data ) {
+
+                # Handle delayed response if CODE
+                return $data if ref($data) eq 'CODE';
+                $res->render($data) unless $res->rendered;
+            }
         }
 
-        # If the route returned something, then analyze it and render it
-        if ( defined $data ) {
-
-            # Handle delayed response if CODE
-            return $data if ref($data) eq 'CODE';
-            $res->render($data) unless $res->rendered;
+        # If nothing got rendered, die with error
+        if ( !$self->res->rendered ) {
+            die $match->[-1]->to
+              . " did not render for method "
+              . $req->method;
         }
+
+        $self->finalize;
     }
+    catch {
+        my $message = $self->long_error ? longmess($_) : $_;
 
-    # If nothing got rendered, die with error
-    if ( !$self->res->rendered ) {
-        return $self->panic(
-            $match->[-1]->to . " did not render for method " . $req->method );
-    }
+        # Log error
+        $self->logger( 'critical', $message ) if $self->can('logger');
 
-    $self->finalize;
-}
-
-sub panic {
-    my ( $self, $message ) = @_;
-    $message //= 'Something went wrong!';
-
-    # Log error
-    $self->logger( 'critical', $message ) if $self->can('logger');
-
-    # If not deployment, let Plack::Middleware handle the error
-    die $message unless $self->mode eq 'deployment';
-
-    $self->res->render_500($message);
-    $self->finalize;
+        # Render 500
+        $self->res->render_500($message);
+        $self->finalize;
+    };
 }
 
 sub finalize {

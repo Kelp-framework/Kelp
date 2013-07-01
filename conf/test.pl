@@ -1,4 +1,4 @@
 {
     # No Logger while testing
-    modules => [qw/JSON Template/]
+    modules_disable => ['Logger']
 };

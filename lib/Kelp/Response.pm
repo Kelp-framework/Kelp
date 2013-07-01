@@ -94,7 +94,7 @@ sub render_error {
     my ( $self, $code, $error ) = @_;
 
     $code  //= 500;
-    $error //= "$code - Internal Server Error";
+    $error //= "Internal Server Error";
 
     $self->set_code($code);
 
@@ -109,26 +109,32 @@ sub render_error {
         );
     }
     catch {
-        $self->render($error);
+        $self->render("$code - $error");
     };
+
+    return $self;
 }
 
 sub render_404 {
-    my ( $self, $error ) = @_;
-    $error //= "File Not Found";
-    $self->render_error( 404, $error );
+    $_[0]->render_error( 404, "File Not Found" );
 }
 
 sub render_500 {
-    my ( $self, $error ) = @_;
-    $error //= "Internal Server Error";
-    $self->render_error( 500, $error );
+    my ( $self, $message ) = @_;
+    if ( $self->app->mode ne 'deployment' ) {
+        if ($message) {
+            return $self->set_code(500)->render($message);
+        }
+        else {
+            local $SIG{__DIE__};    # Silence StackTrace
+            return $self->render_error( 500, $message );
+        }
+    }
+    $self->render_error;
 }
 
 sub render_401 {
-    my ( $self, $error ) = @_;
-    $error //= "Unauthorized";
-    $self->render_error( 401, $error );
+    $_[0]->render_error( 401, "Unauthorized" );
 }
 
 sub redirect_to {
@@ -318,6 +324,23 @@ Set the response code.
 
     $self->res->set_code(401)->render("Access denied");
 
+=head2 render_error
+
+C<render_error( $code, $error )>
+
+Renders the specified return code and an error message. This sub will first look
+for this error template C<error/$code>, before displaying a plain page with the
+error text.
+
+    $self->res->render_error(510, "Not Extended");
+
+The above code will look for a template named C<views/errors/510.tt>, and if not
+found it will render this message:
+
+    510 - Not Extended
+
+A return code of 510 will also be set.
+
 =head2 render_404
 
 A convenience method that sets code 404 and returns "File Not Found".
@@ -329,32 +352,17 @@ A convenience method that sets code 404 and returns "File Not Found".
     }
 
 If your application's tone is overly friendly or humorous, you will want to create a
-custom 404 page. The best way to do this is to subclass this module into your
-own class, for example C<MyApp::Response>. Then override the C<render_404> method.
-
-    package MyApp::Response;
-    use parent 'Kelp::Response';
-
-    sub render_404 {
-        my $self = shift;
-        $self->set_code(404)->template('errors/404.tt');
-    }
-
-You'll have to override the L<Kelp/response> method in your main module too, in
-order to instruct it to use your new class:
-
-    package MyApp;
-    use parent 'Kelp';
-
-    sub response {
-        my $self = shift;
-        return MyApp::Response->new( app => $self );
-    }
+custom 404 page. The best way to do this is to design your own 404.tt template and
+put it in the views/error folder.
 
 =head2 render_500
 
-Renders the stock "500 - Server Error" message. See L</render_404> for examples
-on how to customize it.
+C<render_500($optional_error)>
+
+Renders the stock "500 - Server Error" message.
+Designing your own 500 page is also possible. All you need to do is add file 500.tt in
+views/error. Keep in mind that it will only show in C<deployment>. In any other mode,
+this method will display the optional error, or the stock error message.
 
 =head2 template
 
