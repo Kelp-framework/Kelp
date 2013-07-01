@@ -233,6 +233,8 @@ sub finalize {
 #----------------------------------------------------------------
 sub param { shift->req->param(@_) }
 
+sub session { shift->req->session(@_) }
+
 sub stash {
     my $self = shift;
     @_ ? $self->req->stash->{$_[0]} : $self->req->stash;
@@ -1217,6 +1219,11 @@ A shortcut to C<$self-E<gt>req-E<gt>param>:
     }
 
 See L<Kelp::Request> for more information and examples.
+
+=head2 session
+
+A shortcut to C<$self-E<gt>req-E<gt>session>. Take a look at L<Kelp::Request/session>
+for more information and examples.
 
 =head2 stash
 

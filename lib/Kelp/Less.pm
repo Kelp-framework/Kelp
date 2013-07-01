@@ -19,6 +19,7 @@ our @EXPORT = qw/
   res
   template
   module
+  session
   /;
 
 our $app;
@@ -74,6 +75,7 @@ sub run {
 sub app      { $app }
 sub attr     { Kelp::Base::attr( ref($app), @_ ) }
 sub param    { $app->param(@_) }
+sub session  { $app->session(@_) }
 sub stash    { $app->stash(@_) }
 sub named    { $app->named(@_) }
 sub req      { $app->req }

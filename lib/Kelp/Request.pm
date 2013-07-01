@@ -52,6 +52,18 @@ sub param {
     return $self->SUPER::param(@_);
 }
 
+sub session {
+    my $self = shift;
+    if ( !@_ ) {
+        return $self->env->{'psgix.session'}
+          // croak "No Session middleware wrapped";
+    }
+    return $self->session->{ $_[0] } if @_ == 1;
+    my %hash = @_;
+    $self->session->{$_} = $hash{$_} for keys %hash;
+    return \%hash;
+}
+
 1;
 
 __END__
@@ -114,6 +126,64 @@ If a single argument is passed, then the corresponding value in the JSON
 document is returned.
 
     my $bar = $self->param('bar');  # $bar = 1
+
+=cut
+
+=back
+
+=head2 session
+
+Returns the Plack session hash or dies if no C<Session> middleware was included.
+
+    sub route_zero {
+        my $self = shift;
+        $self->session->{user} = 45;
+    }
+
+If called with a single argument, returns that value from the session hash:
+
+    sub route_one {
+        my $self = shift;
+        my $user = $self->req->session('user');
+    }
+
+Set values in the session using key-value pairs:
+
+    sub route_two {
+        my $self = shift;
+        $self->req->session(
+            name  => 'Jill Andrews',
+            age   => 24,
+            email => 'jill@perlkelp.com'
+        );
+    }
+
+=head3 Common tasks with sessions
+
+=over
+
+=item Initialize file sessions
+
+In your config file:
+
+    middleware => ['Session'],
+    middleware_init => {
+        Session => {
+            store => 'File'
+        }
+    }
+
+=cut
+
+=item Delete session values
+
+    delete $self->req->session->{'useless'};
+
+=cut
+
+=item Remove all session values
+
+    $self->req->session = {};
 
 =cut
 

@@ -32,6 +32,12 @@ $t->request( GET '/param?a=bar&b=foo' )->json_cmp(['a','b']);
 route '/param2' => sub { param 'a' };
 $t->request( GET '/param2?a=bar&b=foo' )->content_is("bar");
 
+# session
+route '/session' => sub {
+    session(bar => 'foo');
+    is session('bar'), 'foo';
+};
+
 # stash
 route '/stash' => sub { stash->{a} = "E"; stash 'a' };
 $t->request( GET '/stash' )->content_is("E");
