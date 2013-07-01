@@ -4,6 +4,7 @@ use Kelp;
 use Test::More;
 use HTTP::Request::Common;
 use FindBin '$Bin';
+use Plack::Middleware::Session;
 
 BEGIN {
     $ENV{KELP_CONFIG_DIR} = "$Bin/conf/session";
