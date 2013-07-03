@@ -774,6 +774,26 @@ default value is `Config`, which will cause the `Kelp::Module::Config` to get
 loaded. See the documentation for [Kelp::Module::Config](http://search.cpan.org/perldoc?Kelp::Module::Config) for more information
 and for an example of how to create and use other config modules.
 
+## loaded\_modules
+
+A hashref containing the names and instances of all loaded modules. For example,
+if you have these two modules loaded: Template and JSON, then a dump of
+the `loaded_modules` hash will look like this:
+
+```perl
+{
+    Template => Kelp::Module::Template=HASH(0x208f6e8),
+    JSON     => Kelp::Module::JSON=HASH(0x209d454)
+}
+```
+
+This can come handy if your module does more than just registering a new method
+into the application. Then, you can use its object instance to do access that
+additional functionality.
+
+```perl
+```
+
 ## path
 
 Gets the current path of the application. That would be the path to `app.psgi`
@@ -929,6 +949,11 @@ sub some_route {
 ```
 
 See [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request) for more information and examples.
+
+## session
+
+A shortcut to `$self->req->session`. Take a look at ["session" in Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request#session)
+for more information and examples.
 
 ## stash
 

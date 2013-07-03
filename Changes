@@ -1,3 +1,12 @@
+2013-07-02: Version 0.4001
+            Added modules_disable and middleware_disable arrays in config
+            Added a REMOTE_USER fallback for nginx
+            Added loaded_modules attribute to Kelp
+            Fixed utf8 encoding for OSX
+            Added a session convenience method
+            PSGI creation remodeled to leverage the StackTrace middleware
+            Introduced render_error method in Kelp::Response, which will look for error templates (404, 500, etc)
+
 2013-06-13: Version 0.3101
             Remove dependency of Template, replace it with Template::Tiny.
             Reason being that Template does not pass its tests under Perl 5.18.
