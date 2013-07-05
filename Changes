@@ -1,3 +1,6 @@
+2013-07-05: Version 0.4011
+            Removed modules_disable and middleware_disable, and added the ability to add and remove elements in an array by adding a '+' or '-' in front of the key name.
+
 2013-07-02: Version 0.4001
             Added modules_disable and middleware_disable arrays in config
             Added a REMOTE_USER fallback for nginx
