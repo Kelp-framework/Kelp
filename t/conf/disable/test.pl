@@ -1,3 +1,0 @@
-{
-    modules_disable => ['Template']
-};

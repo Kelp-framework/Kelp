@@ -32,10 +32,4 @@ $t->request(GET '/mw')
   ->header_is("X-Framework", "Changed")
   ->header_is("Content-Length", 2);
 
-# Disable middleware
-$app->config_hash->{middleware_disable} = ['XFramework'];
-$t->request(GET '/mw')
-  ->header_is("X-Framework", "Perl Kelp");
-
-
 done_testing;

@@ -198,7 +198,8 @@ sub home {
 :conf/development.pl
 # Options specific to development only
 {
-    middleware      => ['StackTrace'],
+    # Add StackTrace in development
+    "+middleware"   => ['StackTrace'],
     middleware_init => {
         StackTrace => {
             force => 1
@@ -209,7 +210,7 @@ sub home {
 # Options specific to testing only
 {
     # No Logger when testing
-    modules_disable => ['Logger']
+    "-modules" => ['Logger']
 }
 [% END -%]
 :views/home.tt

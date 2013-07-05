@@ -44,12 +44,9 @@ sub new {
     $self->load_module( $self->config_module );
     $self->load_module('Routes');
 
-    # Load the modules from the config, skip the disabled
+    # Load the modules from the config
     if ( defined( my $modules = $self->config('modules') ) ) {
-        my @disabled = @{ $self->config('modules_disable') // [] };
-        for my $m (@$modules) {
-            $self->load_module($m) unless grep { $m eq $_ } @disabled;
-        }
+        $self->load_module($_) for (@$modules);
     }
 
     $self->build();
@@ -111,10 +108,6 @@ sub run {
 
             # Make sure the middleware was not already loaded
             next if $self->{_loaded_middleware}->{$class}++;
-
-            # See if the middleware is not disabled
-            my @disabled = @{ $self->config('middleware_disabled') // [] };
-            next if grep { $class eq $_ } @disabled;
 
             my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
             my $args = $self->config("middleware_init.$class") // {};

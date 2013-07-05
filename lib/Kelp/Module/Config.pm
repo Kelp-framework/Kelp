@@ -2,6 +2,7 @@ package Kelp::Module::Config;
 use Kelp::Base 'Kelp::Module';
 use Carp;
 use Try::Tiny;
+use Test::Deep;
 
 # Extension to look for
 attr ext => 'pl';
@@ -159,22 +160,42 @@ sub build {
 }
 
 sub _merge {
-    my ( $a, $b ) = @_;
+    my ( $a, $b, $sigil ) = @_;
 
     return $b
       if !ref($a)
       || !ref($b)
-      || ref($a) ne ref($b)
-      || ref($a) ne 'HASH';
+      || ref($a) ne ref($b);
 
-    for my $k ( keys %$b ) {
-        $a->{$k} =
-          exists $a->{$k}
-          ? _merge( $a->{$k}, $b->{$k} )
-          : $b->{$k};
+    if ( ref $a eq 'ARRAY' ) {
+        return $b unless $sigil;
+        if ( $sigil eq '+' ) {
+            for my $e (@$b) {
+                push @$a, $e unless grep { eq_deeply( $_, $e ) } @$a;
+            }
+        }
+        else {
+            $a = [
+                grep {
+                    my $e = $_;
+                    !grep { eq_deeply( $_, $e ) } @$b
+                } @$a
+            ];
+        }
+        return $a;
     }
+    elsif ( ref $a eq 'HASH' ) {
+        for my $k ( keys %$b ) {
+            my $s = $k =~ s/^(\+|\-)// ? $1 : '';
+            $a->{$k} =
+              exists $a->{$k}
+              ? _merge( $a->{$k}, $b->{"$s$k"}, $s )
+              : $b->{$k};
+        }
 
-    return $a;
+        return $a;
+    }
+    return $b;
 }
 
 1;
@@ -209,6 +230,78 @@ The same order applies to the I<mode> file too, so if the application
 L<mode|Kelp/mode> is I<development>, then C<conf/development.pl> and
 C<../conf/development.pl> will be looked for. If found, they will also be merged
 to the config hash.
+
+=head1 MERGING
+
+The first configuration file this module will look for is C<config.pl>. This is
+where you should keep configuration options that apply to all running environments.
+The mode-specific configuration file will be merged to this config, and it will
+take priority. Merging is done as follows:
+
+=over
+
+=item Scalars will always be overwriten.
+
+=item Hashes will be merged.
+
+=item
+
+Arrays will be overwritten, except in case when the name of the array contains a
+sigil as follows:
+
+=over
+
+=item
+
+C<+> in front of the name will add the elements to the array:
+
+    # in config.pl
+    {
+        middleware => [qw/Bar Foo/]
+    }
+
+    # in development.pl
+    {
+        '+middleware' => ['Baz']    # Add 'Baz' in development
+    }
+
+=cut
+
+=item
+
+C<-> in front of the name will remove the elements from the array:
+
+    # in config.pl
+    {
+        modules => [qw/Template JSON Logger/]
+    }
+
+    # in test.pl
+    {
+        '-modules' => [qw/Logger/]  # Remove the Logger modules in test mode
+    }
+
+=cut
+
+=item
+
+No sigil will cause the array to be completely replaced:
+
+    # in config.pl
+    {
+        middleware => [qw/Bar Foo/]
+    }
+
+    # in cli.pl
+    {
+        middleware => []    # No middleware in CLI
+    }
+
+=cut
+
+=back
+
+=cut
 
 =head1 REGISTERED METHODS
 
@@ -303,21 +396,6 @@ C<['JSON', 'Template']>
 A hashref with initializations for each of the loaded modules, except this one,
 ironically.
 
-=head2 modules_disable
-
-An arrayref with names of modules to disable. Useful when you're using many
-modules, and you want to only disable a few for a certain mode.
-
-    # conf/config.pl
-    {
-        modules => [qw/Bar Foo Baz Bat Cat Matt/]
-    };
-
-    # conf/test.pl
-    {
-        modules_disable => ['Bat']  # Disable the 'Bat' module for tests
-    };
-
 =head2 middleware
 
 An arrayref with middleware to load on startup. The default value is an
@@ -326,11 +404,6 @@ empty array.
 =head2 middleware_init
 
 A hashref with initialization arguments for each of the loaded middleware.
-
-=head2 middleware_disable
-
-An optional arrayref with middleware to disable. See C<modules_disable> for
-and example and usage.
 
 =head1 SUBCLASSING
 
