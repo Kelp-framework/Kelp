@@ -244,9 +244,7 @@ take priority. Merging is done as follows:
 
 =item Hashes will be merged.
 
-=item
-
-Arrays will be overwritten, except in case when the name of the array contains a
+=item Arrays will be overwritten, except in case when the name of the array contains a
 sigil as follows:
 
 =over
@@ -301,7 +299,7 @@ No sigil will cause the array to be completely replaced:
 
 =back
 
-=cut
+=back
 
 =head1 REGISTERED METHODS
 
