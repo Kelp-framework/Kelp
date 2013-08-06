@@ -90,6 +90,22 @@ sub render {
     return $self;
 }
 
+sub render_binary {
+    my $self = shift;
+    my $body = shift // '';
+
+    # Set code 200 if the code has not been set
+    $self->set_code(200) unless $self->code;
+
+    if ( !$self->content_type ) {
+        confess "Content-type must be explicitly set for binaries";
+    }
+
+    $self->body($body);
+    $self->rendered(1);
+    return $self;
+}
+
 sub render_error {
     my ( $self, $code, $error ) = @_;
 
@@ -323,6 +339,18 @@ The above response will contain headers that disable caching.
 Set the response code.
 
     $self->res->set_code(401)->render("Access denied");
+
+=head2 render_binary
+
+Render binary files, such as images, etc. You must explicitly set the content_type
+before that.
+
+    use Kelp::Less;
+
+    get '/image/:name' => sub {
+        my $content = File::Slurp::read_file("$name.jpg");
+        res->set_content_type('image/jpeg')->render_binary( $content );
+    };
 
 =head2 render_error
 

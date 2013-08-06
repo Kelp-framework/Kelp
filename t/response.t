@@ -92,4 +92,10 @@ $t->request( GET "/t2" )
     ->content_type_is('text/html')
     ->content_is("swan");
 
+$app->add_route( "/bin1", sub { $_[0]->res->render_binary( "123" ) } );
+$t->request( GET "/bin1" )->code_is(500);
+
+$app->add_route( "/bin2", sub { $_[0]->res->set_content_type("image/png")->render_binary( "123" ) } );
+$t->request( GET "/bin2" )->code_is(200);
+
 done_testing;
