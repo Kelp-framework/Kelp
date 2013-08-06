@@ -38,10 +38,7 @@
           <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
         </div>
 
-        <h1>
-<a name="synopsis" class="anchor" href="#synopsis"><span class="octicon octicon-link"></span></a>SYNOPSIS</h1>
-
-<p>First ...</p>
+        <p>First ...</p>
 
 <div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
 <span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
@@ -263,6 +260,8 @@ app will use. Here is an example that uses <code>Moose</code> to create lazy att
 and initialize a database connection:</p>
 
 <div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+
+<span class="k">use</span> <span class="n">parent</span> <span class="n">Kelp</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">Moose</span><span class="p">;</span>
 
 <span class="n">has</span> <span class="n">dbh</span> <span class="o">=&gt;</span> <span class="p">(</span>
