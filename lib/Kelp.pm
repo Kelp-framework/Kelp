@@ -502,6 +502,8 @@ app will use. Here is an example that uses C<Moose> to create lazy attributes
 and initialize a database connection:
 
     package MyApp;
+
+    use parent Kelp;
     use Moose;
 
     has dbh => (
