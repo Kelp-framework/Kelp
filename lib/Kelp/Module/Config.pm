@@ -12,6 +12,7 @@ attr path => sub {
     my $self = shift;
     return [
         $ENV{KELP_CONFIG_DIR},
+        'conf',
         $self->app->path,
         $self->app->path . '/conf',
         $self->app->path . '/../conf'
