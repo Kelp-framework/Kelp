@@ -14,7 +14,10 @@ my %h = (
     'barfoo#BAZ'          => 'Barfoo::BAZ',
     'bar_foo_baz_bat#moo' => 'BarFooBazBat::moo',
     'a'                   => 'a',
-    'M::D::f'             => 'M::D::f'
+    'M::D::f'             => 'M::D::f',
+    'R_E_S_T#asured'      => 'REST::asured',
+    'REST::Assured::ok'   => 'REST::Assured::ok',
+    'REST'                => 'REST',
 );
 
 for my $k ( keys %h ) {
