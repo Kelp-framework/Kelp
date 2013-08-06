@@ -218,6 +218,8 @@ and initialize a database connection:
 
 ```perl
 package MyApp;
+
+use parent Kelp;
 use Moose;
 
 has dbh => (
