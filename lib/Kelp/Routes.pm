@@ -264,20 +264,20 @@ There are three types of place holders:
 These placeholders begin with a column (C<:>) and must have a value in order for the
 route to match. All characters are matched, except for the forward slash.
 
-    $r->add( '/user/:id' => 'module#sub' );
+    $r->add( '/user/:id' => 'Module::sub' );
     # /user/a       -> match (id = 'a')
     # /user/123     -> match (id = 123)
     # /user/        -> no match
     # /user         -> no match
     # /user/10/foo  -> no match
 
-    $r->add( '/page/:page/line/:line' => 'module#sub' );
+    $r->add( '/page/:page/line/:line' => 'Module::sub' );
     # /page/1/line/2        -> match (page = 1, line = 2)
     # /page/bar/line/foo    -> match (page = 'bar', line = 'foo')
     # /page/line/4          -> no match
     # /page/5               -> no match
 
-    $r->add( '/{:a}ing/{:b}ing' => 'module#sub' );
+    $r->add( '/{:a}ing/{:b}ing' => 'Module::sub' );
     # /walking/singing      -> match (a = 'walk', b = 'sing')
     # /cooking/ing          -> no match
     # /ing/ing              -> no match
@@ -289,12 +289,12 @@ value. You may also specify a default value for the optional placeholder via
 the L</defaults> option. Again, like the explicit placeholders, the optional
 ones capture all characters, except the forward slash.
 
-    $r->add( '/data/?id' => 'module#sub' );
+    $r->add( '/data/?id' => 'Module::sub' );
     # /bar/foo          -> match ( id = 'foo' )
     # /bar/             -> match ( id = undef )
     # /bar              -> match ( id = undef )
 
-    $r->add( '/:a/?b/:c' => 'module#sub' );
+    $r->add( '/:a/?b/:c' => 'Module::sub' );
     # /bar/foo/baz      -> match ( a = 'bar', b = 'foo', c = 'baz' )
     # /bar/foo          -> match ( a = 'bar', b = undef, c = 'foo' )
     # /bar              -> no match
@@ -304,7 +304,7 @@ Optional default values may be specified via the C<defaults> option.
 
     $r->add(
         '/user/?name' => {
-            to       => 'module#sub',
+            to       => 'Module::sub',
             defaults => { name => 'hank' }
         }
     );
@@ -319,7 +319,7 @@ Optional default values may be specified via the C<defaults> option.
 The wildcard placeholders expect a value and capture all characters, including
 the forward slash.
 
-    $r->add( '/:a/*b/:c'  => 'module#sub' );
+    $r->add( '/:a/*b/:c'  => 'Module::sub' );
     # /bar/foo/baz/bat  -> match ( a = 'bar', b = 'foo/baz', c = 'bat' )
     # /bar/bat          -> no match
 
@@ -328,16 +328,16 @@ the forward slash.
 Curly braces may be used to separate the placeholders from the rest of the
 path:
 
-    $r->add( '/{:a}ing/{:b}ing' => 'module#sub' );
+    $r->add( '/{:a}ing/{:b}ing' => 'Module::sub' );
     # /looking/seeing       -> match ( a = 'look', b = 'see' )
     # /ing/ing              -> no match
 
-    $r->add( '/:a/{?b}ing' => 'module#sub' );
+    $r->add( '/:a/{?b}ing' => 'Module::sub' );
     # /bar/hopping          -> match ( a = 'bar', b = 'hopp' )
     # /bar/ing              -> match ( a = 'bar' )
     # /bar                  -> no match
 
-    $r->add( '/:a/{*b}ing/:c' => 'module#sub' );
+    $r->add( '/:a/{*b}ing/:c' => 'Module::sub' );
     # /bar/hop/ping/foo     -> match ( a = 'bar', b = 'hop/p', c = 'foo' )
     # /bar/ing/foo          -> no match
 
