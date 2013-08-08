@@ -7,4 +7,6 @@ perl:
     - "5.18"
 
 before_install:
-    - cpanm Kelp
+    - cpanm -n Kelp
+
+install: true
