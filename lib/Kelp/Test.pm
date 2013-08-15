@@ -113,6 +113,14 @@ sub header_isnt {
     return $self;
 }
 
+sub header_like {
+    my ( $self, $header, $regexp, $test_name ) = @_;
+    $test_name ||= "Header '$header' =~ $regexp";
+    like $self->res->header($header), $regexp, $test_name
+      || $self->diag_headers();
+    return $self;
+}
+
 sub header_unlike {
     my ( $self, $header, $regexp, $test_name ) = @_;
     $test_name ||= "Header '$header' !~ $regexp";
