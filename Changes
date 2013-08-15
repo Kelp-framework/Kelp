@@ -1,3 +1,9 @@
+2013-08-14: Version 0.4501
+            Minor fixes
+            Add render_binary
+            Add missing header_like
+            POD changes
+
 2013-07-05: Version 0.4011
             Removed modules_disable and middleware_disable, and added the ability to add and remove elements in an array by adding a '+' or '-' in front of the key name.
 
