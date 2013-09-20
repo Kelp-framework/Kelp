@@ -66,6 +66,19 @@ $t->request( POST '/param/3',
   ->code_is(200)
   ->json_cmp({a => "bar", b => "foo"}, "JSON scalar context");
 
+# No JSON content
+$t->request( POST '/param/3', 'Content-Type' => 'application/json')
+  ->code_is(200)
+  ->json_cmp({}, "No JSON content");
+
+# JSON content is not a hash
+$t->request( POST '/param/3',
+    'Content-Type' => 'application/json',
+    'Content' => '[1,2,3]'
+    )
+  ->code_is(200)
+  ->json_cmp({ARRAY => [1,2,3]}, "JSON content is not a hash");
+
 $t->request( POST '/param/1', [a => "bar", b => "foo"])
   ->code_is(200)
   ->json_cmp(['a', 'b'], "Get POST list of params");

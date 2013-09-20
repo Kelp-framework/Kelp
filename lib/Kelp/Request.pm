@@ -16,9 +16,9 @@ attr named => sub { {} };
 
 # nginx does not initialize REMOTE_ADDR and REMOTE_HOST properly
 # when connecting to Starman via a unix socket
-sub address     { $_[0]->env->{REMOTE_ADDR} // $_[0]->env->{HTTP_X_REAL_IP} }
-sub remote_host { $_[0]->env->{REMOTE_HOST} // $_[0]->env->{HTTP_X_FORWARDED_HOST} }
-sub user        { $_[0]->env->{REMOTE_USER} // $_[0]->env->{HTTP_X_REMOTE_USER} }
+sub address     { $_[0]->env->{HTTP_X_REAL_IP}        // $_[0]->env->{REMOTE_ADDR} }
+sub remote_host { $_[0]->env->{HTTP_X_FORWARDED_HOST} // $_[0]->env->{REMOTE_HOST} }
+sub user        { $_[0]->env->{HTTP_X_REMOTE_USER}    // $_[0]->env->{REMOTE_USER} }
 
 sub new {
     my ( $class, %args ) = @_;
@@ -44,9 +44,14 @@ sub param {
 
     if ( $self->is_json ) {
         croak "No JSON decoder" unless $self->app->can('json');
-        my $hash = $self->app->json->decode( $self->content );
-        croak "JSON hash expected" unless ref($hash) eq 'HASH';
-        return @_ ? $hash->{$_[0]} : (wantarray ? keys %$hash : $hash);
+        my $hash = try {
+            $self->app->json->decode( $self->content );
+        }
+        catch {
+            {};
+        };
+        $hash = { ref($hash), $hash } unless ref($hash) eq 'HASH';
+        return @_ ? $hash->{ $_[0] } : ( wantarray ? keys %$hash : $hash );
     }
 
     return $self->SUPER::param(@_);
