@@ -685,7 +685,7 @@ Look up the POD for C<Kelp::Less> for many examples, but to get you started off,
 here is a quick one:
 
     # app.psgi
-    use Kelp:::Less;
+    use Kelp::Less;
 
     get '/api/:user/?action' => sub {
         my ( $self, $user, $action ) = @_;

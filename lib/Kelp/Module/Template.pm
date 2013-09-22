@@ -157,7 +157,7 @@ template engine.
 
     sub build_engine {
         my ( $self, %args ) = @_;
-        return Text::Haml->new;
+        return Text::Haml->new( %args );
     }
 
 =cut
