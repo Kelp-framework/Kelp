@@ -23,11 +23,15 @@ attr -app => sub {
 
 attr res  => sub { die "res is not initialized" };
 
+attr -run => sub {
+    $_[0]->app->run;
+};
+
 sub request {
     my ( $self, $req ) = @_;
     croak "HTTP::Request object needed" unless ref($req) eq 'HTTP::Request';
     $self->note( $req->method . ' ' . $req->uri );
-    $self->res( test_psgi( $self->app->run, sub { shift->($req) } ) );
+    $self->res( test_psgi( $self->run, sub { shift->($req) } ) );
     return $self;
 }
 
