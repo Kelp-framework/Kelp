@@ -139,7 +139,7 @@ sub match {
 
     # Look for this path and method in the cache. If found,
     # return the array of routes that matched the previous time.
-    # If not found, then returl all routes.
+    # If not found, then return all routes.
     my $key = $path . ':' . ( $method // '' );
     my $routes =
       exists $self->cache->{$key}
