@@ -405,7 +405,7 @@ here is a quick one:
 
 ```perl
 # app.psgi
-use Kelp:::Less;
+use Kelp::Less;
 
 get '/api/:user/?action' => sub {
     my ( $self, $user, $action ) = @_;

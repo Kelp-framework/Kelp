@@ -1,3 +1,9 @@
+2013-11-11: Version 0.4550
+            Flip nginx env vars.
+            Change param to accept no JSON content or non-hash JSON
+            Make Kelp::Test::request only load the PSGI app once
+            POD and comments typo fixes
+
 2013-08-14: Version 0.4501
             Minor fixes
             Add render_binary
