@@ -202,7 +202,7 @@ the web app and saves the response as an L<HTTP::Response> object.
 
 =head2 KELP_TESTING
 
-This module sets the C<KELP_TESTING> envinronmental variable to a true value.
+This module sets the C<KELP_TESTING> environmental variable to a true value.
 
 =head1 ATTRIBUTES
 

@@ -241,7 +241,7 @@ take priority. Merging is done as follows:
 
 =over
 
-=item Scalars will always be overwriten.
+=item Scalars will always be overwritten.
 
 =item Hashes will be merged.
 
@@ -387,7 +387,7 @@ C<http://localhost:5000>
 
 =head2 modules
 
-An arrayrf with module names to load on startup. The default value is
+An arrayref with module names to load on startup. The default value is
 C<['JSON', 'Template']>
 
 =head2 modules_init
