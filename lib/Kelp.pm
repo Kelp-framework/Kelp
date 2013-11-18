@@ -927,7 +927,7 @@ begin with C</public>:
 =head3 Uploading files
 
 File uploads are handled by L<Kelp::Request>, which inherits Plack::Request
-and has its C<uploads|Plack::Request/uploads> property. The uploads propery returns a
+and has its C<uploads|Plack::Request/uploads> property. The uploads property returns a
 reference to a hash containing all uploads.
 
     sub upload {
