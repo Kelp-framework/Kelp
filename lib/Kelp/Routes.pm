@@ -101,7 +101,7 @@ sub _parse_route {
 
     # Parrent defined?
     if (%$parent) {
-        if ( $parent->{name} ) {
+        if ( $val->{name} && $parent->{name} ) {
             $val->{name} = $parent->{name} . '_' . $val->{name};
         }
         $val->{pattern} = $parent->{pattern} . $val->{pattern};
