@@ -56,10 +56,14 @@ sub new {
 sub load_module {
     my ( $self, $name, %args ) = @_;
 
+    # A module name with a leading + indicates it's already fully
+    # qualified (i.e., it does not need the Kelp::Module:: prefix).
+    my $prefix = $name =~ s/^\+// ? undef : 'Kelp::Module';
+
     # Make sure the module was not already loaded
     return if $self->loaded_modules->{$name};
 
-    my $class = Plack::Util::load_class( $name, 'Kelp::Module' );
+    my $class = Plack::Util::load_class( $name, $prefix );
     my $module = $self->loaded_modules->{$name} = $class->new( app => $self );
 
     # When loading the Config module itself, we don't have
