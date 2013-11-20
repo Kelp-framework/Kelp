@@ -187,7 +187,10 @@ sub _merge {
     }
     elsif ( ref $a eq 'HASH' ) {
         for my $k ( keys %$b ) {
-            my $s = $k =~ s/^(\+|\-)// ? $1 : '';
+
+            # If the key is an array then look for a merge sigil
+            my $s = ref($b->{$k}) eq 'ARRAY' && $k =~ s/^(\+|\-)// ? $1 : '';
+
             $a->{$k} =
               exists $a->{$k}
               ? _merge( $a->{$k}, $b->{"$s$k"}, $s )
@@ -299,6 +302,24 @@ No sigil will cause the array to be completely replaced:
 =cut
 
 =back
+
+Note that the merge sigils only apply to arrays. All other types will keep the
+sigil in the key name:
+
+    # config.pl
+    {
+        modules      => ["+MyApp::Fully::Qualified::Name"],
+        modules_init => {
+            "+MyApp::Fully::Qualified::Name" => { opt1 => 1, opt2 => 2 }
+        }
+    }
+
+    # development.pl
+    {
+        modules_init => {
+            "+MyApp::Fully::Qualified::Name" => { opt3 => 3 }
+        }
+    }
 
 =back
 

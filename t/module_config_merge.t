@@ -99,6 +99,31 @@ use Kelp::Module::Config;
             { a => { "+b" => [ 2, { bar => 'foo' } ] } },
             { a => { b    => [ 1, { bar => 'foo' }, 2 ] } }
         ],
+
+        # Merging only applies to arrays
+        [ { a => "bar" }, { "+a" => "foo" }, { a => "bar", "+a" => "foo" } ],
+
+        # A real modules initialization test
+        [
+            {
+                modules      => ["+MyApp::Fully::Qualified"],
+                modules_init => {
+                    "+MyApp::Fully::Qualified" => { bar => 1, foo => 'baz' }
+                }
+            },
+            {
+                modules_init => {
+                    "+MyApp::Fully::Qualified" => { coo => 'bah' }
+                }
+            },
+            {
+                modules      => ["+MyApp::Fully::Qualified"],
+                modules_init => {
+                    "+MyApp::Fully::Qualified" => { bar => 1, foo => 'baz', coo => 'bah' }
+                }
+            }
+        ]
+
     );
     _try(@arr);
 }
@@ -133,7 +158,8 @@ use Kelp::Module::Config;
 sub _try {
     for (@_) {
         my ( $a, $b, $c ) = @$_;
-        is_deeply Kelp::Module::Config::_merge( $a, $b ), $c;
+        my $m = Kelp::Module::Config::_merge( $a, $b );
+        is_deeply($m, $c) or diag explain $m;
     }
 }
 

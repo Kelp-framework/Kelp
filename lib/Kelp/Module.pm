@@ -142,7 +142,7 @@ The arguments for all modules are taken from the configuration. If you want to
 pass arguments for your C<Redis> module (example above), you will have to have a
 structure in your config, similar to this:
 
-Example of C<conf/myapp.conf>:
+Example of C<conf/myapp.pl>:
 
     {
         # Load module Redis on start
@@ -158,6 +158,21 @@ Example of C<conf/myapp.conf>:
 
 The hash specified by C<Redis> will be sent as C<%args> in the C<build> method
 of the module.
+
+=head2 Loading modules that live outside of the Kelp::Module namespace
+
+Kelp will automatically prefix all modules with C<Kelp::Module>, so a module name
+C<Redis> should live in C<Kelp::Module::Redis>.
+To use fully qualified modules that live outside of the C<Kelp::Module> namespace,
+prefix the name with a plus sign.
+
+    {
+        # Load a module that lives outside of Kelp::Module
+        modules      => ["+Fully::Qualified::Name"],
+        modules_init => {
+            "+Fully::Qualified::Name" => {...}
+        }
+    };
 
 =head1 METHODS
 
