@@ -655,7 +655,7 @@ begin with `/public`:
 ### Uploading files
 
 File uploads are handled by [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), which inherits Plack::Request
-and has its `uploads|Plack::Request/uploads` property. The uploads propery returns a
+and has its `uploads|Plack::Request/uploads` property. The uploads property returns a
 reference to a hash containing all uploads.
 
 ```perl
@@ -995,14 +995,17 @@ sub check {
 
 - GitHub: https://github.com/naturalist/kelp
 - Mailing list: https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp
+- IRC: \#kelp at irc.perl.org
 
 # AUTHOR
 
-Stefan Geneshky - minimal@cpan.org
+Stefan Geneshky - minimal <at> cpan.org
 
 # CONTRIBUTORS
 
-Gurunandan Bhat - gbhat@pobox.com
+Maurice Aubrey
+David Steinbrunner
+Gurunandan Bhat
 
 # LICENSE
 
