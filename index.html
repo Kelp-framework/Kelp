@@ -40,7 +40,7 @@
 
         <p>First ...</p>
 
-<div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># lib/MyApp.pm</span>
 <span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">parent</span> <span class="s">'Kelp'</span><span class="p">;</span>
 
@@ -61,7 +61,7 @@
 
 <p>Then ...</p>
 
-<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># app.psgi</span>
 <span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
 <span class="nv">$app</span><span class="o">-&gt;</span><span class="n">run</span><span class="p">;</span>
@@ -74,7 +74,7 @@
 
 <p>Or, for quick prototyping use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>:</p>
 
-<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># app.psgi</span>
 <span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Less</span><span class="p">;</span>
 
 <span class="n">get</span> <span class="s">'/hello/?name'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
@@ -212,7 +212,7 @@ running environments, if you name them <em>environment</em><code>.pl</code>. Rep
 To change the running environment, you can specify the app <code>mode</code>, or you can
 set the <code>PLACK_ENV</code> environment variable.</p>
 
-<div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
 </pre></div>
 
 <p>or</p>
@@ -244,7 +244,7 @@ units for your web app.</p>
 <p>This is the <a href="http://search.cpan.org/perldoc?PSGI">PSGI</a> file, of the app, which you will deploy. In it's most basic
 form it should look like this:</p>
 
-<div class="highlight"><pre><span class="k">use</span> <span class="n">lib</span> <span class="s">'../lib'</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="k">use</span> <span class="n">lib</span> <span class="s">'../lib'</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 
 <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">;</span>
@@ -259,7 +259,7 @@ in our example <code>MyApp.pm</code>, initializes any modules and variables that
 app will use. Here is an example that uses <code>Moose</code> to create lazy attributes
 and initialize a database connection:</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="n">parent</span> <span class="n">Kelp</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">Moose</span><span class="p">;</span>
@@ -308,7 +308,7 @@ up to you to use Moose, another object manager, or no object manager at all.
 The above example will be just as successful if you used our own little
 <a href="http://search.cpan.org/perldoc?Kelp::Base">Kelp::Base</a>:</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Base</span> <span class="s">'Kelp'</span><span class="p">;</span>
 
 <span class="n">attr</span> <span class="n">dbi</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
@@ -333,8 +333,8 @@ are assumed to be inside the <a href="#build">"build"</a> method and <code>$r</c
 <p>You can direct HTTP paths to subroutines in your classes or, you can use inline
 code.</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/home"</span><span class="p">,</span> <span class="s">"home"</span> <span class="p">);</span>  <span class="c1"># goes to sub home</span>
-<span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/legal"</span><span class="p">,</span> <span class="s">"legal#view"</span> <span class="p">);</span> <span class="c1"># goes to MyApp::Legal::view</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/home"</span><span class="p">,</span> <span class="s">"home"</span> <span class="p">);</span>  <span class="c1"># goes to sub home</span>
+<span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/legal"</span><span class="p">,</span> <span class="s">"Legal::view"</span> <span class="p">);</span> <span class="c1"># goes to MyApp::Legal::view</span>
 <span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/about"</span><span class="p">,</span> <span class="k">sub </span><span class="p">{</span> <span class="s">"Content for about"</span> <span class="p">});</span> <span class="c1"># inline</span>
 </pre></div>
 
@@ -343,7 +343,7 @@ code.</p>
 
 <p>Make a route only catch a specific HTTP method:</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="p">[</span> <span class="n">POST</span> <span class="o">=&gt;</span> <span class="s">'/update'</span> <span class="p">],</span> <span class="s">"update_user"</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="p">[</span> <span class="n">POST</span> <span class="o">=&gt;</span> <span class="s">'/update'</span> <span class="p">],</span> <span class="s">"update_user"</span> <span class="p">);</span>
 </pre></div>
 
 <h3>
@@ -356,7 +356,7 @@ ever want to maintain your code.</p>
 <h4>
 <a name="explicit" class="anchor" href="#explicit"><span class="octicon octicon-link"></span></a>Explicit</h4>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/update/:id"</span><span class="p">,</span> <span class="s">"update"</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/update/:id"</span><span class="p">,</span> <span class="s">"update"</span> <span class="p">);</span>
 
 <span class="c1"># Later</span>
 <span class="k">sub </span><span class="nf">update</span> <span class="p">{</span>
@@ -368,7 +368,7 @@ ever want to maintain your code.</p>
 <h4>
 <a name="optional" class="anchor" href="#optional"><span class="octicon octicon-link"></span></a>Optional</h4>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/person/?name"</span><span class="p">,</span> <span class="k">sub </span><span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/person/?name"</span><span class="p">,</span> <span class="k">sub </span><span class="p">{</span>
     <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$name</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
     <span class="k">return</span> <span class="s">"I am "</span> <span class="o">.</span> <span class="nv">$name</span> <span class="sr">//</span> <span class="s">"nobody"</span><span class="p">;</span>
 <span class="p">});</span>
@@ -379,7 +379,7 @@ ever want to maintain your code.</p>
 <h4>
 <a name="wildcards" class="anchor" href="#wildcards"><span class="octicon octicon-link"></span></a>Wildcards</h4>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/*article/:id'</span><span class="p">,</span> <span class="s">'articles#view'</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/*article/:id'</span><span class="p">,</span> <span class="s">'Articles::view'</span> <span class="p">);</span>
 </pre></div>
 
 <p>This will handle <code>/bar/foo/baz/500</code> and send it to <code>MyApp::Articles::view</code>
@@ -390,9 +390,9 @@ with parameters <code>$article</code> equal to <code>bar/foo/baz</code> and <cod
 
 <p>Paths' named placeholders can be restricted by providing regular expressions.</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/user/:id'</span><span class="p">,</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/user/:id'</span><span class="p">,</span> <span class="p">{</span>
     <span class="n">check</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="n">id</span> <span class="o">=&gt;</span> <span class="s">'\d+'</span> <span class="p">},</span>
-    <span class="n">to</span>    <span class="o">=&gt;</span> <span class="s">"users#get"</span>
+    <span class="n">to</span>    <span class="o">=&gt;</span> <span class="s">"Users::get"</span>
 <span class="p">});</span>
 
 <span class="c1"># Matches /user/1000, but not /user/abc</span>
@@ -405,7 +405,7 @@ with parameters <code>$article</code> equal to <code>bar/foo/baz</code> and <cod
 If a default value is provided for any of them, it will be used in case the
 placeholder value is missing.</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/:id/?other'</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="n">other</span> <span class="o">=&gt;</span> <span class="s">'info'</span> <span class="p">}</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/:id/?other'</span><span class="p">,</span> <span class="n">defaults</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="n">other</span> <span class="o">=&gt;</span> <span class="s">'info'</span> <span class="p">}</span> <span class="p">);</span>
 
 <span class="c1"># GET /100;</span>
 <span class="c1"># { id =&gt; 100, other =&gt; 'info' }</span>
@@ -420,7 +420,7 @@ placeholder value is missing.</p>
 <p>A <em>bridge</em> is a route that has to return a true value in order for the next
 route in line to be processed.</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/users'</span><span class="p">,</span> <span class="p">{</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="s">'Users::auth'</span><span class="p">,</span> <span class="n">bridge</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/users'</span><span class="p">,</span> <span class="p">{</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="s">'Users::auth'</span><span class="p">,</span> <span class="n">bridge</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
 <span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">'/users/:action'</span> <span class="o">=&gt;</span> <span class="s">'Users::dispatch'</span> <span class="p">);</span>
 </pre></div>
 
@@ -432,7 +432,7 @@ route in line to be processed.</p>
 <p>Each path can be given a name and later a URL can be built using that name and
 the necessary arguments.</p>
 
-<div class="highlight"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/update/:id"</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'update'</span><span class="p">,</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="s">'user#update'</span> <span class="p">}</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$r</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span> <span class="s">"/update/:id"</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'update'</span><span class="p">,</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="s">'User::update'</span> <span class="p">}</span> <span class="p">);</span>
 
 <span class="c1"># Later</span>
 
@@ -447,8 +447,8 @@ could use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>. In
 Look up the POD for <code>Kelp::Less</code> for many examples, but to get you started off,
 here is a quick one:</p>
 
-<div class="highlight"><pre><span class="c1"># app.psgi</span>
-<span class="k">use</span> <span class="nn">Kelp::</span><span class="n">:Less</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># app.psgi</span>
+<span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Less</span><span class="p">;</span>
 
 <span class="n">get</span> <span class="s">'/api/:user/?action'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
     <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$user</span><span class="p">,</span> <span class="nv">$action</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
@@ -480,7 +480,7 @@ you. This way you can load different middleware for each running mode, e.g.
 <p>Add middleware names to the <code>middleware</code> array in your configuration file and
 the corresponding initializing arguments in the <code>middleware_init</code> hash:</p>
 
-<div class="highlight"><pre><span class="c1"># conf/development.pl</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># conf/development.pl</span>
 <span class="p">{</span>
     <span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Session Debug/</span><span class="p">],</span>
     <span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
@@ -495,7 +495,7 @@ array.</p>
 <h3>
 <a name="in-apppsgi" class="anchor" href="#in-apppsgi"><span class="octicon octicon-link"></span></a>In <code>app.psgi</code>:</h3>
 
-<div class="highlight"><pre><span class="c1"># app.psgi</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># app.psgi</span>
 <span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Plack::</span><span class="n">Builder</span><span class="p">;</span>
 
@@ -513,7 +513,7 @@ array.</p>
 <p>Make sure you call <code>SUPER</code> first, and then wrap new middleware around the
 returned app.</p>
 
-<div class="highlight"><pre><span class="c1"># lib/MyApp.pm</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># lib/MyApp.pm</span>
 <span class="k">sub </span><span class="nf">run</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="nn">SUPER::</span><span class="n">run</span><span class="p">(</span><span class="nv">@_</span><span class="p">);</span>
@@ -543,7 +543,7 @@ analyzing the response. Therefore, each test usually begins with the
 It sends the request to the web app and saves the response as an
 <a href="http://search.cpan.org/perldoc?HTTP::Response">HTTP::Response</a> object.</p>
 
-<div class="highlight"><pre><span class="c1"># file t/test.t</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># file t/test.t</span>
 <span class="k">use</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Test</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">Test::</span><span class="n">More</span><span class="p">;</span>
@@ -606,7 +606,7 @@ inside a route definition.</p>
 return a simple scalar value or a reference to a hash, array or anything that
 can be converted to JSON.</p>
 
-<div class="highlight"><pre><span class="c1"># Content-type automatically set to "text/html"</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># Content-type automatically set to "text/html"</span>
 <span class="k">sub </span><span class="nf">text_route</span> <span class="p">{</span>
     <span class="k">return</span> <span class="s">"There, there ..."</span><span class="p">;</span>
 <span class="p">}</span>
@@ -620,26 +620,26 @@ can be converted to JSON.</p>
 <h3>
 <a name="rendering-text" class="anchor" href="#rendering-text"><span class="octicon octicon-link"></span></a>Rendering text</h3>
 
-<div class="highlight"><pre><span class="c1"># Render simple text</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># Render simple text</span>
 <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">text</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">"It works!"</span><span class="p">);</span>
 </pre></div>
 
 <h3>
 <a name="rendering-html" class="anchor" href="#rendering-html"><span class="octicon octicon-link"></span></a>Rendering HTML</h3>
 
-<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">html</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">"&lt;h1&gt;It works!&lt;/h1&gt;"</span><span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">html</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span><span class="s">"&lt;h1&gt;It works!&lt;/h1&gt;"</span><span class="p">);</span>
 </pre></div>
 
 <h3>
 <a name="custom-content-type" class="anchor" href="#custom-content-type"><span class="octicon octicon-link"></span></a>Custom content type</h3>
 
-<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">set_content_type</span><span class="p">(</span><span class="s">'image/png'</span><span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">set_content_type</span><span class="p">(</span><span class="s">'image/png'</span><span class="p">);</span>
 </pre></div>
 
 <h3>
 <a name="return-404-or-500-errors" class="anchor" href="#return-404-or-500-errors"><span class="octicon octicon-link"></span></a>Return 404 or 500 errors</h3>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">(</span><span class="nv">$missing</span><span class="p">)</span> <span class="p">{</span>
         <span class="k">return</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">render_404</span><span class="p">;</span>
@@ -653,7 +653,7 @@ can be converted to JSON.</p>
 <h3>
 <a name="templates" class="anchor" href="#templates"><span class="octicon octicon-link"></span></a>Templates</h3>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">hello</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">hello</span> <span class="p">{</span>
     <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$name</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">template</span><span class="p">(</span> <span class="s">'hello.tt'</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="nv">$name</span> <span class="p">}</span> <span class="p">);</span>
 <span class="p">}</span>
@@ -663,7 +663,7 @@ can be converted to JSON.</p>
 content-type to <code>text/html</code>. To set a different content-type, use
 <code>set_content_type</code> or any of its aliases:</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">hello_txt</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">hello_txt</span> <span class="p">{</span>
     <span class="k">my</span> <span class="p">(</span> <span class="nv">$self</span><span class="p">,</span> <span class="nv">$name</span> <span class="p">)</span> <span class="o">=</span> <span class="nv">@_</span><span class="p">;</span>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">text</span><span class="o">-&gt;</span><span class="n">template</span><span class="p">(</span> <span class="s">'hello_txt.tt'</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="nv">$name</span> <span class="p">}</span> <span class="p">);</span>
 <span class="p">}</span>
@@ -672,7 +672,7 @@ content-type to <code>text/html</code>. To set a different content-type, use
 <h3>
 <a name="headers" class="anchor" href="#headers"><span class="octicon octicon-link"></span></a>Headers</h3>
 
-<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">set_header</span><span class="p">(</span> <span class="s">"X-Framework"</span><span class="p">,</span> <span class="s">"Kelp"</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span> <span class="p">{</span> <span class="n">success</span> <span class="o">=&gt;</span> <span class="o">\</span><span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">set_header</span><span class="p">(</span> <span class="s">"X-Framework"</span><span class="p">,</span> <span class="s">"Kelp"</span> <span class="p">)</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span> <span class="p">{</span> <span class="n">success</span> <span class="o">=&gt;</span> <span class="o">\</span><span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
 </pre></div>
 
 <h3>
@@ -683,7 +683,7 @@ middleware that comes with Plack. Here is an example configuration that serves
 files in your <code>public</code> folder (under the Kelp root folder) from URLs that
 begin with <code>/public</code>:</p>
 
-<div class="highlight"><pre><span class="c1"># conf/config.pl</span>
+<div class="highlight highlight-perl"><pre><span class="c1"># conf/config.pl</span>
 <span class="p">{</span>
     <span class="n">middleware</span>      <span class="o">=&gt;</span> <span class="p">[</span><span class="sx">qw/Static/</span><span class="p">],</span>
     <span class="n">middleware_init</span> <span class="o">=&gt;</span> <span class="p">{</span>
@@ -699,10 +699,10 @@ begin with <code>/public</code>:</p>
 <a name="uploading-files" class="anchor" href="#uploading-files"><span class="octicon octicon-link"></span></a>Uploading files</h3>
 
 <p>File uploads are handled by <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, which inherits Plack::Request
-and has its <code>uploads|Plack::Request/uploads</code> property. The uploads propery returns a
+and has its <code>uploads|Plack::Request/uploads</code> property. The uploads property returns a
 reference to a hash containing all uploads.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">upload</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">upload</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">my</span> <span class="nv">$uploads</span>  <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">uploads</span><span class="p">;</span>
 
@@ -713,7 +713,7 @@ reference to a hash containing all uploads.</p>
 
 <p>For <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>, then you can use the <code>req</code> reserved word:</p>
 
-<div class="highlight"><pre><span class="n">get</span> <span class="s">'/upload'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="n">get</span> <span class="s">'/upload'</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
     <span class="k">my</span> <span class="nv">$uploads</span> <span class="o">=</span> <span class="n">req</span><span class="o">-&gt;</span><span class="n">uploads</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
@@ -723,7 +723,7 @@ reference to a hash containing all uploads.</p>
 
 <p>To send a delayed response, have your route return a subroutine.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">delayed</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">delayed</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">return</span> <span class="k">sub </span><span class="p">{</span>
         <span class="k">my</span> <span class="nv">$responder</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
@@ -745,7 +745,7 @@ of the <code>Kelp::Module</code> namespace. Modules' job is to initialize and re
 methods into the web application class. The following is the full code of the
 <a href="http://search.cpan.org/perldoc?Kelp::Module::JSON">Kelp::Module::JSON</a> for example:</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="nn">Kelp::Module::</span><span class="n">JSON</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="nn">Kelp::Module::</span><span class="n">JSON</span><span class="p">;</span>
 
 <span class="k">use</span> <span class="nn">Kelp::</span><span class="n">Base</span> <span class="s">'Kelp::Module'</span><span class="p">;</span>
 <span class="k">use</span> <span class="n">JSON</span><span class="p">;</span>
@@ -793,7 +793,7 @@ examples.</p>
 
 <p>Gets the current hostname.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">hostname</span> <span class="ow">eq</span> <span class="s">'prod-host'</span> <span class="p">)</span> <span class="p">{</span>
         <span class="o">...</span>
@@ -808,7 +808,7 @@ examples.</p>
 configuration file to merge into the main configuration. See
 <a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information.</p>
 
-<div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">mode</span> <span class="o">=&gt;</span> <span class="s">'development'</span> <span class="p">);</span>
 <span class="c1"># conf/config.pl and conf/development.pl are merged with priority</span>
 <span class="c1"># given to the second one.</span>
 </pre></div>
@@ -828,7 +828,7 @@ and for an example of how to create and use other config modules.</p>
 if you have these two modules loaded: Template and JSON, then a dump of
 the <code>loaded_modules</code> hash will look like this:</p>
 
-<div class="highlight"><pre><span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="p">{</span>
     <span class="n">Template</span> <span class="o">=&gt;</span> <span class="nn">Kelp::Module::</span><span class="n">Template</span><span class="o">=</span><span class="n">HASH</span><span class="p">(</span><span class="mh">0x208f6e8</span><span class="p">),</span>
     <span class="n">JSON</span>     <span class="o">=&gt;</span> <span class="nn">Kelp::Module::</span><span class="n">JSON</span><span class="o">=</span><span class="n">HASH</span><span class="p">(</span><span class="mh">0x209d454</span><span class="p">)</span>
 <span class="p">}</span>
@@ -850,7 +850,7 @@ additional functionality.</p>
 <p>Gets or sets the name of the application. If not set, the name of the main
 class will be used.</p>
 
-<div class="highlight"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'Twittar'</span> <span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="k">my</span> <span class="nv">$app</span> <span class="o">=</span> <span class="n">MyApp</span><span class="o">-&gt;</span><span class="k">new</span><span class="p">(</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'Twittar'</span> <span class="p">);</span>
 </pre></div>
 
 <h2>
@@ -872,7 +872,7 @@ The <code>KELP_LONG_ERROR</code> environment variable can also set this attribut
 <p>This attribute only makes sense if called within a route definition. It will
 contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a> instance.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">req</span><span class="o">-&gt;</span><span class="n">is_json</span> <span class="p">)</span> <span class="p">{</span>
         <span class="o">...</span>
@@ -886,7 +886,7 @@ contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp:
 <p>This attribute only makes sense if called within a route definition. It will
 contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp::Response">Kelp::Response</a> instance.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">res</span><span class="o">-&gt;</span><span class="n">json</span><span class="o">-&gt;</span><span class="n">render</span><span class="p">(</span> <span class="p">{</span> <span class="n">success</span> <span class="o">=&gt;</span> <span class="mi">1</span> <span class="p">}</span> <span class="p">);</span>
 <span class="p">}</span>
@@ -902,7 +902,7 @@ contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp:
 constructor, so it can be overridden to add route destinations and
 initializations.</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 
 <span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
@@ -927,7 +927,7 @@ initializations.</p>
 <p>Used to load a module. All modules must be under the <code>Kelp::Module::</code>
 namespace.</p>
 
-<div class="highlight"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">load_module</span><span class="p">(</span><span class="s">"Redis"</span><span class="p">,</span> <span class="n">server</span> <span class="o">=&gt;</span> <span class="s">'127.0.0.1'</span><span class="p">);</span>
+<div class="highlight highlight-perl"><pre><span class="nv">$self</span><span class="o">-&gt;</span><span class="n">load_module</span><span class="p">(</span><span class="s">"Redis"</span><span class="p">,</span> <span class="n">server</span> <span class="o">=&gt;</span> <span class="s">'127.0.0.1'</span><span class="p">);</span>
 <span class="c1"># Will look for and load Kelp::Module::Redis</span>
 </pre></div>
 
@@ -943,7 +943,7 @@ See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for m
 returns an instance of <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, initialized with the current request's
 environment. You can override this method to use a custom request module.</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 <span class="k">use</span> <span class="nn">MyApp::</span><span class="n">Request</span><span class="p">;</span>
 
 <span class="k">sub </span><span class="nf">request</span> <span class="p">{</span>
@@ -960,7 +960,7 @@ environment. You can override this method to use a custom request module.</p>
 <p>Override this method, to modify the response object just before it gets
 finalized.</p>
 
-<div class="highlight"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
+<div class="highlight highlight-perl"><pre><span class="nb">package</span> <span class="n">MyApp</span><span class="p">;</span>
 
 <span class="k">sub </span><span class="nf">before_finalize</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
@@ -991,7 +991,7 @@ include middleware. See <a href="#Adding%20middleware">"Adding middleware"</a> f
 
 <p>A shortcut to <code>$self-&gt;req-&gt;param</code>:</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">some_route</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="k">if</span> <span class="p">(</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">param</span><span class="p">(</span><span class="s">'age'</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">18</span> <span class="p">)</span> <span class="p">{</span>
         <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">can_watch_south_path</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
@@ -1029,7 +1029,7 @@ See <a href="http://search.cpan.org/perldoc?Kelp::Request#named">"named" in Kelp
 <p>A safe shortcut to <code>$self-&gt;routes-&gt;url</code>. Builds a URL from path and
 arguments.</p>
 
-<div class="highlight"><pre><span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
+<div class="highlight highlight-perl"><pre><span class="k">sub </span><span class="nf">build</span> <span class="p">{</span>
     <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>
     <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">routes</span><span class="o">-&gt;</span><span class="n">add</span><span class="p">(</span><span class="s">"/:name/:id"</span><span class="p">,</span> <span class="p">{</span> <span class="n">name</span> <span class="o">=&gt;</span> <span class="s">'name'</span><span class="p">,</span> <span class="n">to</span> <span class="o">=&gt;</span> <span class="k">sub </span><span class="p">{</span>
         <span class="o">...</span>
@@ -1051,6 +1051,7 @@ arguments.</p>
 </li>
 <li>Mailing list: <a href="https://groups.google.com/forum/?fromgroups%5C#!forum/perl-kelp">https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp</a>
 </li>
+<li>IRC: #kelp at irc.perl.org</li>
 </ul>
       </section>
 
