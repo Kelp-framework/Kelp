@@ -392,6 +392,17 @@ Designing your own 500 page is also possible. All you need to do is add file 500
 views/error. Keep in mind that it will only show in C<deployment>. In any other mode,
 this method will display the optional error, or the stock error message.
 
+=head2 redirect_to
+
+Redirects the client to a named route or to a given url. In case the route is passed by
+name, a hash reference with the needed arguments can be passed after the route's name.
+As a third optional argument, you can enter the desired response code:
+
+ $self->redirect_to( '/example' );
+ $self->redirect_to( 'catalogue' );
+ $self->redirect_to( 'catalogue', { id => 243 });
+ $self->redirect_to( 'other', {}, 303 );
+
 =head2 template
 
 This method renders a template. The template should be previously configured by
