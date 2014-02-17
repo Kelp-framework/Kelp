@@ -1254,8 +1254,6 @@ arguments.
 
 =item * Mailing list: https://groups.google.com/forum/?fromgroups#!forum/perl-kelp
 
-=item * IRC: #kelp at irc.perl.org
-
 =back
 
 =head1 AUTHOR
@@ -1264,8 +1262,12 @@ Stefan Geneshky - minimal <at> cpan.org
 
 =head1 CONTRIBUTORS
 
+Julio Fraire
+
 Maurice Aubrey
+
 David Steinbrunner
+
 Gurunandan Bhat
 
 =head1 LICENSE
