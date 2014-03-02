@@ -34,9 +34,11 @@ sub render {
 sub _rename {
     my ( $self, $name ) = @_;
     return unless $name;
-    return !ref($name) && $name !~ /\.(.+)$/
-      ? $name . '.' . $self->ext
-      : $name;
+
+    return $name if ref($name) || $name =~ /\.(.+)$/;
+
+    my $ext = $self->ext;
+    return (defined $ext && length $ext) ? "$name.$ext" : $name;
 }
 
 1;
