@@ -1,3 +1,9 @@
+2014-03-02: Version 0.4570
+            Allow attributes to set undef values
+            do not append default template extension if ext() is undef
+            Added POD
+            Added tests
+
 2013-11-19: Version 0.4560
             Allow for fully qualified Kelp module names
             Config merge sigils will now only work for ARRAY
