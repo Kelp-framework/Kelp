@@ -995,7 +995,6 @@ sub check {
 
 - GitHub: https://github.com/naturalist/kelp
 - Mailing list: https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp
-- IRC: \#kelp at irc.perl.org
 
 # AUTHOR
 
@@ -1003,8 +1002,12 @@ Stefan Geneshky - minimal <at> cpan.org
 
 # CONTRIBUTORS
 
+Julio Fraire
+
 Maurice Aubrey
+
 David Steinbrunner
+
 Gurunandan Bhat
 
 # LICENSE
