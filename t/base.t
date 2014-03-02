@@ -11,6 +11,7 @@ attr bat => sub {
 };
 attr color => sub { $_[0]->_build_color };
 attr -ro => 9;
+attr un => sub { undef };
 
 sub _build_color { "red" }
 
@@ -36,12 +37,19 @@ use Test::More;
 my $o = B1->new;
 
 isa_ok $o, 'B1';
-can_ok $o, qw/bar foo baz bat ro/;
+can_ok $o, qw/bar foo baz bat ro un/;
 is $o->bar, 1;
 is_deeply $o->foo, { a => 1 };
 is_deeply $o->baz, [1,2,3,4];
 is $o->bat, 2;
 is $o->bat, 2;
+
+# undef
+is $o->un, undef;
+$o->un(1);
+is $o->un, 1;
+$o->un(undef);
+is $o->un, undef;
 
 $o->bar(3);
 is $o->bar, 3;

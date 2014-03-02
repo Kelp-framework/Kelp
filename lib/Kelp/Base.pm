@@ -49,7 +49,7 @@ sub attr {
     my $readonly = $name =~ s/^\-//;
 
     *{"${class}::$name"} = sub {
-        if ( defined $_[1] && !$readonly ) {
+        if ( @_ > 1 && !$readonly ) {
             $_[0]->{$name} = $_[1];
         }
         return $_[0]->{$name} if exists $_[0]->{$name};
