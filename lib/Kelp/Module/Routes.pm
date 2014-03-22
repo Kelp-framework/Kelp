@@ -1,13 +1,18 @@
 package Kelp::Module::Routes;
 
+use strict;
+use warnings;
+use Plack::Util ();
 use Kelp::Base 'Kelp::Module';
-use Kelp::Routes;
 
 sub build {
     my ( $self, %args ) = @_;
 
-    # Create a Kelp::Routes object
-    my $r = Kelp::Routes->new( %args );
+    my $module = $args{module} // 'Kelp::Routes';
+
+    # Create a route object
+    my $class = Plack::Util::load_class( $module );
+    my $r = $class->new( %args );
 
     # Register two methods:
     # * routes - contains the routes instance

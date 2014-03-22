@@ -6,6 +6,20 @@ use v5.10;
 use Test::More;
 use Kelp::Routes::Pattern;
 
+# No placeholders
+_match(
+    '/bar',
+    yes => {
+        '/bar'  => {},
+        '/bar/' => {},
+    },
+    par => {
+        '/bar'  => [],
+        '/bar/' => [],
+    },
+);
+
+
 _match(
     '/:a/?b',
     yes => {
@@ -254,11 +268,11 @@ sub _match {
         for my $path (@arr) {
             ok $p->match($path), "match: $path";
             if ( ref $yes eq 'HASH' ) {
-                is_deeply $yes->{$path}, $p->named, "$path placeholders ok"
+                is_deeply $p->named, $yes->{$path}, "$path placeholders ok"
                   or diag explain $p->named;
             }
             if ( $par && $par->{$path} ) {
-                is_deeply $par->{$path}, $p->param, "$path param ok"
+                is_deeply $p->param, $par->{$path}, "$path param ok"
                   or diag caller;
             }
         }
