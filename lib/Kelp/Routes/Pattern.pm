@@ -96,6 +96,8 @@ sub match {
     return 0 if ( $self->via && $self->via ne ( $method // '' ) );
     return 0 unless my @matched = $path =~ $self->regex;
 
+    @matched = () unless $#+; # were there any captures? see perlvar @+
+
     # Initialize the named parameters hash and its default values
     my %named = map { $_ => $+{$_} } keys %+;
     for ( keys %{ $self->defaults } ) {
