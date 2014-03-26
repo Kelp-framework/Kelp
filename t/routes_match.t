@@ -81,17 +81,17 @@ my $r = Kelp::Routes->new;
     $r->clear;
     $r->add('/a', 'a');
     my $m = $r->match('/a');
-    is_deeply $m, $r->cache->{'/a:'};
+    is_deeply $m, $r->cache->get('/a:');
 
     $m = $r->match('/a', 'POST');
-    is_deeply $m, $r->cache->{'/a:POST'};
+    is_deeply $m, $r->cache->get('/a:POST');
 
     $r->add('/a/b', { to => 'ab', bridge => 1 });
     $m = $r->match('/a/b');
-    is_deeply $m, $r->cache->{'/a/b:'};
+    is_deeply $m, $r->cache->get('/a/b:');
     $r->add('/a/b/c', 'abc');
     my $n = $r->match('/a/b/c');
-    is_deeply $n, $r->cache->{'/a/b/c:'};
+    is_deeply $n, $r->cache->get('/a/b/c:');
 }
 
 done_testing;

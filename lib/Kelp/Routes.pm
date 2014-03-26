@@ -9,8 +9,18 @@ use Class::Inspector;
 
 attr base   => '';
 attr routes => sub { [] };
-attr cache  => sub { {} };
 attr names  => sub { {} };
+
+# Cache
+attr _CACHE => sub { {} };
+attr cache => sub {
+    my $self = shift;
+    Plack::Util::inline_object(
+        get   => sub { $self->_CACHE->{ $_[0] } },
+        set   => sub { $self->_CACHE->{ $_[0] } = $_[1] },
+        clear => sub { $self->_CACHE( {} ) }
+    );
+};
 
 sub add {
     my ( $self, $pattern, $descr ) = @_;
@@ -19,8 +29,8 @@ sub add {
 
 sub clear {
     $_[0]->routes( [] );
-    $_[0]->cache(  {} );
-    $_[0]->names(  {} );
+    $_[0]->cache->clear;
+    $_[0]->names( {} );
 }
 
 sub _camelize {
@@ -141,10 +151,7 @@ sub match {
     # return the array of routes that matched the previous time.
     # If not found, then return all routes.
     my $key = $path . ':' . ( $method // '' );
-    my $routes =
-      exists $self->cache->{$key}
-      ? $self->cache->{$key}
-      : $self->routes;
+    my $routes = $self->cache->get($key) // $self->routes;
 
     # Look through all routes, grep the ones that match
     # and sort them by 'bridge' and 'pattern'
@@ -152,7 +159,9 @@ sub match {
       sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
       grep { $_->match( $path, $method ) } @$routes;
 
-    return $self->cache->{$key} = \@processed;
+    my $value = \@processed;
+    $self->cache->set( $key, $value );
+    return $value;
 }
 
 1;
@@ -451,6 +460,33 @@ wrap it in a local sub:
     ...
     sub outside {
         return Outside::Module::route;
+    }
+
+=head2 cache
+
+Routes will be cached in memory, so repeating requests will be dispatched much
+faster. The C<cache> attribute can optionally be initialized with an instance of
+a caching module with interface similar to L<CHI> and L<Cache>.
+The module interface should at the very least provide the following methods:
+
+=head3 get($key) - retrieve a key from the cache
+
+=head3 set($key, $value, $expiration) - set a key in the cache
+
+=head3 clear() - clear all cache
+
+The caching module should be initialized in the config file:
+
+    # config.pl
+    {
+        modules_init => {
+            Routes => {
+                cache => Cache::Memory->new(
+                    namespace       => 'MyApp',
+                    default_expires => '3600 sec'
+                );
+            }
+        }
     }
 
 =head1 SUBROUTINES
