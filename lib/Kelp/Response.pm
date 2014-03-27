@@ -82,10 +82,14 @@ sub render {
     if ( $self->content_type eq 'application/json' ) {
         confess "No JSON decoder" unless $self->app->can('json');
         confess "Data must be a reference" unless ref($body);
-        $body = $self->app->json->encode($body);
+        my $json = $self->app->json;
+        $body = $json->encode($body);
+        $body = encode('UTF-8', $body) unless $json->property('utf8');
+        $self->body( $body );
+    } else {
+        $self->body( encode( $self->app->charset, $body ) );
     }
 
-    $self->body( encode( $self->app->charset, $body ) );
     $self->rendered(1);
     return $self;
 }
