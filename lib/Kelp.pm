@@ -12,7 +12,7 @@ use Plack::Util;
 use Kelp::Request;
 use Kelp::Response;
 
-our $VERSION = 0.4570;
+our $VERSION = 0.4601;
 
 # Basic attributes
 attr -host => hostname;
@@ -1261,6 +1261,8 @@ arguments.
 Stefan Geneshky - minimal <at> cpan.org
 
 =head1 CONTRIBUTORS
+
+Ruslan Zakirov
 
 Julio Fraire
 

@@ -1,3 +1,8 @@
+2014-03-27: Version 0.4601
+            If no placeholders in route, param array should be empty (Maurice Aubrey)
+            Move route cache to a CHI-like interface, in order to allow for custom cache modules
+            Don't double encode JSON repsonse (Ruslan Zakirov)
+
 2014-03-02: Version 0.4570
             Allow attributes to set undef values
             do not append default template extension if ext() is undef
