@@ -4,6 +4,7 @@ use Kelp;
 use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
+use utf8;
 
 my $app = Kelp->new( mode => 'test' );
 my $t = Kelp::Test->new( app => $app );
@@ -86,5 +87,13 @@ $t->request( POST '/param/1', [a => "bar", b => "foo"])
 $t->request( POST '/param/2', [a => "bar", b => "foo"])
   ->code_is(200)
   ->json_cmp({a => "bar", b => "foo"}, "POST array context");
+
+# UTF8
+my $utf_hash = {
+    english => 'Well done',
+    russian => 'Молодец'
+};
+$app->add_route( '/json/utf', sub { $utf_hash } );
+$t->request( GET '/json/utf' )->json_cmp( $utf_hash );
 
 done_testing;
