@@ -7,9 +7,10 @@ use Kelp::Routes::Pattern;
 use Plack::Util;
 use Class::Inspector;
 
-attr base   => '';
-attr routes => sub { [] };
-attr names  => sub { {} };
+attr base    => '';
+attr routes  => sub { [] };
+attr names   => sub { {} };
+attr rebless => 0;
 
 # Cache
 attr _CACHE => sub { {} };
@@ -162,6 +163,44 @@ sub match {
     my $value = \@processed;
     $self->cache->set( $key, $value );
     return $value;
+}
+
+sub dispatch {
+    my ( $self, $app, $route ) = @_;
+    $app   || die "Application instance required";
+    $route || die "No route pattern instance supplied";
+
+    # Shortcuts
+    my $req = $app->req;
+    my $to  = $route->to;
+
+    # Destination must be either a scalar, or a code reference
+    if ( !$to || ref $to && ref $to ne 'CODE' ) {
+        die 'Invalid destination for ' . $req->path;
+    }
+
+    # If the destination is not a code reference, then we assume it's
+    # a fully qualified function name, so we find its reference
+    unless ( ref $to ) {
+
+        # Check if the destination function exists
+        unless ( exists &$to ) {
+            die sprintf( 'Route not found %s for %s', $to, $req->path );
+        }
+
+        # If rebless is set, we rebless the application instance into the
+        # new class and pass it into the code
+        if ( $self->rebless && $to =~ /^(.+)::(\w+)$/ ) {
+            my ( $controller, $action ) = ( $1, $2 );
+            bless \%$app, $controller;
+        }
+
+        # Move to reference
+        $to = \&{$to};
+    }
+
+    $req->named( $route->named );
+    return $to->( $app, @{ $route->param } );
 }
 
 1;
