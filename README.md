@@ -416,9 +416,7 @@ sub action {
 
 Turning on re-blessing is best done in the config of [Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes). Once
 turned on, the route dispatcher will re-bless the application instance into the
-controller class, allowing for more traditional OO development. Note, that
-reblessing \*may\* entail a performance penalty. Our benchmarks show that they
-are quite insignificant.
+controller class, allowing for more traditional OO development.
 
 With re-blessing turned on:
 
