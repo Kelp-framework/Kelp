@@ -79,8 +79,8 @@ into your current one for testing and debugging purposes.
 file, screen, or anything supported by Log::Dispatcher.
 - __Powerful Rendering__. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.
-- __JSON encoder/decoder__. If you're serious about your back-end code. Kelp comes
-with JSON, but you can easily plug in JSON::XS or any decoder of your choice.
+- __JSON encoder/decoder__. Kelp comes with JSON, but you can easily plug in JSON::XS
+or any decoder of your choice.
 - __Extendable Core__. Kelp uses pluggable modules for everything. This allows
 anyone to add a module for a custom interface. Writing Kelp modules is a
 pleasant and fulfilling activity.
@@ -395,6 +395,45 @@ $r->add( "/update/:id", { name => 'update', to => 'User::update' } );
 
 my $url = $self->route->url('update', id => 1000); # /update/1000
 ```
+
+### Reblessing the app into the controller class
+
+With version 0.9001, Kelp introduces an optional re-blessing of the application
+instance into the controller class. By default, this feature is turned off,
+so each controller method will, by default, receive an instance of the main app.
+
+Default behavior:
+
+```perl
+# lib/MyApp/Bar.pm
+package MyApp::Bar;
+
+sub action {
+    my $self = shift;    # Default: $self will be an instance of MyApp
+    ...
+}
+```
+
+Turning on re-blessing is best done in the config of [Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes). Once
+turned on, the route dispatcher will re-bless the application instance into the
+controller class, allowing for more traditional OO development. Note, that
+reblessing \*may\* entail a performance penalty. Our benchmarks show that they
+are quite insignificant.
+
+With re-blessing turned on:
+
+```perl
+# lib/MyApp/Bar.pm
+package MyApp::Bar;
+use parent 'MyApp';
+
+sub action {
+    my $self = shift;  # Reblessed: $self will be an instance of MyApp::Bar
+    ...
+}
+```
+
+To find out how to turn on re-blessing, see ["rebless" in Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes#rebless).
 
 ## Quick development using Kelp::Less
 
@@ -1001,6 +1040,8 @@ sub check {
 Stefan Geneshky - minimal <at> cpan.org
 
 # CONTRIBUTORS
+
+Ruslan Zakirov
 
 Julio Fraire
 

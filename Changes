@@ -1,3 +1,6 @@
+2014-04-03: Version 0.9001
+            Allow for reblessing the app instance into the controller class
+
 2014-03-31: Version 0.4602
             Replace $json->property with $json->get_utf8 in order to maintain compatibility across different JSON implementations
 
