@@ -116,8 +116,8 @@ file, screen, or anything supported by Log::Dispatcher.</li>
 <strong>Powerful Rendering</strong>. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.</li>
 <li>
-<strong>JSON encoder/decoder</strong>. If you're serious about your back-end code. Kelp comes
-with JSON, but you can easily plug in JSON::XS or any decoder of your choice.</li>
+<strong>JSON encoder/decoder</strong>. Kelp comes with JSON, but you can easily plug in JSON::XS
+or any decoder of your choice.</li>
 <li>
 <strong>Extendable Core</strong>. Kelp uses pluggable modules for everything. This allows
 anyone to add a module for a custom interface. Writing Kelp modules is a
@@ -438,6 +438,44 @@ the necessary arguments.</p>
 
 <span class="k">my</span> <span class="nv">$url</span> <span class="o">=</span> <span class="nv">$self</span><span class="o">-&gt;</span><span class="n">route</span><span class="o">-&gt;</span><span class="n">url</span><span class="p">(</span><span class="s">'update'</span><span class="p">,</span> <span class="n">id</span> <span class="o">=&gt;</span> <span class="mi">1000</span><span class="p">);</span> <span class="c1"># /update/1000</span>
 </pre></div>
+
+<h3>
+<a name="reblessing-the-app-into-the-controller-class" class="anchor" href="#reblessing-the-app-into-the-controller-class"><span class="octicon octicon-link"></span></a>Reblessing the app into the controller class</h3>
+
+<p>With version 0.9001, Kelp introduces an optional re-blessing of the application
+instance into the controller class. By default, this feature is turned off,
+so each controller method will, by default, receive an instance of the main app.</p>
+
+<p>Default behavior:</p>
+
+<div class="highlight highlight-perl"><pre><span class="c1"># lib/MyApp/Bar.pm</span>
+<span class="nb">package</span> <span class="nn">MyApp::</span><span class="n">Bar</span><span class="p">;</span>
+
+<span class="k">sub </span><span class="nf">action</span> <span class="p">{</span>
+    <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>    <span class="c1"># Default: $self will be an instance of MyApp</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Turning on re-blessing is best done in the config of <a href="http://search.cpan.org/perldoc?Kelp::Routes">Kelp::Routes</a>. Once
+turned on, the route dispatcher will re-bless the application instance into the
+controller class, allowing for more traditional OO development. Note, that
+reblessing *may* entail a performance penalty. Our benchmarks show that they
+are quite insignificant.</p>
+
+<p>With re-blessing turned on:</p>
+
+<div class="highlight highlight-perl"><pre><span class="c1"># lib/MyApp/Bar.pm</span>
+<span class="nb">package</span> <span class="nn">MyApp::</span><span class="n">Bar</span><span class="p">;</span>
+<span class="k">use</span> <span class="n">parent</span> <span class="s">'MyApp'</span><span class="p">;</span>
+
+<span class="k">sub </span><span class="nf">action</span> <span class="p">{</span>
+    <span class="k">my</span> <span class="nv">$self</span> <span class="o">=</span> <span class="nb">shift</span><span class="p">;</span>  <span class="c1"># Reblessed: $self will be an instance of MyApp::Bar</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>To find out how to turn on re-blessing, see <a href="http://search.cpan.org/perldoc?Kelp::Routes#rebless">"rebless" in Kelp::Routes</a>.</p>
 
 <h2>
 <a name="quick-development-using-kelpless" class="anchor" href="#quick-development-using-kelpless"><span class="octicon octicon-link"></span></a>Quick development using Kelp::Less</h2>
@@ -1051,8 +1089,29 @@ arguments.</p>
 </li>
 <li>Mailing list: <a href="https://groups.google.com/forum/?fromgroups%5C#!forum/perl-kelp">https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp</a>
 </li>
-<li>IRC: #kelp at irc.perl.org</li>
-</ul>
+</ul><h1>
+<a name="author" class="anchor" href="#author"><span class="octicon octicon-link"></span></a>AUTHOR</h1>
+
+<p>Stefan Geneshky - minimal  cpan.org</p>
+
+<h1>
+<a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>CONTRIBUTORS</h1>
+
+<p>Ruslan Zakirov</p>
+
+<p>Julio Fraire</p>
+
+<p>Maurice Aubrey</p>
+
+<p>David Steinbrunner</p>
+
+<p>Gurunandan Bhat</p>
+
+<h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>LICENSE</h1>
+
+<p>This module and all the modules in this package are governed by the same license
+as Perl itself.</p>
       </section>
 
     </div>
