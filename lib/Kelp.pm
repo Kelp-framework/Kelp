@@ -668,39 +668,6 @@ the necessary arguments.
 
     my $url = $self->route->url('update', id => 1000); # /update/1000
 
-=head3 Reblessing the app into the controller class
-
-With version 0.9001, Kelp introduces an optional re-blessing of the application
-instance into the controller class. By default, this feature is turned off,
-so each controller method will, by default, receive an instance of the main app.
-
-Default behavior:
-
-    # lib/MyApp/Bar.pm
-    package MyApp::Bar;
-
-    sub action {
-        my $self = shift;    # Default: $self will be an instance of MyApp
-        ...
-    }
-
-Turning on re-blessing is best done in the config of L<Kelp::Routes>. Once
-turned on, the route dispatcher will re-bless the application instance into the
-controller class, allowing for more traditional OO development.
-
-With re-blessing turned on:
-
-    # lib/MyApp/Bar.pm
-    package MyApp::Bar;
-    use parent 'MyApp';
-
-    sub action {
-        my $self = shift;  # Reblessed: $self will be an instance of MyApp::Bar
-        ...
-    }
-
-To find out how to turn on re-blessing, see L<Kelp::Routes/rebless>.
-
 =head2 Quick development using Kelp::Less
 
 For writing quick experimental web apps and to reduce the boiler plate, one

@@ -10,7 +10,6 @@ use Class::Inspector;
 attr base    => '';
 attr routes  => sub { [] };
 attr names   => sub { {} };
-attr rebless => 0;
 
 # Cache
 attr _CACHE => sub { {} };
@@ -186,13 +185,6 @@ sub dispatch {
         # Check if the destination function exists
         unless ( exists &$to ) {
             die sprintf( 'Route not found %s for %s', $to, $req->path );
-        }
-
-        # If rebless is set, we rebless the application instance into the
-        # new class and pass it into the code
-        if ( $self->rebless && $to =~ /^(.+)::(\w+)$/ ) {
-            my ( $controller, $action ) = ( $1, $2 );
-            bless \%$app, $controller;
         }
 
         # Move to reference
@@ -526,52 +518,6 @@ The caching module should be initialized in the config file:
                 );
             }
         }
-    }
-
-=head2 rebless
-
-A new attribute, introduced in Kelp version 0.9001. If set to a
-non-zero value it will force the route dispatcher re-bless the application
-instance into the controller class. This allows for writing of more
-traditional object oriented controllers, which inherit from the main class and
-receive a reference to themselves.
-
-Enabling this feature can be done either in the config, or via the
-L<Kelp/routes> attribute of the main application.
-
-Via the config:
-
-    # config.pl
-    {
-        modules_init => {
-            Routes => {
-                rebless => 1
-            }
-        }
-    };
-
-Via the application instance (less pretty, so not recommended):
-
-    # lib/MyApp.pm
-    package MyApp;
-    use parent 'Kelp';
-
-    sub build {
-        my $self = shift;
-        $self->routes->rebless(1);
-        ...;
-    }
-
-Once rebless is turned on, each route will rebless the application instance
-into the controller class:
-
-    # lib/MyApp/Users.pm
-    package MyApp::Users;
-    use parent 'MyApp';
-
-    sub save {
-        my $self = shift;    # $self is now an instance of MyApp::Routes
-        ...;
     }
 
 =head1 SUBROUTINES
