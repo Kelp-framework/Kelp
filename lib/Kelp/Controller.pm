@@ -1,6 +1,6 @@
 package Kelp::Controller;
 
-use Kelp::Base 'Kelp';
+use Kelp::Base;
 use Carp;
 
 attr app => sub { croak 'No app defined' };
