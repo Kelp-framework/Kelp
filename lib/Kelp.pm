@@ -47,7 +47,7 @@ sub new {
     # Load the modules from the config
     if ( defined( my $modules = $self->config('modules') ) ) {
         $self->load_module($_) for (@$modules);
-    }
+    }        
 
     $self->build();
     return $self;

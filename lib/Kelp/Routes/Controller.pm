@@ -1,9 +1,8 @@
 package Kelp::Routes::Controller;
 
+use Kelp::Base 'Kelp::Routes';
+use Kelp::Controller;
 use Carp;
-use Kelp::Base;
-
-use parent qw/ Kelp::Routes /;
 
 sub dispatch {
     my $self = shift;
@@ -16,6 +15,8 @@ sub dispatch {
 
     my ($controller_class, $action) = ($to =~ /^(.+)::(\w+)$/)
         or croak "Invalid controller '$to'";
+
+    $controller_class = 'Kelp::Controller' if ref($app) eq $controller_class;
 
     my $controller = $controller_class->new(app => $app);
     return $controller->$action(@{ $match->param });
