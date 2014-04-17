@@ -14,7 +14,7 @@ attr stash => sub { {} };
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
 
-# If you're running the web app as a proxy, use Plack::Moddleware::ReverseProxy
+# If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
 sub address     { $_[0]->env->{REMOTE_ADDR} }
 sub remote_host { $_[0]->env->{REMOTE_HOST} }
 sub user        { $_[0]->env->{REMOTE_USER} }
