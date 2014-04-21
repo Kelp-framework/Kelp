@@ -2,7 +2,7 @@ package Kelp;
 
 use Kelp::Base;
 
-use Carp 'longmess';
+use Carp qw/ longmess croak /;
 use FindBin;
 use Encode;
 use Try::Tiny;
@@ -51,6 +51,16 @@ sub new {
 
     $self->build();
     return $self;
+}
+
+# Create a shallow copy of the app, optionally blessed into a
+# different subclass.
+sub _copy {
+    my $self = shift;
+    my $subclass = shift || ref($self);
+
+    ref $self or croak '_copy requires instance';
+    return bless { %$self }, $subclass;
 }
 
 sub load_module {
@@ -144,6 +154,7 @@ sub psgi {
         for my $route (@$match) {
 
             # Dispatch
+            $self->req->named( $route->named );
             my $data = $self->routes->dispatch( $self, $route );
 
             # Log info about the route
