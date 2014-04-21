@@ -257,7 +257,7 @@ C<res>.
 
 =head2 cookies
 
-Ac L<HTTP::Cookies> object containing the cookie jar for all tests.
+An L<HTTP::Cookies> object containing the cookie jar for all tests.
 
 =head1 METHODS
 
