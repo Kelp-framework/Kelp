@@ -150,13 +150,27 @@ sub build {
         }
     }
 
-    # Register two methods: config and config_hash
     $self->register(
+
+        # Return the entire config hash
         config_hash => $self->data,
-        config      => sub {
+
+        # A wrapper arount the get method
+        config => sub {
             my ( $app, $path ) = @_;
             return $self->get($path);
-        }
+        },
+
+        # A tiny object containing only merge, clear and set. Very useful when
+        # you're writing tests and need to add new config options, set the
+        # entire config hash to a new value, or clear it completely.
+        _cfg => Plack::Util::inline_object(
+            merge => sub {
+                $self->data( _merge( $self->data, $_[0] ) );
+            },
+            clear => sub { $self->data( {} ) },
+            set   => sub { $self->data( $_[0] ) }
+          )
     );
 }
 
@@ -343,6 +357,23 @@ A reference to the entire configuration hash.
     my $pos = $self->config_hash->{row}->{col}->{position};
 
 Using this or C<config> is entirely up to the application developer.
+
+=head3 _cfg
+
+A tiny object that contains only three methods - B<merge>, B<clear> and B<set>.
+It allows you to merge values to the config hash, clear it completely or
+set it to an entirely new value. This method comes handy when writing tests.
+
+    # Somewhere in a .t file
+    my $app = MyApp->new( mode => 'test' );
+
+    my %original_config = %{ $app->config_hash };
+    $app->_cfg->merge( { middleware => ['Foo'] } );
+
+    # Now you can test with middleware Foo added to the config
+
+    # Revert to the original configuration
+    $app->_cfg->set( \%original_config );
 
 =head1 ATTRIBUTES
 

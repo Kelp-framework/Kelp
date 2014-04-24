@@ -3,14 +3,10 @@ use Kelp::Test;
 use Kelp;
 use Test::More;
 use HTTP::Request::Common;
-use FindBin '$Bin';
 use Plack::Middleware::Session;
 
-BEGIN {
-    $ENV{KELP_CONFIG_DIR} = "$Bin/conf/session";
-}
-
 my $app = Kelp->new( mode => 'test' );
+$app->_cfg->merge( { middleware => ['Session'] });
 my $t = Kelp::Test->new( app => $app );
 
 #ok $app->can('session');
