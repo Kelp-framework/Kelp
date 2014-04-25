@@ -15,7 +15,7 @@ sub dispatch {
     my ($controller_class, $action) = ($to =~ /^(.+)::(\w+)$/)
         or croak "Invalid controller '$to'";
 
-    my $controller = $app->_copy($controller_class);
+    my $controller = $app->_clone($controller_class);
     return $controller->$action(@{ $match->param });
 }
 

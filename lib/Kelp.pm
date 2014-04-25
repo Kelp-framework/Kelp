@@ -33,7 +33,7 @@ attr config_module => 'Config';
 
 # Undocumented.
 # Used to unlock the undocumented features of the Config module.
-attr __config   => undef;
+attr __config => undef;
 
 attr -loaded_modules => sub { {} };
 
@@ -61,11 +61,11 @@ sub new {
 
 # Create a shallow copy of the app, optionally blessed into a
 # different subclass.
-sub _copy {
+sub _clone {
     my $self = shift;
     my $subclass = shift || ref($self);
 
-    ref $self or croak '_copy requires instance';
+    ref $self or croak '_clone requires instance';
     return bless { %$self }, $subclass;
 }
 

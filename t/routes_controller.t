@@ -1,0 +1,36 @@
+use lib 't/lib';
+use Kelp::Base -strict;
+use MyApp2;
+use Kelp::Test;
+use HTTP::Request::Common;
+use Test::More;
+
+# Get the app
+my $app = MyApp2->new(
+    __config => {
+        modules_init => {
+            Routes => {
+                base   => 'MyApp2::Controller',
+                router => 'Controller',
+            }
+        }
+    }
+);
+
+# Test object
+my $t = Kelp::Test->new( app => $app );
+
+$t->request_ok( GET '/blessed' )
+  ->content_is('MyApp2::Controller');
+
+$t->request_ok( GET '/blessed_bar' )
+  ->content_is('MyApp2::Controller::Bar');
+
+$t->request_ok( GET '/blessed_bar2' )
+  ->content_is('MyApp2::Controller::Bar');
+
+$t->request_ok( GET '/hello' )
+  ->content_is('OK');
+
+done_testing;
+
