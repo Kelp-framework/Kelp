@@ -28,7 +28,13 @@ attr -charset => sub {
     $_[0]->config("charset") // 'UTF-8';
 };
 
+# Name the config module
 attr config_module => 'Config';
+
+# Undocumented.
+# Used to unlock the undocumented features of the Config module.
+attr __config   => undef;
+
 attr -loaded_modules => sub { {} };
 
 # Each route's request an response objects will
@@ -41,13 +47,13 @@ sub new {
     my $self = shift->SUPER::new(@_);
 
     # Always load these modules
-    $self->load_module( $self->config_module );
+    $self->load_module( $self->config_module, extra => $self->__config );
     $self->load_module('Routes');
 
     # Load the modules from the config
     if ( defined( my $modules = $self->config('modules') ) ) {
         $self->load_module($_) for (@$modules);
-    }        
+    }
 
     $self->build();
     return $self;

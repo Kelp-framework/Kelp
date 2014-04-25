@@ -5,7 +5,7 @@ use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
 
-my $app = Kelp->new( mode => 'test' );
+my $app = Kelp->new( mode => 'test', __config => 1 );
 $app->routes->base("main");
 
 # Need only one route

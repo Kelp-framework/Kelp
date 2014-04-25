@@ -150,6 +150,31 @@ sub build {
         }
     }
 
+    # Undocumented! Add 'extra' argument to unlock these special features:
+    # 1. If the extra argument contains a HASH, it will be merged to the
+    #    configuration upon loading.
+    # 2. A new attribute '_cfg' will be registered into the app, which has
+    # three methods: merge, clear and set. Use them to merge a hash into
+    # the configuration, clear it, or set it to a new value. You can do those
+    # at any point in the life of the app.
+    #
+    if ( my $extra = delete $args{extra} ) {
+        $self->data( _merge( $self->data, $extra ) ) if ref($extra) eq 'HASH';
+        $self->register(
+
+         # A tiny object containing only merge, clear and set. Very useful when
+         # you're writing tests and need to add new config options, set the
+         # entire config hash to a new value, or clear it completely.
+            _cfg => Plack::Util::inline_object(
+                merge => sub {
+                    $self->data( _merge( $self->data, $_[0] ) );
+                },
+                clear => sub { $self->data( {} ) },
+                set   => sub { $self->data( $_[0] ) }
+            )
+        );
+    }
+
     $self->register(
 
         # Return the entire config hash
@@ -159,18 +184,7 @@ sub build {
         config => sub {
             my ( $app, $path ) = @_;
             return $self->get($path);
-        },
-
-        # A tiny object containing only merge, clear and set. Very useful when
-        # you're writing tests and need to add new config options, set the
-        # entire config hash to a new value, or clear it completely.
-        _cfg => Plack::Util::inline_object(
-            merge => sub {
-                $self->data( _merge( $self->data, $_[0] ) );
-            },
-            clear => sub { $self->data( {} ) },
-            set   => sub { $self->data( $_[0] ) }
-          )
+        }
     );
 }
 
