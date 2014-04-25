@@ -31,6 +31,11 @@ sub request {
     return $self;
 }
 
+sub request_ok {
+    my ( $self, $req, $test_name ) = @_;
+    $self->request($req)->code_is( 200, $test_name );
+}
+
 sub code_is {
     my ( $self, $code, $test_name ) = @_;
     $test_name ||= "Response code is $code";
@@ -238,6 +243,16 @@ you can take advantage of the simplified syntax for creating an HTTP request.
     $t->request( POST '/api', [ user => 'jane' ] );
 
 This method returns C<$self>, so other methods can be chained after it.
+
+=head2 request_ok
+
+C<request_ok( $http_request, $test_name )
+
+Runs C<request>, then tests if the response code is 200. Equivalent to the following
+code:
+
+    $t->request( GET '/path' )->code_is(200);
+    $t->request_ok( GET '/path' );    # Same as the above
 
 =head2 code_is, code_isnt
 
