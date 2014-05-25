@@ -220,18 +220,34 @@ _match(
 
 # Regexp instead of pattern
 _match(
-    qr{/(\w+)/(\w+)$},
+    qr{/([a-z]+)/([a-z]+)$},
+    no  => [qw{/12/12 /123/abc /abc/123}],
+    yes => [qw{/abc/a /a/b /a/abc}],
     par => {
-        '/abc/def' => [qw/abc def/]
+        '/abc/a' => [qw{abc a}],
+        '/a/b'   => [qw{a b}],
+        '/a/abc' => [qw{a abc}],
     }
 );
 
 _match(
-    qr{/(\w+)/?(\w*)$},
+    qr{/([a-z]+)/?([a-z]*)$},
+    no  => [qw{/123 /abc/123}],
+    yes => [qw{/abc/def /abc}],
     par => {
         '/abc/def' => [qw/abc def/],
-        '/abc'     => ['abc'],
-        '/abc/###' => ['abc']
+        '/abc'     => [ 'abc', '' ],
+    }
+);
+
+_match(
+    qr{/(\d{1,3})$},
+    no  => [ '/abc', '/ab2', '/1234', '/123a' ],
+    yes => [qw{/1 /12 /123}],
+    par => {
+        '/1'   => ['1'],
+        '/12'  => ['12'],
+        '/123' => ['123']
     }
 );
 
