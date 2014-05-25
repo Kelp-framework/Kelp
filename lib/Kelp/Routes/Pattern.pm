@@ -50,8 +50,14 @@ sub _build_regex {
 
     my $PAT = '(.?)([:*?])(\w+)';
     my $pattern =  $self->pattern;
+
+    # Curly braces and brackets are only used for separation.
+    # We replace all of them with \0, then convert the pattern
+    # into a regular expression. This way if the regular expression
+    # contains curlies, they won't be removed.
+    $pattern =~ s/[{}]/\0/g;
     $pattern =~ s{$PAT}{$self->_rep_regex($1, $2, $3)}eg;
-    $pattern =~ s/[{}]//g;
+    $pattern =~ s/\0//g;
     $pattern .= '/?' unless $pattern =~ m{/$};
     $pattern .= '$' unless $self->bridge;
 
@@ -111,7 +117,7 @@ sub match {
         $self->param( [ map { $named{$_} } @tokens ] );
     }
     else {
-        $self->param( \@matched );
+        $self->param( [ map { $_ eq '' ? undef : $_ } @matched] );
     }
 
     return 1;

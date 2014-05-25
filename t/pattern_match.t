@@ -203,6 +203,28 @@ _match(
 );
 
 _match(
+    '/:a',
+    check => { a => '\d{1,3}' },
+    yes   => [qw{/1 /12 /123}],
+    no    => [qw{/a /ab /abc /1234 /a12}]
+);
+
+# Checks and partials
+_match(
+    '/:a/{?b}ing',
+    check => { a => qr/\w{3}/, b => qr/\d{1,3}/ },
+    yes   => {
+        '/bar/ing'    => { a => 'bar' },
+        '/bar/123ing' => { a => 'bar', b => '123' }
+    },
+    par => {
+        '/bar/ing'    => [ 'bar', undef ],
+        '/bar/123ing' => [ 'bar', '123' ]
+    },
+    no => [ '/a/b', '/a', '/a/min', '/a/1234ing' ]
+);
+
+_match(
     '/:a/*c',
     check => { a => qr/[^0-9]+/, c => qr/\d{1,2}/ },
     yes => {
@@ -236,7 +258,7 @@ _match(
     yes => [qw{/abc/def /abc}],
     par => {
         '/abc/def' => [qw/abc def/],
-        '/abc'     => [ 'abc', '' ],
+        '/abc'     => [ 'abc', undef ],
     }
 );
 
