@@ -1,6 +1,6 @@
 package MyApp2::Controller::Bar;
 use Kelp::Base 'MyApp2::Controller';
 
-sub hello { "OK" }
+sub test_inherit { "OK" }
 
 1;

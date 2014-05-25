@@ -29,8 +29,11 @@ $t->request_ok( GET '/blessed_bar' )
 $t->request_ok( GET '/blessed_bar2' )
   ->content_is('MyApp2::Controller::Bar');
 
-$t->request_ok( GET '/hello' )
+$t->request_ok( GET '/test_inherit' )
   ->content_is('OK');
+
+$t->request_ok( GET '/test_module' )
+  ->content_is('UTF-8');
 
 done_testing;
 
