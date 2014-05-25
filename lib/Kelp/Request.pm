@@ -14,11 +14,10 @@ attr stash => sub { {} };
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
 
-# nginx does not initialize REMOTE_ADDR and REMOTE_HOST properly
-# when connecting to Starman via a unix socket
-sub address     { $_[0]->env->{HTTP_X_REAL_IP}        // $_[0]->env->{REMOTE_ADDR} }
-sub remote_host { $_[0]->env->{HTTP_X_FORWARDED_HOST} // $_[0]->env->{REMOTE_HOST} }
-sub user        { $_[0]->env->{HTTP_X_REMOTE_USER}    // $_[0]->env->{REMOTE_USER} }
+# If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
+sub address     { $_[0]->env->{REMOTE_ADDR} }
+sub remote_host { $_[0]->env->{REMOTE_HOST} }
+sub user        { $_[0]->env->{REMOTE_USER} }
 
 sub new {
     my ( $class, %args ) = @_;
@@ -135,6 +134,26 @@ document is returned.
 =cut
 
 =back
+
+=head2 address, remote_host, user
+
+These are shortcuts to the REMOTE_ADDR, REMOTE_HOST and REMOTE_USER environment
+variables.
+
+    if ( $self->req->address eq '127.0.0.1' ) {
+        ...
+    }
+
+Note. If you're running the web app behind nginx (or another web server), you need
+to use L<Plack::Middleware::ReverseProxy>.
+
+    # app.psgi
+
+    builder {
+        enable_if { $_[0]->{REMOTE_ADDR} =~ /127\.0\.0\.1/ }
+        "Plack::Middleware::ReverseProxy";
+        $app->run;
+    };
 
 =head2 session
 
