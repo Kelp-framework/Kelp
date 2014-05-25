@@ -144,9 +144,18 @@ sub build {
     };
 
     # Find, parse and merge 'config' and mode files
-    for ( 'config', $self->app->mode ) {
-        if ( my $filename = $find->($_) ) {
+    for my $name ( 'config', $self->app->mode ) {
+        if ( my $filename = $find->($name) ) {
             $process->($filename);
+        }
+        else {
+            if ( $ENV{KELP_CONFIG_WARN} ) {
+                my $message =
+                  $name eq 'config'
+                  ? "Main config file not found or not readable"
+                  : "Config file for mode '$name' not found or not readable";
+                  warn $message;
+            }
         }
     }
 
