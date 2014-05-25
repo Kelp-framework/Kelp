@@ -24,10 +24,6 @@ attr -app => sub {
 
 attr res  => sub { die "res is not initialized" };
 
-attr -run => sub {
-    $_[0]->app->run;
-};
-
 attr cookies => sub { HTTP::Cookies->new };
 
 sub request {
@@ -50,7 +46,7 @@ sub request {
     # Add the current cookie to the request headers
     $self->cookies->add_cookie_header($req);
 
-    my $res = test_psgi( $self->run, sub { shift->($req) } );
+    my $res = test_psgi( $self->app->run, sub { shift->($req) } );
 
     # Extract the cookies from the response and add them to the cookie jar
     $self->cookies->extract_cookies($res);
@@ -60,7 +56,8 @@ sub request {
 }
 
 sub request_ok {
-    shift->request(@_)->code_is(200);
+    my ( $self, $req, $test_name ) = @_;
+    $self->request($req)->code_is( 200, $test_name );
 }
 
 sub code_is {
@@ -274,6 +271,16 @@ you can take advantage of the simplified syntax for creating an HTTP request.
     $t->request( POST '/api', [ user => 'jane' ] );
 
 This method returns C<$self>, so other methods can be chained after it.
+
+=head2 request_ok
+
+C<request_ok( $http_request, $test_name )
+
+Runs C<request>, then tests if the response code is 200. Equivalent to the following
+code:
+
+    $t->request( GET '/path' )->code_is(200);
+    $t->request_ok( GET '/path' );    # Same as the above
 
 =head2 code_is, code_isnt
 

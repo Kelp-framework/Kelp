@@ -18,6 +18,9 @@ sub build {
     $r->add( "/test", sub { "OK" } );
     $r->add( "/greet/:name", "routes#greet");
     $r->add( "/bye/:name", "Routes2::goodbye");
+
+    # Controller routes
+    $r->add("/blessed", "blessed");
 }
 
 1;

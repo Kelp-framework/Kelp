@@ -4,41 +4,33 @@ use Kelp;
 use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
-use FindBin '$Bin';
 
-# Allow the redefining of globs at Kelp::Module
-BEGIN {
-    $ENV{KELP_REDEFINE} = 1;
-    $ENV{KELP_CONFIG_DIR} = "$Bin/conf/null";
-}
+my $app = Kelp->new( mode => 'test', __config => 1 );
+$app->routes->base("main");
 
-{
-    my $t = app_t();
+# Need only one route
+$app->add_route( '/mw', sub { "OK" } );
 
-    $t->request( GET '/mw' )
-      ->header_is("X-Framework", "Perl Kelp");
-}
+my $t = Kelp::Test->new( app => $app );
 
-{
-    $ENV{KELP_CONFIG_DIR} = "$Bin/conf/mw";
-    my $t = app_t();
+# No middleware
+$t->request( GET '/mw' )
+  ->header_is( "X-Framework", "Perl Kelp" );
 
-    for ( 0 .. 1 ) {
-        $t->request( GET '/mw' )
-          ->header_is( "X-Framework", "Changed" )
-          ->header_is( "Content-Length", 2 );
+# Add middleware
+$app->_cfg->merge(
+    {
+        middleware      => [ 'XFramework', 'ContentLength' ],
+        middleware_init => {
+            XFramework => {
+                framework => 'Changed'
+            }
+        }
     }
-}
+);
 
-sub app_t {
-    my $app = Kelp->new( mode => 'test' );
-    $app->routes->base("main");
-    my $t = Kelp::Test->new( app => $app );
-
-    # Need only one route
-    $app->add_route( '/mw', sub { "OK" } );
-
-    return $t;
-}
+$t->request( GET '/mw' )
+  ->header_is( "X-Framework", "Changed" )
+  ->header_is( "Content-Length", 2 );
 
 done_testing;

@@ -159,10 +159,38 @@ sub build {
         }
     }
 
-    # Register two methods: config and config_hash
+    # Undocumented! Add 'extra' argument to unlock these special features:
+    # 1. If the extra argument contains a HASH, it will be merged to the
+    #    configuration upon loading.
+    # 2. A new attribute '_cfg' will be registered into the app, which has
+    # three methods: merge, clear and set. Use them to merge a hash into
+    # the configuration, clear it, or set it to a new value. You can do those
+    # at any point in the life of the app.
+    #
+    if ( my $extra = delete $args{extra} ) {
+        $self->data( _merge( $self->data, $extra ) ) if ref($extra) eq 'HASH';
+        $self->register(
+
+         # A tiny object containing only merge, clear and set. Very useful when
+         # you're writing tests and need to add new config options, set the
+         # entire config hash to a new value, or clear it completely.
+            _cfg => Plack::Util::inline_object(
+                merge => sub {
+                    $self->data( _merge( $self->data, $_[0] ) );
+                },
+                clear => sub { $self->data( {} ) },
+                set   => sub { $self->data( $_[0] ) }
+            )
+        );
+    }
+
     $self->register(
+
+        # Return the entire config hash
         config_hash => $self->data,
-        config      => sub {
+
+        # A wrapper arount the get method
+        config => sub {
             my ( $app, $path ) = @_;
             return $self->get($path);
         }
@@ -352,6 +380,23 @@ A reference to the entire configuration hash.
     my $pos = $self->config_hash->{row}->{col}->{position};
 
 Using this or C<config> is entirely up to the application developer.
+
+=head3 _cfg
+
+A tiny object that contains only three methods - B<merge>, B<clear> and B<set>.
+It allows you to merge values to the config hash, clear it completely or
+set it to an entirely new value. This method comes handy when writing tests.
+
+    # Somewhere in a .t file
+    my $app = MyApp->new( mode => 'test' );
+
+    my %original_config = %{ $app->config_hash };
+    $app->_cfg->merge( { middleware => ['Foo'] } );
+
+    # Now you can test with middleware Foo added to the config
+
+    # Revert to the original configuration
+    $app->_cfg->set( \%original_config );
 
 =head1 ATTRIBUTES
 

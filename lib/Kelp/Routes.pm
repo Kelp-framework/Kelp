@@ -191,7 +191,6 @@ sub dispatch {
         $to = \&{$to};
     }
 
-    $req->named( $route->named );
     return $to->( $app, @{ $route->param } );
 }
 
