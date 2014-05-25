@@ -157,6 +157,12 @@ sub render_401 {
     $_[0]->render_error( 401, "Unauthorized" );
 }
 
+sub redirect {
+    my $self = shift;
+    $self->rendered(1);
+    $self->SUPER::redirect(@_);
+}
+
 sub redirect_to {
     my ( $self, $where, $args, $code ) = @_;
     my $url = $self->app->url_for($where, %$args);
