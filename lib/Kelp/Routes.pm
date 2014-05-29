@@ -675,6 +675,15 @@ Routes that used regular expressions instead of patterns will only initialize
 the C<param> array with the regex captures, unless those patterns are using
 named captures in which case the C<named> hash will also be initialized.
 
+=head1 EXTENDING
+
+This is the default router class for each new Kelp application, but it doesn't
+have to be. You can create your own subclass that better suits your needs. It's
+generally enough to override the L</dispatch> method.
+
+Kelp comes with L<Kelp::Routes::Controller>, a router extension which reblesses
+the application instance into a controller class.
+
 =head1 ACKNOWLEDGEMENTS
 
 This module was inspired by L<Routes::Tiny>.

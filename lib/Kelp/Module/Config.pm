@@ -252,32 +252,33 @@ Kelp::Module::Config - Configuration for Kelp applications
 =head1 DESCRIPTION
 
 This is one of the two modules that are automatically loaded for each and every
-Kelp application. It reads configuration files containing Perl-style hashes,
-and merges them depending on the value of the application's C<mode> attribute.
+Kelp application. The other one is L<Kelp::Module::Routes>. It reads
+configuration files containing Perl-style hashes, and merges them depending on
+the value of the application's C<mode> attribute.
 
-The main configuration file name is C<config.pl>, and it will be searched in the
-C<conf> and C<../conf> directories. You can also set the C<KELP_CONFIG_DIR> environmental
-variable with the path to the configuration files.
+The main configuration file name is C<config.pl>, and it will be searched in
+the C<conf> and C<../conf> directories. You can also set the C<KELP_CONFIG_DIR>
+environmental variable with the path to the configuration files.
 
 This module comes with some L<default values|/DEFAULTS>, so if there are no
-configuration files found, those values will be used.
-Any values from configuration files will add to or override the default values.
+configuration files found, those values will be used.  Any values from
+configuration files will add to or override the default values.
 
 =head1 ORDER
 
-First the module will look for C<conf/config.pl>, then for C<../conf/config.pl>.
-If found, they will be parsed and merged into the default values.
-The same order applies to the I<mode> file too, so if the application
-L<mode|Kelp/mode> is I<development>, then C<conf/development.pl> and
-C<../conf/development.pl> will be looked for. If found, they will also be merged
-to the config hash.
+First the module will look for C<conf/config.pl>, then for
+C<../conf/config.pl>.  If found, they will be parsed and merged into the
+default values.  The same order applies to the I<mode> file too, so if the
+application L<mode|Kelp/mode> is I<development>, then C<conf/development.pl>
+and C<../conf/development.pl> will be looked for. If found, they will also be
+merged to the config hash.
 
 =head1 MERGING
 
 The first configuration file this module will look for is C<config.pl>. This is
-where you should keep configuration options that apply to all running environments.
-The mode-specific configuration file will be merged to this config, and it will
-take priority. Merging is done as follows:
+where you should keep configuration options that apply to all running
+environments.  The mode-specific configuration file will be merged to this
+config, and it will take priority. Merging is done as follows:
 
 =over
 
@@ -516,5 +517,15 @@ Since the config files are searched in both C<conf/> and C<../conf/>, you can
 use the same configuration set of files for your application and for your tests.
 Assuming the all of your test will reside in C<t/>, they should be able to load
 and find the config files at C<../conf/>.
+
+=head1 ENVIRONMENT VARIABLES
+
+=head2 KELP_CONFIG_WARN
+
+This module will not warn for missing config and mode files. It will
+silently load the default configuration hash. Set KELP_CONFIG_WARN to a
+true value to make this module warn about missing files.
+
+    $ KELP_CONFIG_WARN=1 plackup app.psgi
 
 =cut

@@ -364,8 +364,7 @@ or any decoder of your choice.
 =item
 
 B<Extendable Core>. Kelp uses pluggable modules for everything. This allows
-anyone to add a module for a custom interface. Writing Kelp modules is a
-pleasant and fulfilling activity.
+anyone to add a module for a custom interface. Writing Kelp modules is easy.
 
 =cut
 
@@ -684,6 +683,56 @@ the necessary arguments.
     # Later
 
     my $url = $self->route->url('update', id => 1000); # /update/1000
+
+=head2 Reblessing the app into a controller class
+
+All of the examples here show routes which take an instance of the web
+application as a first parameter. This is true even if those routes live in
+another class. To rebless the app instance into the controller class instance,
+use the custom router class L<Kelp::Router::Controller>.
+
+=head3 Step 1: Specify the custom router class in the config
+
+    # config.pl
+    {
+        modules_init => {
+            Routes => {
+                router => 'Controller'
+            }
+        }
+    }
+
+=head3 Step 2: Create a main controller class
+
+This class must inherit from Kelp.
+
+    # lib/MyApp/Controller.pm
+    package MyApp::Controller;
+    use Kelp::Base 'MyApp';
+
+    # Now $self is an instance of 'MyApp::Controller';
+    sub service_method {
+        my $self = shift;
+        ...;
+    }
+
+    1;
+
+=head3 Step 3: Create any number of controller classes
+
+They all must inherit from your main controller class.
+
+    # lib/MyApp/Controller/Users.pm
+    package MyApp::Controller::Users;
+    use Kelp::Base 'MyApp::Controller';
+
+    # Now $self is an instance of 'MyApp::Controller::Users'
+    sub authenticate {
+        my $self = shift;
+        ...;
+    }
+
+    1;
 
 =head2 Quick development using Kelp::Less
 
