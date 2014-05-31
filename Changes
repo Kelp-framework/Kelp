@@ -1,3 +1,19 @@
+2014-05-30: Version 0.9001
+
+            Bug Fixes:
+            - Curly braces get stripped from pattern checks
+            - Remove HTTP_X headers from Kelp::Request (security hole)
+
+            New features
+            - Allow for extending Kelp::Routes and using custom routers (Maurice Aubrey)
+            - Create Kelp::Routes::Controller, which reblesses the web app into a controller class (Maurice Aubrey)
+            - Set env KELP_CONFIG_WARN to warn for missing config files
+            - Set rendered to true when redirecting (Julio Fraire)
+            - Add request_ok method to Kelp::Test
+            - Config module optionally registers _cfg method, to help manipulate the configuration.
+            - Add a cookie jar to Kelp::Test
+
+
 2014-03-31: Version 0.4602
             Replace $json->property with $json->get_utf8 in order to maintain compatibility across different JSON implementations
 

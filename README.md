@@ -82,8 +82,7 @@ module of your choice to return rich text, html and JSON responses.
 - __JSON encoder/decoder__. Kelp comes with JSON, but you can easily plug in JSON::XS
 or any decoder of your choice.
 - __Extendable Core__. Kelp uses pluggable modules for everything. This allows
-anyone to add a module for a custom interface. Writing Kelp modules is a
-pleasant and fulfilling activity.
+anyone to add a module for a custom interface. Writing Kelp modules is easy.
 - __Sleek Testing__. Kelp takes Plack::Test and wraps it in an object oriented
 class of convenience methods. Testing is done via sending requests to your
 routes, then analyzing the response.
@@ -396,42 +395,61 @@ $r->add( "/update/:id", { name => 'update', to => 'User::update' } );
 my $url = $self->route->url('update', id => 1000); # /update/1000
 ```
 
-### Reblessing the app into the controller class
+## Reblessing the app into a controller class
 
-With version 0.9001, Kelp introduces an optional re-blessing of the application
-instance into the controller class. By default, this feature is turned off,
-so each controller method will, by default, receive an instance of the main app.
+All of the examples here show routes which take an instance of the web
+application as a first parameter. This is true even if those routes live in
+another class. To rebless the app instance into the controller class instance,
+use the custom router class [Kelp::Router::Controller](http://search.cpan.org/perldoc?Kelp::Router::Controller).
 
-Default behavior:
+### Step 1: Specify the custom router class in the config
 
 ```perl
-# lib/MyApp/Bar.pm
-package MyApp::Bar;
-
-sub action {
-    my $self = shift;    # Default: $self will be an instance of MyApp
-    ...
+# config.pl
+{
+    modules_init => {
+        Routes => {
+            router => 'Controller'
+        }
+    }
 }
 ```
 
-Turning on re-blessing is best done in the config of [Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes). Once
-turned on, the route dispatcher will re-bless the application instance into the
-controller class, allowing for more traditional OO development.
+### Step 2: Create a main controller class
 
-With re-blessing turned on:
+This class must inherit from Kelp.
 
 ```perl
-# lib/MyApp/Bar.pm
-package MyApp::Bar;
-use parent 'MyApp';
+# lib/MyApp/Controller.pm
+package MyApp::Controller;
+use Kelp::Base 'MyApp';
 
-sub action {
-    my $self = shift;  # Reblessed: $self will be an instance of MyApp::Bar
-    ...
+# Now $self is an instance of 'MyApp::Controller';
+sub service_method {
+    my $self = shift;
+    ...;
 }
+
+1;
 ```
 
-To find out how to turn on re-blessing, see ["rebless" in Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes#rebless).
+### Step 3: Create any number of controller classes
+
+They all must inherit from your main controller class.
+
+```perl
+# lib/MyApp/Controller/Users.pm
+package MyApp::Controller::Users;
+use Kelp::Base 'MyApp::Controller';
+
+# Now $self is an instance of 'MyApp::Controller::Users'
+sub authenticate {
+    my $self = shift;
+    ...;
+}
+
+1;
+```
 
 ## Quick development using Kelp::Less
 
