@@ -243,7 +243,7 @@ From this point on, all requests run with C<$t-E<gt>request> will be sent to C<$
 
 =head2 res
 
-Each time C<$t->request> is used to send a request, an HTTP::Response object is
+Each time C<$t-E<gt>request> is used to send a request, an HTTP::Response object is
 returned and saved in the C<res> attribute. You can use it to run tests,
 although as you will see, this module provides methods which make this a lot
 easier. It is recommended that you use the convenience methods rather than using
@@ -274,7 +274,7 @@ This method returns C<$self>, so other methods can be chained after it.
 
 =head2 request_ok
 
-C<request_ok( $http_request, $test_name )
+C<request_ok( $http_request, $test_name )>
 
 Runs C<request>, then tests if the response code is 200. Equivalent to the following
 code:
