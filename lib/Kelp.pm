@@ -100,13 +100,13 @@ sub build {
 }
 
 # Override to use a custom request object
-sub request {
+sub build_request {
     my ( $self, $env ) = @_;
     return Kelp::Request->new( app => $self, env => $env );
 }
 
 # Override to use a custom response object
-sub response {
+sub build_response {
     my $self = shift;
     return Kelp::Response->new( app => $self );
 }
@@ -142,8 +142,8 @@ sub psgi {
     my ( $self, $env ) = @_;
 
     # Create the request and response objects
-    my $req = $self->req( $self->request($env) );
-    my $res = $self->res( $self->response );
+    my $req = $self->req( $self->build_request($env) );
+    my $res = $self->res( $self->build_response );
 
     # Get route matches
     my $match = $self->routes->match( $req->path, $req->method );
@@ -1205,7 +1205,7 @@ C<modules_init> hash in the config. The precedence is given to the
 inline options.
 See L<Kelp::Module> for more information on making and using modules.
 
-=head2 request
+=head2 build_request
 
 This method is used to create the request object for each HTTP request. It
 returns an instance of L<Kelp::Request>, initialized with the current request's
@@ -1214,9 +1214,9 @@ environment. You can override this method to use a custom request module.
     package MyApp;
     use MyApp::Request;
 
-    sub request {
+    sub build_request {
         my ( $self, $env ) = @_;
-        return MyApp::Requst->new( app => $app, env => $env );
+        return MyApp::Request->new( app => $app, env => $env );
     }
 
     # Now each request will be handled by MyApp::Request
@@ -1238,10 +1238,10 @@ finalized.
 The above is an example of how to insert a custom header into the response of
 every route.
 
-=head2 response
+=head2 build_response
 
 This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is L<Kelp::Response>. Much like L</request>, the
+By default the object created is L<Kelp::Response>. Much like L</build_request>, the
 response can also be overridden to use a custom response object.
 
 =head2 run

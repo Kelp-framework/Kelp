@@ -7,7 +7,7 @@ sub before_finalize {
     $self->res->header( 'X-Test', 'MyApp' );
 }
 
-sub response {
+sub build_response {
     my $self = shift;
     MyApp::Response->new( app => $self );
 }
