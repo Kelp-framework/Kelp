@@ -84,7 +84,7 @@ sub render {
         confess "Data must be a reference" unless ref($body);
         my $json = $self->app->json;
         $body = $json->encode($body);
-        $body = encode('UTF-8', $body) unless $json->get_utf8;
+        $body = encode($self->app->charset, $body) unless $json->get_utf8;
         $self->body( $body );
     } else {
         $self->body( encode( $self->app->charset, $body ) );
