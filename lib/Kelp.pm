@@ -165,10 +165,10 @@ sub psgi {
 
             # Log info about the route
             if ( $self->can('logger') ) {
-                $self->logger(
-                    'info',
+                $self->info(
                     sprintf( "%s - %s %s - %s",
-                        $req->address, $req->method, $req->path, $route->to )
+                        $req->address, $req->method,
+                        $req->path,    $route->to )
                 );
             }
 
