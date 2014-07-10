@@ -52,4 +52,10 @@ $c->data({ C => 'baz' });
 $c->path("$Bin/conf/f");
 dies_ok { $c->build() };
 
+# Access to the app
+$c->data({});
+$c->path("$Bin/conf/g");
+$c->build();
+is_deeply( $c->data, { mode => 'test' } );
+
 done_testing;

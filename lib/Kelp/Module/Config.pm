@@ -99,12 +99,18 @@ sub load {
     my $text = do { local $/ = undef; <$in> };
     close($in);
 
-    my $_eval = sub {
+    my ( $hash, $error );
+    {
         local $@;
-        return (eval shift, $@);
-    };
+        my $app = $self->app;
+        $hash =
+            eval "package Kelp::Module::Config::Sandbox;"
+          . "use Kelp::Base -strict;"
+          . "sub app; local *app = sub { \$app };"
+          . $text;
+        $error = $@;
+    }
 
-    my ( $hash, $error ) = $_eval->( $text );
     die "Config file $filename parse error: " . $error if $error;
     die "Config file $filename did not return a HASH - $hash"
       unless ref $hash eq 'HASH';
