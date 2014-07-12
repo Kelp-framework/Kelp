@@ -85,7 +85,7 @@ sub _parse_route {
         if ( !grep { $method eq $_ } qw/GET POST PUT DELETE/ ) {
             carp "Using an odd method: $method";
         }
-        $val->{via} = $method;
+        $val->{method} = $method;
         $key = $pattern;
     }
 
@@ -559,8 +559,8 @@ A hashref with options.
     # GET /item/100 -> MyApp::Items::view
     $r->add(
         '/item/:id', {
-            to  => 'items#view',
-            via => 'GET'
+            to     => 'items#view',
+            method => 'GET'
         }
     );
 
@@ -585,15 +585,15 @@ reference.
     $r->add( '/item' => { to => 'Items::handle' } ) ;   # /item -> MyApp::Items::handle
     $r->add( '/item' => { to => 'Items::handle' } );    # Same as above
 
-=head4 via
+=head4 method
 
 Specifies an HTTP method to be considered by L</match> when matching a route.
 
     # POST /item -> MyApp::Items::add
     $r->add(
         '/item' => {
-            via => 'POST',
-            to  => 'items#add'
+            method => 'POST',
+            to     => 'items#add'
         }
     );
 

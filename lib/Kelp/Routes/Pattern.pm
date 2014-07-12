@@ -6,6 +6,7 @@ use Kelp::Base;
 
 attr pattern  => sub { die "pattern is required" };
 attr via      => undef;
+attr method   => sub { $_[0]->via };
 attr name     => sub { $_[0]->pattern };
 attr check    => sub { {} };
 attr defaults => sub { {} };
@@ -14,6 +15,7 @@ attr regex    => sub { $_[0]->_build_regex };
 attr named    => sub { {} };
 attr param    => sub { [] };
 attr to       => undef;
+
 
 sub new {
     my $class = shift;
@@ -99,7 +101,7 @@ sub build {
 
 sub match {
     my ( $self, $path, $method ) = @_;
-    return 0 if ( $self->via && $self->via ne ( $method // '' ) );
+    return 0 if ( $self->method && $self->method ne ( $method // '' ) );
     return 0 unless my @matched = $path =~ $self->regex;
 
     @matched = () unless $#+; # were there any captures? see perlvar @+
@@ -157,13 +159,13 @@ L<Kelp::Routes/PLACEHOLDERS>.
     ...
     $p->match('/4/something-else');    # True
 
-=head2 via
+=head2 method
 
 Specifies an HTTP method to be matched by the route.
 
     my $p = Kelp::Routes::Patters->new(
         pattern => '/:id/*other',
-        via     => 'PUT'
+        method  => 'PUT'
     );
 
     $p->match('/4/something-else', 'GET');    # False. Only PUT allowed.

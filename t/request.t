@@ -96,4 +96,16 @@ my $utf_hash = {
 $app->add_route( '/json/utf', sub { $utf_hash } );
 $t->request( GET '/json/utf' )->json_cmp( $utf_hash );
 
+# Make sure legacy 'via' attribute works for backwards
+# compatibiliry
+$app->add_route(
+    '/via_legacy', {
+        via => 'POST',
+        to  => sub { "OK" }
+    }
+);
+$t->request( POST 'via_legacy' )
+  ->code_is(200)
+  ->content_is("OK");
+
 done_testing;

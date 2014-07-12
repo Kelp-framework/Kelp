@@ -1,6 +1,14 @@
-package A; sub b{} 1;
-package Bar; sub foo{} 1;
-package Bar::Foo; sub baz{} 1;
+package A;
+sub b { }
+1;
+
+package Bar;
+sub foo { }
+1;
+
+package Bar::Foo;
+sub baz { }
+1;
 
 use strict;
 use warnings;
@@ -14,7 +22,6 @@ use Test::More;
 use Kelp::Routes;
 
 my $r = Kelp::Routes->new;
-
 
 # Basic
 #
@@ -33,9 +40,9 @@ my $r = Kelp::Routes->new;
 {
     $r->clear;
     $r->add( [ POST => '/a' ] => 'a#b' );
-    is_deeply _d( $r, qw/via pattern to/ ), [
+    is_deeply _d( $r, qw/method pattern to/ ), [
         {
-            via     => 'POST',
+            method  => 'POST',
             pattern => '/a',
             to      => 'A::b'
         }
@@ -47,13 +54,13 @@ my $r = Kelp::Routes->new;
 {
     $r->clear;
     $r->add( [ MOST => '/a' ] => 'a#b' );
-    is_deeply _d( $r, qw/via pattern to/ ), [
+    is_deeply _d( $r, qw/method pattern to/ ), [
         {
-            via     => 'MOST',
+            method  => 'MOST',
             pattern => '/a',
             to      => 'A::b'
         }
-    ];
+      ];
 }
 
 # Sub
@@ -91,11 +98,11 @@ my $r = Kelp::Routes->new;
     is_deeply $r->routes, [];
 }
 
-# Key trumps via in the value
+# Key trumps method in the value
 {
     $r->clear;
-    $r->add([POST => '/a'] => { to => 'a', via => 'PUT' });
-    is_deeply _d($r, qw/via/), [{ via => 'POST' }];
+    $r->add( [ POST => '/a' ] => { to => 'a', method => 'PUT' } );
+    is_deeply _d( $r, qw/method/ ), [ { method => 'POST' } ];
 }
 
 # Regex
@@ -104,9 +111,11 @@ my $r = Kelp::Routes->new;
     $r->clear;
     my $re = qr{^/a/(\w+)$};
     $r->add( $re, 'bar#foo' );
-    is_deeply _d($r, qw/pattern/), [{
-        pattern => $re
-    }];
+    is_deeply _d( $r, qw/pattern/ ), [
+        {
+            pattern => $re
+        }
+      ];
 }
 
 # Hash
@@ -125,7 +134,7 @@ my $r = Kelp::Routes->new;
             check => { a => '\d' },
             to    => 'Bar::foo'
         }
-    ];
+      ];
 }
 
 # Base
@@ -133,12 +142,12 @@ my $r = Kelp::Routes->new;
 {
     $r->clear;
     $r->base('Bar');
-    $r->add('/a' => 'foo#baz');
+    $r->add( '/a' => 'foo#baz' );
     is_deeply _d( $r, qw/to/ ), [
         {
-            to    => 'Bar::Foo::baz'
+            to => 'Bar::Foo::baz'
         }
-    ];
+      ];
     $r->base('');
 }
 
@@ -148,22 +157,25 @@ my $r = Kelp::Routes->new;
 
     # Tree not ARRAY
     $r->clear;
-    $r->add('/user' => {
-        tree => { a => 1, b => 2}
-    });
+    $r->add(
+        '/user' => {
+            tree => { a => 1, b => 2 }
+        }
+    );
     is_deeply $r->routes, [];
 
     # Tree no name
     $r->clear;
-    $r->add('/a' => {
-        to => 'a',
-        tree => [
-            '/b' => { name => 'b', to => 'a#b' },
-            '/c' => 'a#c'
-        ]
-    });
-    is_deeply _d($r, 'name'), [ {}, { name => 'b' }, {} ];
-
+    $r->add(
+        '/a' => {
+            to   => 'a',
+            tree => [
+                '/b' => { name => 'b', to => 'a#b' },
+                '/c' => 'a#c'
+            ]
+        }
+    );
+    is_deeply _d( $r, 'name' ), [ {}, { name => 'b' }, {} ];
 
     # Good tree
     $r->clear;
@@ -180,14 +192,15 @@ my $r = Kelp::Routes->new;
                     name => 'change',
                     tree => [
                         '/name' => { to => 'bar#change_name', name => 'name' },
-                        [ PUT  => '/email' ] => { to => 'bar#change_email', name => 'email' }
+                        [ PUT  => '/email' ] =>
+                          { to => 'bar#change_email', name => 'email' }
                     ]
                 }
             ]
         }
     );
 
-    is_deeply _d( $r, qw/pattern name to via/ ), [
+    is_deeply _d( $r, qw/pattern name to method/ ), [
         {
             pattern => '/user',
             name    => 'user',
@@ -204,7 +217,7 @@ my $r = Kelp::Routes->new;
             pattern => '/user/id',
             name    => 'user_delete',
             to      => 'Bar::del',
-            via     => 'DELETE'
+            method  => 'DELETE'
         }, {
             pattern => '/user/change',
             name    => 'user_change',
@@ -217,11 +230,10 @@ my $r = Kelp::Routes->new;
             pattern => '/user/change/email',
             name    => 'user_change_email',
             to      => 'Bar::change_email',
-            via     => 'PUT'
+            method  => 'PUT'
         }
       ];
 }
-
 
 sub _d {
     my ( $r, @fields ) = @_;
@@ -229,7 +241,7 @@ sub _d {
     for my $route ( @{ $r->routes } ) {
         my @a = scalar(@fields) ? @fields : keys %{$route};
         my %h = ();
-        for my $k ( @a ) {
+        for my $k (@a) {
             $h{$k} = $route->{$k} if ( defined $route->{$k} );
         }
         push @o, \%h;
@@ -237,7 +249,5 @@ sub _d {
     return \@o;
 }
 
-
 done_testing;
-
 

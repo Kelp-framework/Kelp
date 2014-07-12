@@ -275,7 +275,7 @@ _match(
 
 # Method
 {
-    my $p = Kelp::Routes::Pattern->new( pattern => '/a', via => 'POST' );
+    my $p = Kelp::Routes::Pattern->new( pattern => '/a', method => 'POST' );
     ok $p->match('/a', 'POST');
     ok !$p->match('/a', 'GET');
     ok !$p->match('/a');
