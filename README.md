@@ -37,11 +37,11 @@ $app->run;
 
 Finally ...
 
-```none
+```
 > plackup app.psgi
 ```
 
-Or, for quick prototyping use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less):
+Or, for quick prototyping use [Kelp::Less](https://metacpan.org/pod/Kelp::Less):
 
 ```perl
 # app.psgi
@@ -69,21 +69,21 @@ framework.
 
 Kelp provides:
 
-- __Advanced Routing__. Create intricate, yet simple ways to capture HTTP requests
+- **Advanced Routing**. Create intricate, yet simple ways to capture HTTP requests
 and route them to their designated code. Use explicit and optional named
 placeholders, wildcards, or just regular expressions.
-- __Flexible Configuration__. Use different configuration file for each
+- **Flexible Configuration**. Use different configuration file for each
 environment, e.g. development, deployment, etc. Merge a temporary configuration
 into your current one for testing and debugging purposes.
-- __Enhanced Logging__. Log messages at different levels of emergency. Log to a
+- **Enhanced Logging**. Log messages at different levels of emergency. Log to a
 file, screen, or anything supported by Log::Dispatcher.
-- __Powerful Rendering__. Use the built-in auto-rendering logic, or the template
+- **Powerful Rendering**. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.
-- __JSON encoder/decoder__. Kelp comes with JSON, but you can easily plug in JSON::XS
+- **JSON encoder/decoder**. Kelp comes with JSON, but you can easily plug in JSON::XS
 or any decoder of your choice.
-- __Extendable Core__. Kelp uses pluggable modules for everything. This allows
+- **Extendable Core**. Kelp uses pluggable modules for everything. This allows
 anyone to add a module for a custom interface. Writing Kelp modules is easy.
-- __Sleek Testing__. Kelp takes Plack::Test and wraps it in an object oriented
+- **Sleek Testing**. Kelp takes Plack::Test and wraps it in an object oriented
 class of convenience methods. Testing is done via sending requests to your
 routes, then analyzing the response.
 
@@ -93,7 +93,7 @@ What makes Kelp different from the other Perl micro web frameworks? There are a
 number of fine web frameworks on CPAN, and most of them provide a complete
 platform for web app building. Most of them, however, bring their deployment code,
 and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
-_Plack_\-centric. It uses Plack as its foundation layer, and it builds the web
+_Plack_-centric. It uses Plack as its foundation layer, and it builds the web
 framework on top of it. `Kelp::Request` is an extension of `Plack::Request`,
 `Kelp::Response` is an extension of `Plack::Response`.
 
@@ -113,22 +113,22 @@ and a small footprint, and it's completely object manager agnostic.
 The easiest way to create the directory structure and a general application
 skeleton is by using the `Kelp` script, which comes with this package.
 
-```none
+```
 > Kelp MyApp
 ```
 
 This will create `lib/MyApp.pm`, `app.psgi` and some other files (explained
 below).
 
-To create a [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less) app, use:
+To create a [Kelp::Less](https://metacpan.org/pod/Kelp::Less) app, use:
 
-```none
+```
 > Kelp --less MyApp
 ```
 
 Get help by typing:
 
-```none
+```
 > Kelp --help
 ```
 
@@ -138,7 +138,7 @@ Before you begin writing the internals of your app, you need to create the
 directory structure either by hand, or by using the above described `Kelp`
 utility script.
 
-```none
+```
  .
  |--/lib
  |   |--MyApp.pm
@@ -156,12 +156,12 @@ utility script.
  |--app.psgi
 ```
 
-- __/lib__
+- **/lib**
 
     The `lib` folder contains your application modules and any local modules
     that you want your app to use.
 
-- __/conf__
+- **/conf**
 
     The `conf` folder is where Kelp will look for configuration files. You need one
     main file, named `config.pl`. You can also add other files that define different
@@ -172,32 +172,32 @@ utility script.
 
     ```perl
     my $app = MyApp->new( mode => 'development' );
-```
+    ```
 
     or
 
-    ```none
+    ```
     > PLACK_ENV=development plackup app.psgi
-```
+    ```
 
-- __/view__
+- **/view**
 
     This is where the `Template` module will look for template files.
 
-- __/log__
+- **/log**
 
     This is where the `Logger` module will create `error.log`, `debug.log` and
     any other log files that were defined in the configuration.
 
-- __/t__
+- **/t**
 
     The `t` folder is traditionally used to hold test files. It is up to you to use
     it or not, although we strongly recommend that you write some automated test
     units for your web app.
 
-- __app.psgi__
+- **app.psgi**
 
-    This is the [PSGI](http://search.cpan.org/perldoc?PSGI) file, of the app, which you will deploy. In it's most basic
+    This is the [PSGI](https://metacpan.org/pod/PSGI) file, of the app, which you will deploy. In it's most basic
     form it should look like this:
 
     ```perl
@@ -206,7 +206,7 @@ utility script.
 
     my $app = MyApp->new;
     $app->run;
-```
+    ```
 
 ## The application classes
 
@@ -260,10 +260,10 @@ the creation of the object instance, e.g. when we call `MyApp->new`;
 - The `read` subroutine, takes `$self` and `$id` (the named placeholder from the
 path), and uses `$self->dbh` to retrieve data.
 
-_A note about object managers:_ The above example uses [Moose](http://search.cpan.org/perldoc?Moose). It is entirely
+_A note about object managers:_ The above example uses [Moose](https://metacpan.org/pod/Moose). It is entirely
 up to you to use Moose, another object manager, or no object manager at all.
 The above example will be just as successful if you used our own little
-[Kelp::Base](http://search.cpan.org/perldoc?Kelp::Base):
+[Kelp::Base](https://metacpan.org/pod/Kelp::Base):
 
 ```perl
 package MyApp;
@@ -280,7 +280,7 @@ attr dbi => sub {
 
 Kelp uses a powerful and very flexible router. Traditionally, it is also light
 and consists of less than 300 lines of code (comments included). You are
-encouraged to read [Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes), but here are some key points. All examples
+encouraged to read [Kelp::Routes](https://metacpan.org/pod/Kelp::Routes), but here are some key points. All examples
 are assumed to be inside the ["build"](#build) method and `$r` is equal to
 `$self->routes`:
 
@@ -334,7 +334,7 @@ This will handle `/person`, `/person/` and `/person/jack`.
 
 #### Wildcards
 
-```perl
+```
 $r->add( '/*article/:id', 'Articles::view' );
 ```
 
@@ -380,7 +380,7 @@ $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
 $r->add( '/users/:action' => 'Users::dispatch' );
 ```
 
-See ["BRIDGES" in Kelp::Routes](http://search.cpan.org/perldoc?Kelp::Routes#BRIDGES) for more information.
+See ["BRIDGES" in Kelp::Routes](https://metacpan.org/pod/Kelp::Routes#BRIDGES) for more information.
 
 ### URL building
 
@@ -400,7 +400,7 @@ my $url = $self->route->url('update', id => 1000); # /update/1000
 All of the examples here show routes which take an instance of the web
 application as a first parameter. This is true even if those routes live in
 another class. To rebless the app instance into the controller class instance,
-use the custom router class [Kelp::Router::Controller](http://search.cpan.org/perldoc?Kelp::Router::Controller).
+use the custom router class [Kelp::Router::Controller](https://metacpan.org/pod/Kelp::Router::Controller).
 
 ### Step 1: Specify the custom router class in the config
 
@@ -454,7 +454,7 @@ sub authenticate {
 ## Quick development using Kelp::Less
 
 For writing quick experimental web apps and to reduce the boiler plate, one
-could use [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less). In this case all of the code can be put in `app.psgi`:
+could use [Kelp::Less](https://metacpan.org/pod/Kelp::Less). In this case all of the code can be put in `app.psgi`:
 Look up the POD for `Kelp::Less` for many examples, but to get you started off,
 here is a quick one:
 
@@ -539,7 +539,7 @@ Note that any middleware defined in your config file will be added first.
 Deploying a Kelp application is done the same way any other Plack application is
 deployed:
 
-```none
+```
 > plackup -E deployment -s Starman app.psgi
 ```
 
@@ -549,9 +549,9 @@ Kelp provides a test class called `Kelp::Test`. It is object oriented, and all
 methods return the `Kelp::Test` object, so they can be chained together.
 Testing is done by sending HTTP requests to an already built application and
 analyzing the response. Therefore, each test usually begins with the
-["request" in Kelp::Test](http://search.cpan.org/perldoc?Kelp::Test#request) method, which takes a single [HTTP::Request](http://search.cpan.org/perldoc?HTTP::Request) parameter.
+["request" in Kelp::Test](https://metacpan.org/pod/Kelp::Test#request) method, which takes a single [HTTP::Request](https://metacpan.org/pod/HTTP::Request) parameter.
 It sends the request to the web app and saves the response as an
-[HTTP::Response](http://search.cpan.org/perldoc?HTTP::Response) object.
+[HTTP::Response](https://metacpan.org/pod/HTTP::Response) object.
 
 ```perl
 # file t/test.t
@@ -584,27 +584,27 @@ database.
 - Second, we create an instance of the `Kelp::Test` class and tell it that it
 will perform all tests using our `$app` instance.
 - At this point we are ready to send requests to the app via the
-[request](http://search.cpan.org/perldoc?Kelp::Test#request) method. It takes only one argument, an
-HTTP::Request object. It is very convenient to use the [HTTP::Request::Common](http://search.cpan.org/perldoc?HTTP::Request::Common)
+[request](https://metacpan.org/pod/Kelp::Test#request) method. It takes only one argument, an
+HTTP::Request object. It is very convenient to use the [HTTP::Request::Common](https://metacpan.org/pod/HTTP::Request::Common)
 module here, because you can create common requests using abridged syntax,
 i.e. `GET`, `POST`, etc.  The line `$t->request( GET '/path' )` fist
 creates a HTTP::Request GET object, and then passes it to the `request` method.
 - After we send the request, we can test the response using any of the `Test::`
-modules, or via the methods provided by [Kelp::Test](http://search.cpan.org/perldoc?Kelp::Test).
+modules, or via the methods provided by [Kelp::Test](https://metacpan.org/pod/Kelp::Test).
 In the above example, we test if we got a code 200 back from `/path` and if the
 returned content was `It works`.
 
 Run the rest as usual, using `prove`:
 
-```none
+```
 > prove -l t/test.t
 ```
 
-Take a look at the [Kelp::Test](http://search.cpan.org/perldoc?Kelp::Test) for details and more examples.
+Take a look at the [Kelp::Test](https://metacpan.org/pod/Kelp::Test) for details and more examples.
 
 ## Building an HTTP response
 
-Kelp contains an elegant module, called [Kelp::Response](http://search.cpan.org/perldoc?Kelp::Response), which extends
+Kelp contains an elegant module, called [Kelp::Response](https://metacpan.org/pod/Kelp::Response), which extends
 `Plack::Response` with several useful methods. Most methods return `$self`
 after they do the required job.
 For the sake of the examples below, let's assume that all of the code is located
@@ -689,7 +689,7 @@ $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
 
 ### Serving static files
 
-If you want to serve static pages, you can use the [Plack::Middleware::Static](http://search.cpan.org/perldoc?Plack::Middleware::Static)
+If you want to serve static pages, you can use the [Plack::Middleware::Static](https://metacpan.org/pod/Plack::Middleware::Static)
 middleware that comes with Plack. Here is an example configuration that serves
 files in your `public` folder (under the Kelp root folder) from URLs that
 begin with `/public`:
@@ -709,7 +709,7 @@ begin with `/public`:
 
 ### Uploading files
 
-File uploads are handled by [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), which inherits Plack::Request
+File uploads are handled by [Kelp::Request](https://metacpan.org/pod/Kelp::Request), which inherits Plack::Request
 and has its `uploads|Plack::Request/uploads` property. The uploads property returns a
 reference to a hash containing all uploads.
 
@@ -723,7 +723,7 @@ sub upload {
 }
 ```
 
-For [Kelp::Less](http://search.cpan.org/perldoc?Kelp::Less), then you can use the `req` reserved word:
+For [Kelp::Less](https://metacpan.org/pod/Kelp::Less), then you can use the `req` reserved word:
 
 ```perl
 get '/upload' => sub {
@@ -747,7 +747,7 @@ sub delayed {
 }
 ```
 
-See the [PSGI](http://search.cpan.org/perldoc?PSGI#Delayed-Response-and-Streaming-Body) pod for more
+See the [PSGI](https://metacpan.org/pod/PSGI#Delayed-Response-and-Streaming-Body) pod for more
 information and examples.
 
 ## Pluggable modules
@@ -755,7 +755,7 @@ information and examples.
 Kelp can be extended using custom _modules_. Each new module must be a subclass
 of the `Kelp::Module` namespace. Modules' job is to initialize and register new
 methods into the web application class. The following is the full code of the
-[Kelp::Module::JSON](http://search.cpan.org/perldoc?Kelp::Module::JSON) for example:
+[Kelp::Module::JSON](https://metacpan.org/pod/Kelp::Module::JSON) for example:
 
 ```perl
 package Kelp::Module::JSON;
@@ -783,18 +783,18 @@ If we instruct our web application to load the `JSON` module, it will have a
 new method `json` which will be a link to the `JSON` object initialized in the
 module.
 
-See more exampled and POD at [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module).
+See more exampled and POD at [Kelp::Module](https://metacpan.org/pod/Kelp::Module).
 
 ### How to load modules using the config
 
-There are two modules that are __always__ loaded by each application instance.
+There are two modules that are **always** loaded by each application instance.
 Those are `Config` and `Routes`. The reason behind this is that each and every
 application always needs a router and configuration.
-All other modules must be loaded either using the ["load\_module"](#load\_module) method, or
+All other modules must be loaded either using the ["load\_module"](#load_module) method, or
 using the `modules` key in the configuration. The default configuration already
 loads these modules: `Template`, `Logger` and `JSON`. Your configuration can
 remove some and/or add others. The configuration key `modules_init` may contain
-hashes with initialization arguments. See [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module) for configuration
+hashes with initialization arguments. See [Kelp::Module](https://metacpan.org/pod/Kelp::Module) for configuration
 examples.
 
 # ATTRIBUTES
@@ -816,7 +816,7 @@ sub some_route {
 
 Sets or gets the current mode. The mode is important for the app to know what
 configuration file to merge into the main configuration. See
-[Kelp::Module::Config](http://search.cpan.org/perldoc?Kelp::Module::Config) for more information.
+[Kelp::Module::Config](https://metacpan.org/pod/Kelp::Module::Config) for more information.
 
 ```perl
 my $app = MyApp->new( mode => 'development' );
@@ -828,7 +828,7 @@ my $app = MyApp->new( mode => 'development' );
 
 Sets of gets the class of the configuration module to be loaded on startup. The
 default value is `Config`, which will cause the `Kelp::Module::Config` to get
-loaded. See the documentation for [Kelp::Module::Config](http://search.cpan.org/perldoc?Kelp::Module::Config) for more information
+loaded. See the documentation for [Kelp::Module::Config](https://metacpan.org/pod/Kelp::Module::Config) for more information
 and for an example of how to create and use other config modules.
 
 ## loaded\_modules
@@ -847,9 +847,6 @@ the `loaded_modules` hash will look like this:
 This can come handy if your module does more than just registering a new method
 into the application. Then, you can use its object instance to do access that
 additional functionality.
-
-```perl
-```
 
 ## path
 
@@ -878,7 +875,7 @@ The `KELP_LONG_ERROR` environment variable can also set this attribute.
 ## req
 
 This attribute only makes sense if called within a route definition. It will
-contain a reference to the current [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request) instance.
+contain a reference to the current [Kelp::Request](https://metacpan.org/pod/Kelp::Request) instance.
 
 ```perl
 sub some_route {
@@ -892,7 +889,7 @@ sub some_route {
 ## res
 
 This attribute only makes sense if called within a route definition. It will
-contain a reference to the current [Kelp::Response](http://search.cpan.org/perldoc?Kelp::Response) instance.
+contain a reference to the current [Kelp::Response](https://metacpan.org/pod/Kelp::Response) instance.
 
 ```perl
 sub some_route {
@@ -942,21 +939,21 @@ $self->load_module("Redis", server => '127.0.0.1');
 Options for the module may be specified after its name, or in the
 `modules_init` hash in the config. The precedence is given to the
 inline options.
-See [Kelp::Module](http://search.cpan.org/perldoc?Kelp::Module) for more information on making and using modules.
+See [Kelp::Module](https://metacpan.org/pod/Kelp::Module) for more information on making and using modules.
 
-## request
+## build\_request
 
 This method is used to create the request object for each HTTP request. It
-returns an instance of [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request), initialized with the current request's
+returns an instance of [Kelp::Request](https://metacpan.org/pod/Kelp::Request), initialized with the current request's
 environment. You can override this method to use a custom request module.
 
 ```perl
 package MyApp;
 use MyApp::Request;
 
-sub request {
+sub build_request {
     my ( $self, $env ) = @_;
-    return MyApp::Requst->new( app => $app, env => $env );
+    return MyApp::Request->new( app => $app, env => $env );
 }
 
 # Now each request will be handled by MyApp::Request
@@ -981,16 +978,16 @@ sub before_finalize {
 The above is an example of how to insert a custom header into the response of
 every route.
 
-## response
+## build\_response
 
 This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is [Kelp::Response](http://search.cpan.org/perldoc?Kelp::Response). Much like ["request"](#request), the
+By default the object created is [Kelp::Response](https://metacpan.org/pod/Kelp::Response). Much like ["build\_request"](#build_request), the
 response can also be overridden to use a custom response object.
 
 ## run
 
 This method builds and returns the PSGI app. You can override it in order to
-include middleware. See ["Adding middleware"](#Adding middleware) for an example.
+include middleware. See ["Adding middleware"](#adding-middleware) for an example.
 
 ## param
 
@@ -1005,11 +1002,11 @@ sub some_route {
 }
 ```
 
-See [Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request) for more information and examples.
+See [Kelp::Request](https://metacpan.org/pod/Kelp::Request) for more information and examples.
 
 ## session
 
-A shortcut to `$self->req->session`. Take a look at ["session" in Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request#session)
+A shortcut to `$self->req->session`. Take a look at ["session" in Kelp::Request](https://metacpan.org/pod/Kelp::Request#session)
 for more information and examples.
 
 ## stash
@@ -1017,14 +1014,14 @@ for more information and examples.
 Provides safe access to `$self->req->stash`. When called without
 arguments, it will return the stash hash. If called with a single argument, it
 will return the value of the corresponding key in the stash.
-See ["stash" in Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request#stash) for more information and examples.
+See ["stash" in Kelp::Request](https://metacpan.org/pod/Kelp::Request#stash) for more information and examples.
 
 ## named
 
 Provides safe access to `$self->req->named`. When called without
 arguments, it will return the named hash. If called with a single argument, it
 will return the value of the corresponding key in the named hash.
-See ["named" in Kelp::Request](http://search.cpan.org/perldoc?Kelp::Request#named) for more information and examples.
+See ["named" in Kelp::Request](https://metacpan.org/pod/Kelp::Request#named) for more information and examples.
 
 ## url\_for
 
@@ -1049,7 +1046,7 @@ sub check {
 # SUPPORT
 
 - GitHub: https://github.com/naturalist/kelp
-- Mailing list: https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp
+- Mailing list: https://groups.google.com/forum/?fromgroups#!forum/perl-kelp
 
 # AUTHOR
 

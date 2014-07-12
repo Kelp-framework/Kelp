@@ -1,10 +1,26 @@
+2014-07-12: Version 0.9012
+
+            [New features]
+            - Add access to the application instance from the config files
+            - Kelp.pm methods 'requiest' and 'response' renamed to 'build_request' and 'build_response', in order
+              to minimize cofusion. NOTE: If your application is overriding any of those, make sure to rename them too.
+            - Replace explicit UTF-8 encoding with $app->charset
+            - Rename pattern attribute 'via' to 'method'. 'via' will still work as a shortcut to 'method', so
+              this will not break backwards compatibility.
+
+            [Fixes]
+            - POD fixes
+
+            [Other]
+            - Using Pod::Markdown::Github to generate README.md from Kelp.pm
+
 2014-05-30: Version 0.9001
 
-            Bug Fixes:
+            [Bug Fixes:]
             - Curly braces get stripped from pattern checks
             - Remove HTTP_X headers from Kelp::Request (security hole)
 
-            New features
+            [New features]
             - Allow for extending Kelp::Routes and using custom routers (Maurice Aubrey)
             - Create Kelp::Routes::Controller, which reblesses the web app into a controller class (Maurice Aubrey)
             - Set env KELP_CONFIG_WARN to warn for missing config files
