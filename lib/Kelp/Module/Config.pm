@@ -279,6 +279,15 @@ application L<mode|Kelp/mode> is I<development>, then C<conf/development.pl>
 and C<../conf/development.pl> will be looked for. If found, they will also be
 merged to the config hash.
 
+=head1 ACCESSING THE APPLICATION
+
+The application instance can be accessed within the config files via the C<app>
+keyword.
+
+    {
+        bin_path => app->path . '/bin'
+    }
+
 =head1 MERGING
 
 The first configuration file this module will look for is C<config.pl>. This is
