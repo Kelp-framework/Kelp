@@ -151,6 +151,28 @@ my $r = Kelp::Routes->new;
     $r->base('');
 }
 
+# Base + fully qualified name
+{
+    $r->clear;
+    $r->base('Bar');
+    $r->add( '/a' => '+Plack::Util::load_class' );
+    is_deeply _d( $r, qw/to/ ), [
+        {
+            to => 'Plack::Util::load_class'
+        }
+      ];
+
+    $r->clear;
+    $r->add( '/a' => '+plack#util#load_class');
+    is_deeply _d( $r, qw/to/ ), [
+        {
+            to => 'Plack::Util::load_class'
+        }
+      ];
+
+    $r->base('');
+}
+
 # Tree
 #
 {

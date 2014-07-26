@@ -68,7 +68,8 @@ sub _parse_route {
 
     # Format destination
     if ( !ref $val->{to} ) {
-        $val->{to} = _camelize( $val->{to}, $self->base );
+        my $sigil = $val->{to} =~ s/^(\+)// ? $1 : undef;
+        $val->{to} = _camelize( $val->{to}, $sigil ? undef : $self->base );
 
         # Load the class, if there is one and it is not 'main'
         if (   defined $val->{to}
@@ -475,8 +476,8 @@ This will prepend C<MyApp::> to all route destinations.
     $r->add( '/view' => 'User::view' );    # /view -> MyApp::User::view
 
 A Kelp application will automatically set this value to the name of the main
-class. If you need to use a route located in another package, you'll have to
-wrap it in a local sub:
+class. If you need to use a route located in another package, you must prefix
+it with a plus sign:
 
     # Problem:
 
@@ -486,11 +487,8 @@ wrap it in a local sub:
 
     # Solution:
 
-    $r->add( '/outside' => 'outside' );
-    ...
-    sub outside {
-        return Outside::Module::route;
-    }
+    $r->add( '/outside' => '+Outside::Module::route' );
+    # /outside -> Outside::Module::route
 
 =head2 cache
 
