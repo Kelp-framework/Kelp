@@ -7,9 +7,14 @@ use Carp;
 use Log::Dispatch;
 use Data::Dumper;
 
+sub _logger {
+    my ( $self, %args ) = @_;
+    Log::Dispatch->new(%args);
+}
+
 sub build {
     my ( $self, %args ) = @_;
-    my $logger = $self->{logger} = Log::Dispatch->new(%args);
+    my $logger = $self->{logger} = $self->_logger(%args);
 
     # Register a few levels
     my @levels_to_register = qw/debug info error/;
