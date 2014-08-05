@@ -8,6 +8,8 @@ our @EXPORT = qw/
   attr
   config
   del
+  debug
+  error
   get
   module
   named
@@ -84,8 +86,8 @@ sub req      { $app->req }
 sub res      { $app->res }
 sub template { $app->res->template(@_) }
 sub view     { $app->res->template(@_) }
-sub debug    { $app->debug(@_) }
-sub error    { $app->error(@_) }
+sub debug    { $app->debug(@_) if $app->can('debug') }
+sub error    { $app->error(@_) if $app->can('error') }
 sub module   { $app->load_module(@_) }
 sub config   { $app->config(@_) }
 
