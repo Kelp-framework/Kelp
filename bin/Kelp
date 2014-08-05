@@ -9,12 +9,14 @@ use File::Slurp 'write_file';
 
 my $path = '.';
 my $verbose = 1;
+my $force = 0;
 my $less = 0;
 my $help = 0;
 
 GetOptions(
     "path=s"   => \$path,
     "verbose!" => \$verbose,
+    "force!"   => \$force,
     "less"     => \$less,
     "help"     => \$help
 );
@@ -29,6 +31,7 @@ Options:
     --path=s        Path where to create the files
     --less          Create a Kelp::Less application files
     --(no)verbose   Display information
+    --force         Force overwriting existing files
     --help          This help screen
 ];
     say $usage;
@@ -81,6 +84,12 @@ while ( my ( $filename, $lines ) = each %$files ) {
         _say("Creating folder: $dir");
         make_path($dir);
     }
+
+    if ( -e $filename && !$force) {
+        say "File $filename exists. Use --force to overwrite.";
+        next;
+    }
+
     _say("Writing file: $filename");
     write_file( $filename, $lines );
 }
@@ -93,9 +102,11 @@ sub _say {
 }
 
 __DATA__
-:app.psgi
 [% IF less -%]
+:[% name %].psgi
 use Kelp::Less;
+
+module 'Logger::StdErr';
 
 get '/home' => sub {
     template 'home';
@@ -103,6 +114,7 @@ get '/home' => sub {
 
 run;
 [% ELSE -%]
+:app.psgi
 use lib 'lib';
 use [% name %];
 
