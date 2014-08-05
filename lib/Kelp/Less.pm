@@ -6,20 +6,22 @@ use Kelp::Base -strict;
 our @EXPORT = qw/
   app
   attr
-  route
+  config
+  del
   get
+  module
+  named
+  param
   post
   put
-  del
-  run
-  param
-  stash
-  named
   req
   res
-  template
-  module
+  route
+  run
   session
+  stash
+  template
+  view
   /;
 
 our $app;
@@ -81,9 +83,11 @@ sub named    { $app->named(@_) }
 sub req      { $app->req }
 sub res      { $app->res }
 sub template { $app->res->template(@_) }
+sub view     { $app->res->template(@_) }
 sub debug    { $app->debug(@_) }
 sub error    { $app->error(@_) }
 sub module   { $app->load_module(@_) }
+sub config   { $app->config(@_) }
 
 1;
 
@@ -315,6 +319,14 @@ currently loaded template module.
         template 'hello.tt', { name => named 'name' };
     };
 
+=head2 view
+
+A shortcut for L</template>.
+
+    get '/hello/:name' => sub {
+        view 'hello.tt', { name => named 'name' };
+    };
+
 =head2 run
 
 Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack>.
@@ -324,6 +336,14 @@ Creates and returns a PSGI ready subroutine, and makes the app ready for C<Plack
 Loads a Kelp module. The module options may be specified after the module name.
 
     module 'JSON::XS', pretty => 1;
+
+=head2 config
+
+Provides procedural interface to the configuration.
+
+    get '/hello' => sub {
+        my $baz = config('bar.foo.baz');
+    };
 
 =head1 TESTING
 

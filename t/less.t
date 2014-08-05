@@ -69,4 +69,8 @@ route '/sub' => 'func';
 sub func { "K" }
 $t->request( GET '/sub' )->content_is("K");
 
+# config
+route '/config' => sub { config('modules') };
+$t->request( GET '/config')->json_cmp(['JSON', 'Template']);
+
 done_testing;
