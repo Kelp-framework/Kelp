@@ -17,8 +17,13 @@ my $app = MyApp2->new(
     }
 );
 
+$app->routes->add('/inline', sub {"OK"});
+
 # Test object
 my $t = Kelp::Test->new( app => $app );
+
+$t->request_ok( GET '/inline')
+  ->content_is("OK");
 
 $t->request_ok( GET '/blessed' )
   ->content_is('MyApp2::Controller');

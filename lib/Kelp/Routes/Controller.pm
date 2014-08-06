@@ -10,7 +10,7 @@ sub dispatch {
 
     my $to = $match->to or croak 'No destination defined';
 
-    return $self->SUPER::dispatch($match, $app) if ref $to;
+    return $self->SUPER::dispatch($app, $match) if ref $to;
 
     my ($controller_class, $action) = ($to =~ /^(.+)::(\w+)$/)
         or croak "Invalid controller '$to'";
