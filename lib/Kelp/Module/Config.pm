@@ -144,7 +144,7 @@ sub build {
             $parsed = $self->load($name);
         }
         catch {
-            croak "Parsing $name died with error: '${_}'";
+            die "Parsing $name died with error: '${_}'";
         };
         $data_ref = _merge( $data_ref, $parsed );
     };

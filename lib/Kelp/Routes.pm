@@ -137,7 +137,7 @@ sub _parse_route {
 
 sub url {
     my $self = shift;
-    my $name = shift // croak "Route name is missing";
+    my $name = shift // die "Route name is missing";
     my %args = @_ == 1 ? %{ $_[0] } : @_;
 
     return $name unless exists $self->names->{$name};

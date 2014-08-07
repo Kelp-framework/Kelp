@@ -6,7 +6,7 @@ use Encode;
 use Carp;
 use Try::Tiny;
 
-attr -app => sub { confess "app is required" };
+attr -app => sub { croak "app is required" };
 attr rendered => 0;
 attr partial  => 0;
 
@@ -80,8 +80,8 @@ sub render {
 
     # If the content has been determined as JSON, then encode it
     if ( $self->content_type eq 'application/json' ) {
-        confess "No JSON decoder" unless $self->app->can('json');
-        confess "Data must be a reference" unless ref($body);
+        die "No JSON decoder" unless $self->app->can('json');
+        die "Data must be a reference" unless ref($body);
         my $json = $self->app->json;
         $body = $json->encode($body);
         $body = encode($self->app->charset, $body) unless $json->get_utf8;
@@ -102,7 +102,7 @@ sub render_binary {
     $self->set_code(200) unless $self->code;
 
     if ( !$self->content_type ) {
-        confess "Content-type must be explicitly set for binaries";
+        die "Content-type must be explicitly set for binaries";
     }
 
     $self->body($body);
@@ -176,7 +176,7 @@ sub template {
     $vars->{app} = $self->app;
 
     # Do we have a template module loaded?
-    croak "No template module loaded"
+    die "No template module loaded"
       unless $self->app->can('template');
 
     my $output = $self->app->template( $template, $vars, @rest );

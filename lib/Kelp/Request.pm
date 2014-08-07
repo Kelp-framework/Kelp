@@ -6,7 +6,7 @@ use Encode;
 use Carp;
 use Try::Tiny;
 
-attr -app => sub { confess "app is required" };
+attr -app => sub { croak "app is required" };
 
 # The stash is used to pass values from one route to another
 attr stash => sub { {} };
@@ -42,7 +42,7 @@ sub param {
     my $self = shift;
 
     if ( $self->is_json ) {
-        croak "No JSON decoder" unless $self->app->can('json');
+        die "No JSON decoder" unless $self->app->can('json');
         my $hash = try {
             $self->app->json->decode( $self->content );
         }
@@ -60,7 +60,7 @@ sub session {
     my $self = shift;
     if ( !@_ ) {
         return $self->env->{'psgix.session'}
-          // croak "No Session middleware wrapped";
+          // die "No Session middleware wrapped";
     }
     return $self->session->{ $_[0] } if @_ == 1;
     my %hash = @_;
