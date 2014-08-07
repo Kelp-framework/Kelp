@@ -106,12 +106,10 @@ __DATA__
 :[% name %].psgi
 use Kelp::Less;
 
-module 'Logger::StdErr';
-module 'Template';
-module 'JSON';
+module 'Logger::Simple';
 
-get '/home' => sub {
-    template 'home';
+get '/' => sub {
+    "Hello, world!";
 };
 
 run;
