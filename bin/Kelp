@@ -107,6 +107,8 @@ __DATA__
 use Kelp::Less;
 
 module 'Logger::StdErr';
+module 'Template';
+module 'JSON';
 
 get '/home' => sub {
     template 'home';
@@ -120,8 +122,6 @@ use [% name %];
 
 my $app = [% name %]->new();
 $app->run;
-[% END -%]
-[% UNLESS less -%]
 :lib/[% module_path %]/[% module_file %].pm
 package [% name %];
 use Kelp::Base 'Kelp';
@@ -139,8 +139,6 @@ sub home {
 }
 
 1;
-[% END -%]
-[% UNLESS less -%]
 :conf/config.pl
 # Common settings
 {
@@ -224,32 +222,22 @@ sub home {
     # No Logger when testing
     "-modules" => ['Logger']
 }
-[% END -%]
 :views/home.tt
 Hello, world!
-[% UNLESS less -%]
 :log/keep
 keeper
-[% END -%]
 :t/main.t
 use Kelp::Base -strict;
 use Kelp::Test;
 use Test::More;
 use HTTP::Request::Common;
-[% UNLESS less -%]
 use [% name %];
-[% END -%]
 
-[% IF less -%]
-# Create a test object using the app file
-my $t = Kelp::Test->new( psgi => 'app.psgi' );
-[% ELSE -%]
 # Create an application object
 my $app = [% name %]->new( mode => 'test' );
 
 # Feed it into a test object
 my $t = Kelp::Test->new( app => $app );
-[% END -%]
 
 # Send a GET request to /home and test the response
 $t->request( GET '/home' )
@@ -258,3 +246,4 @@ $t->request( GET '/home' )
   ->content_like(qr/Hello, world!/);
 
 done_testing;
+[% END %]

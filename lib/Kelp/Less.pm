@@ -40,7 +40,7 @@ sub import {
     warnings->import;
     feature->import(':5.10');
 
-    $app = Kelp->new(@_);
+    $app = Kelp->new(config_module => 'Config::Less', @_);
     $app->routes->base('main');
 }
 
@@ -315,7 +315,12 @@ object for the current route.
 =head2 template
 
 A shortcut to C<$self-E<gt>res-E<gt>template>. Renders a template using the
-currently loaded template module.
+currently loaded template module. Note that a Kelp::Less application does not
+by default load a template module, so you will have to load it yourself.
+
+    use Kelp::Less;
+
+    module 'Template', path => 'views';
 
     get '/hello/:name' => sub {
         template 'hello.tt', { name => named 'name' };
