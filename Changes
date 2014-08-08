@@ -1,3 +1,45 @@
+2014-08-08: Version 0.9015
+
+            [Bug Fixes]
+
+            - Fix a typo causing a fatal error in Routes::Controller
+            - Fix debug and error keywords in Kelp::Less
+            - Remove an explicit return undef, per Perl::Critic
+
+            [New Features and Improvements]
+
+            - Allow for route methods outside of base class
+              It is now possible to add a route that lives outside of the base class
+              by prefixing it with '+'. This works for both Perl and camelized
+              strings.
+
+            - Add config keyword to Kelp::Less
+
+            - Virtualize the logger instantiation
+              Add a _logger function in Module::Logger, which creates the logger
+              instance, making it easier to subclass the Logger module.
+              Add a Logger::Simple module, which dumps everything to STDERR
+              This module is convenient to use during development with Kelp::Less.
+
+            - Update bin/Kelp
+              * bin/Kelp --less <name> will now create a psgi file with the specified name
+                (previously it would always create app.psgi).
+              * Existing files will not be overwritten, unless --force specified.
+
+            - Simplify Less application boilerplate
+              Add a Config subclass with simplified configuration that will be used by
+              default by any Kelp::Less application. This configuration will not load
+              any modules or middleware, leaving it up to the user to manually load
+              any modules needed.
+              Additionally, bin/Kelp --less <name> will now only generate the psgi
+              application, and not any other folders, views, templates etc.
+
+            - Downgrade confess to croak and croak to die
+              Kelp::Response used confess and croak excessively. Both changed to die,
+              so that the user can control how much stack trace they want via the
+              'long_error' attribute or the KELP_LONG_ERROR env variable.
+
+
 2014-07-12: Version 0.9012
 
             [New features]
