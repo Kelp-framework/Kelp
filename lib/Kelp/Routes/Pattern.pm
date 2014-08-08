@@ -94,7 +94,7 @@ sub build {
         carp $1 eq '!'
             ? "Field $2 doesn't match checks"
             : "Default value for field $2 is missing";
-        return undef;
+        return;
     }
     return $pattern;
 }
