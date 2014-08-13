@@ -578,7 +578,7 @@ if you specify a hashref for a destination:
 Sets the destination for the route. It should be a subroutine name or CODE
 reference.
 
-    $r->add( '/user' => { to => 'users#home' } ); # /home -> MyApp::Users::home
+    $r->add( '/home' => { to => 'users#home' } ); # /home -> MyApp::Users::home
     $r->add( '/sys' => { to => sub { ... } });    # /sys -> execute code
     $r->add( '/item' => { to => 'Items::handle' } ) ;   # /item -> MyApp::Items::handle
     $r->add( '/item' => { to => 'items#handle' } );    # Same as above
