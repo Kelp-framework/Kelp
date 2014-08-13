@@ -1315,6 +1315,8 @@ Stefan Geneshky - minimal <at> cpan.org
 
 =head1 CONTRIBUTORS
 
+Perlover
+
 Ruslan Zakirov
 
 Julio Fraire
