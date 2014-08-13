@@ -491,7 +491,7 @@ units for your web app.
 This is the L<PSGI> file, of the app, which you will deploy. In it's most basic
 form it should look like this:
 
-    use lib '../lib';
+    use lib './lib';
     use MyApp;
 
     my $app = MyApp->new;
