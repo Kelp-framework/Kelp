@@ -103,10 +103,13 @@ sub load {
     {
         local $@;
         my $app = $self->app;
+        my $module = $filename;
+        $module =~ s/\W/_/g;
         $hash =
-            eval "package Kelp::Module::Config::Sandbox;"
+            eval "package Kelp::Module::Config::Sandbox::$module;"
           . "use Kelp::Base -strict;"
           . "sub app; local *app = sub { \$app };"
+          . "sub include(\$); local *include = sub { \$self->load(\@_) };"
           . $text;
         $error = $@;
     }
