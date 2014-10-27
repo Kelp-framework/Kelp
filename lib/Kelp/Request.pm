@@ -150,10 +150,12 @@ to use L<Plack::Middleware::ReverseProxy>.
     # app.psgi
 
     builder {
-        enable_if { $_[0]->{REMOTE_ADDR} =~ /127\.0\.0\.1/ }
+        enable_if { ! $_[0]->{REMOTE_ADDR} || $_[0]->{REMOTE_ADDR} =~ /127\.0\.0\.1/ }
         "Plack::Middleware::ReverseProxy";
         $app->run;
     };
+
+(REMOTE_ADDR is not set at all when using the proxy via filesocket).
 
 =head2 session
 
