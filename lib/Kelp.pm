@@ -1315,9 +1315,7 @@ Stefan Geneshky - minimal <at> cpan.org
 
 =head1 CONTRIBUTORS
 
-Perlover
-
-Ruslan Zakirov
+In no particular order:
 
 Julio Fraire
 
@@ -1326,6 +1324,12 @@ Maurice Aubrey
 David Steinbrunner
 
 Gurunandan Bhat
+
+Perlover
+
+Ruslan Zakirov
+
+senfomat
 
 =head1 LICENSE
 
