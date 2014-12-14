@@ -56,16 +56,17 @@ sub param {
     return $self->SUPER::param(@_);
 }
 
-sub session {
+sub session :lvalue {
     my $self = shift;
     if ( !@_ ) {
         return $self->env->{'psgix.session'}
           // die "No Session middleware wrapped";
     }
-    return $self->session->{ $_[0] } if @_ == 1;
+    my $session = $self->env->{'psgix.session'};
+    return $session->{ $_[0] } if @_ == 1;
     my %hash = @_;
-    $self->session->{$_} = $hash{$_} for keys %hash;
-    return \%hash;
+    $session->{$_} = $hash{$_} for keys %hash;
+    return $session;
 }
 
 1;
