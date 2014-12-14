@@ -1332,6 +1332,8 @@ Ruslan Zakirov
 
 senfomat
 
+Ivan Baidakou (basiliscos)
+
 =head1 LICENSE
 
 This module and all the modules in this package are governed by the same license
