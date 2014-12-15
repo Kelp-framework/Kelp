@@ -201,7 +201,7 @@ utility script.
     form it should look like this:
 
     ```perl
-    use lib '../lib';
+    use lib './lib';
     use MyApp;
 
     my $app = MyApp->new;
@@ -400,7 +400,7 @@ my $url = $self->route->url('update', id => 1000); # /update/1000
 All of the examples here show routes which take an instance of the web
 application as a first parameter. This is true even if those routes live in
 another class. To rebless the app instance into the controller class instance,
-use the custom router class [Kelp::Router::Controller](https://metacpan.org/pod/Kelp::Router::Controller).
+use the custom router class [Kelp::Routes::Controller](https://metacpan.org/pod/Kelp::Routes::Controller).
 
 ### Step 1: Specify the custom router class in the config
 
@@ -528,7 +528,8 @@ returned app.
 sub run {
     my $self = shift;
     my $app = $self->SUPER::run(@_);
-    Plack::Middleware::ContentLength->wrap($app);
+    $app = Plack::Middleware::ContentLength->wrap($app);
+    return $app;
 }
 ```
 
@@ -1054,7 +1055,7 @@ Stefan Geneshky - minimal <at> cpan.org
 
 # CONTRIBUTORS
 
-Ruslan Zakirov
+In no particular order:
 
 Julio Fraire
 
@@ -1063,6 +1064,14 @@ Maurice Aubrey
 David Steinbrunner
 
 Gurunandan Bhat
+
+Perlover
+
+Ruslan Zakirov
+
+Christian Froemmel (senfomat)
+
+Ivan Baidakou (basiliscos)
 
 # LICENSE
 
