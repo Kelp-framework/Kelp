@@ -1,3 +1,16 @@
+2014-12-14: Version 0.9021
+
+            [Bug Fixes]
+
+            - POD fixes
+
+            [New features]
+
+            - Session now accepts hashref, which also allows for the destruction
+              of the enitire session.
+            - Add "include" function to config files, making it possible to include
+              other file into the configuration.
+
 2014-08-08: Version 0.9015
 
             [Bug Fixes]
