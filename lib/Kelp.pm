@@ -804,7 +804,8 @@ returned app.
     sub run {
         my $self = shift;
         my $app = $self->SUPER::run(@_);
-        Plack::Middleware::ContentLength->wrap($app);
+        $app = Plack::Middleware::ContentLength->wrap($app);
+        return $app;
     }
 
 Note that any middleware defined in your config file will be added first.
@@ -1330,6 +1331,8 @@ Perlover
 Ruslan Zakirov
 
 senfomat
+
+Ivan Baidakou (basiliscos)
 
 =head1 LICENSE
 

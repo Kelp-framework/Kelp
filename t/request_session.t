@@ -38,8 +38,12 @@ $app->add_route( '/session', sub {
       };
 
     $r->session = {};
-    is_deeply $r->session, $s;
+    is_deeply $r->session, {};
+    return 'All OK';
 });
-$t->request( GET '/session' );
+$t->request( GET '/session' )
+    ->code_is(200)
+    ->content_is('All OK');
+is_deeply $t->app->req->session, {};
 
 done_testing;
