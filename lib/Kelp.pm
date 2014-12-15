@@ -127,7 +127,9 @@ sub run {
         for my $class (@$middleware) {
 
             # Make sure the middleware was not already loaded
-            next if $self->{_loaded_middleware}->{$class}++;
+            # This does not apply for testing, in which case we want
+            # the middleware to wrap every single time
+            next if $self->{_loaded_middleware}->{$class}++ && !$ENV{KELP_TESTING};
 
             my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
             my $args = $self->config("middleware_init.$class") // {};
@@ -1330,7 +1332,7 @@ Perlover
 
 Ruslan Zakirov
 
-senfomat
+Christian Froemmel (senfomat)
 
 Ivan Baidakou (basiliscos)
 

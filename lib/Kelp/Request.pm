@@ -56,14 +56,19 @@ sub param {
     return $self->SUPER::param(@_);
 }
 
-sub session :lvalue {
-    my $self = shift;
-    if ( !@_ ) {
-        return $self->env->{'psgix.session'}
-          // die "No Session middleware wrapped";
+sub session {
+    my $self    = shift;
+    my $session = $self->env->{'psgix.session'}
+      // die "No Session middleware wrapped";
+
+    return $session if !@_;
+
+    if ( @_ == 1 ) {
+        my $value = shift;
+        return $session->{$value} unless ref $value;
+        return $self->env->{'psgix.session'} = $value;
     }
-    my $session = $self->env->{'psgix.session'};
-    return $session->{ $_[0] } if @_ == 1;
+
     my %hash = @_;
     $session->{$_} = $hash{$_} for keys %hash;
     return $session;
@@ -162,27 +167,42 @@ to use L<Plack::Middleware::ReverseProxy>.
 
 Returns the Plack session hash or dies if no C<Session> middleware was included.
 
-    sub route_zero {
+    sub get_session_value {
         my $self = shift;
         $self->session->{user} = 45;
     }
 
 If called with a single argument, returns that value from the session hash:
 
-    sub route_one {
+    sub set_session_value {
         my $self = shift;
         my $user = $self->req->session('user');
+        # Same as $self->req->session->{'user'};
     }
 
 Set values in the session using key-value pairs:
 
-    sub route_two {
+    sub set_session_hash {
         my $self = shift;
         $self->req->session(
             name  => 'Jill Andrews',
             age   => 24,
             email => 'jill@perlkelp.com'
         );
+    }
+
+Set values using a Hashref:
+
+    sub set_session_hashref {
+        my $self = shift;
+        $self->req->session( { bar => 'foo' } );
+    }
+
+Clear the session:
+
+    sub clear_session {
+        my $self = shift;
+        $self->req->session( {} );
     }
 
 =head3 Common tasks with sessions
