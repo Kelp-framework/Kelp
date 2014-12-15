@@ -222,7 +222,7 @@ In your config file:
 
 =cut
 
-=item Delete session values
+=item Delete session value
 
     delete $self->req->session->{'useless'};
 
@@ -230,7 +230,7 @@ In your config file:
 
 =item Remove all session values
 
-    $self->req->session = {};
+    $self->req->session( {} );
 
 =cut
 
