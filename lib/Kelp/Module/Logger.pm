@@ -58,3 +58,50 @@ sub message {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+Kelp::Module::Logger - Logger for Kelp applications
+
+=head1 SYNOPSIS
+
+    # conf/config.pl
+    {
+        modules => ['Logger'],
+        modules_init => {
+            Logger => {
+                outputs => [
+                    [ 'Screen',  min_level => 'debug', newline => 1 ],
+                ]
+            },
+        },
+    }
+
+   # lib/MyApp.pm
+   sub run {
+        my $self = shift;
+        my $app = $self->SUPER::run(@_);
+        ...;
+        $app->info('Kelp is ready to rock!');
+        return $app;
+   }
+
+
+=head1 DESCRIPTION
+
+This module provides an log interface for Kelp web application. It uses
+L<Log::Dispatcher> as underlying logging module.
+
+=head1 REGISTERED METHODS
+
+=head2 debug
+
+=head2 info
+
+=head2 error
+
+=cut
