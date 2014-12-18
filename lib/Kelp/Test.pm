@@ -57,11 +57,15 @@ sub request {
 
 sub request_ok {
     my ( $self, $req, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $self->request($req)->code_is( 200, $test_name );
 }
 
 sub code_is {
     my ( $self, $code, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Response code is $code";
     is $self->res->code, $code, $test_name;
 
@@ -82,6 +86,8 @@ sub code_isnt {
 
 sub content_is {
     my ( $self, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content is '$value'";
     is Encode::decode( $self->app->charset, $self->res->content ), $value,
       $test_name;
@@ -90,6 +96,8 @@ sub content_is {
 
 sub content_isnt {
     my ( $self, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content is not '$value'";
     isnt Encode::decode( $self->app->charset, $self->res->content ), $value,
       $test_name;
@@ -98,6 +106,8 @@ sub content_isnt {
 
 sub content_like {
     my ( $self, $regexp, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content matches $regexp";
     like Encode::decode( $self->app->charset, $self->res->content ), $regexp,
       $test_name;
@@ -106,6 +116,8 @@ sub content_like {
 
 sub content_unlike {
     my ( $self, $regexp, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content does not match $regexp";
     unlike Encode::decode( $self->app->charset, $self->res->content ), $regexp,
       $test_name;
@@ -114,6 +126,8 @@ sub content_unlike {
 
 sub content_type_is {
     my ( $self, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content-Type is '$value'";
     is $self->res->content_type, $value, $test_name;
     return $self;
@@ -121,6 +135,8 @@ sub content_type_is {
 
 sub content_type_isnt {
     my ( $self, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Content-Type is not '$value'";
     isnt $self->res->content_type, $value, $test_name;
     return $self;
@@ -128,6 +144,8 @@ sub content_type_isnt {
 
 sub header_is {
     my ( $self, $header, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Header '$header' => '$value'";
     is $self->res->header($header), $value, $test_name
       || $self->diag_headers();
@@ -136,6 +154,8 @@ sub header_is {
 
 sub header_isnt {
     my ( $self, $header, $value, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Header '$header' is not '$value'";
     isnt $self->res->header($header), $value, $test_name
       || $self->diag_headers();
@@ -144,6 +164,8 @@ sub header_isnt {
 
 sub header_like {
     my ( $self, $header, $regexp, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Header '$header' =~ $regexp";
     like $self->res->header($header), $regexp, $test_name
       || $self->diag_headers();
@@ -152,6 +174,8 @@ sub header_like {
 
 sub header_unlike {
     my ( $self, $header, $regexp, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Header '$header' !~ $regexp";
     unlike $self->res->header($header), $regexp, $test_name
       || $self->diag_headers();
@@ -160,6 +184,8 @@ sub header_unlike {
 
 sub json_cmp {
     my ( $self, $expected, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "JSON structure matches";
     fail "No JSON decoder" unless $self->app->can('json');
     like $self->res->header('content-type'), qr/json/, 'Content-Type is JSON'
