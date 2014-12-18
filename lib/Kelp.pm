@@ -209,7 +209,9 @@ sub psgi {
         $self->logger( 'critical', $message ) if $self->can('logger');
 
         # Render 500
-        $self->res->render_500($message);
+        # force stringificaion to avoid exception class JSONization,
+        # which in case of fail will become null, but that is useles
+        $self->res->render_500("$message");
         $self->finalize;
     };
 }
