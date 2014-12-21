@@ -79,6 +79,8 @@ sub code_is {
 
 sub code_isnt {
     my ( $self, $code, $test_name ) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
     $test_name ||= "Response code is not $code";
     isnt $self->res->code, $code, $test_name;
     return $self;
