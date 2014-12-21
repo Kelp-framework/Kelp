@@ -8,6 +8,7 @@ use Test::Deep;
 use Carp;
 use Encode ();
 use HTTP::Cookies;
+use Try::Tiny;
 
 BEGIN {
     $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
@@ -184,15 +185,27 @@ sub header_unlike {
     return $self;
 }
 
+sub json_content {
+    my $self = shift;
+    fail "No JSON decoder" unless $self->app->can('json');
+    my $result;
+    try {
+        $result = $self->app->json->decode( $self->res->content );
+    }
+    catch {
+        fail("Poorly formatted JSON");
+    };
+    return $result;
+}
+
 sub json_cmp {
     my ( $self, $expected, $test_name ) = @_;
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "JSON structure matches";
-    fail "No JSON decoder" unless $self->app->can('json');
     like $self->res->header('content-type'), qr/json/, 'Content-Type is JSON'
       or return $self;
-    my $json = $self->app->json->decode( $self->res->content );
+    my $json = $self->json_content;
     cmp_deeply( $json, $expected, $test_name ) or diag explain $json;
     return $self;
 }

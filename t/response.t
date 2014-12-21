@@ -79,6 +79,9 @@ $t->request( GET "/r2" )
     ->content_type_is('application/json')
     ->json_cmp({ a => 'foo' });
 
+# json_content will return a hash
+is ref($t->request( GET "/r2" )->json_content), 'HASH';
+
 # Template
 $app->add_route( "/t1", sub { $_[0]->res->text->template( \"[% word %]", { word => 'duck' } ) } );
 $t->request( GET "/t1" )
