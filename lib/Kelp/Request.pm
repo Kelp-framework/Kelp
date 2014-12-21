@@ -101,27 +101,21 @@ A reference to the Kelp application.
 
 =head2 stash
 
+Returns a hashref, which represents stash the current the request
+
 An all use, utility hash to use to pass information between routes. The stash
 is a concept originally conceived by the developers of L<Catalyst>. It's a hash
 that you can use to pass data from one route to another.
 
-    # Create a bridge route that checks if the user is authenticated, and saves
-    # the username in the stash.
-    $app->routes->add('/user' => { bridge => 1, to => sub {
-        my $self = shift;
-        return $self->stash->{username} = app->authenticate();
-    }});
+    # put value into stash
+    $self->req->stash->{username} = app->authenticate();
+    # more convenient way
+    $self->stash->{username} = app->authenticate();
 
-    # This route is run after the above bridge, so we know that we have an
-    # authenticated user and their username in the stash.
-    $app->routes->add('/user/welcome' => sub {
-        my $self = shift;
-        return "Hello " . $self->req->stash->{username};
-    });
-
-With no arguments C<stash> returns the entire stash hash. A single argument is
-interpreted as the key to the stash hash and its value is returned accordingly.
-
+    # get value from stash
+    return "Hello " . $self->req->stash->{username};
+    # more convenient way
+    return "Hello " . $self->stash('username');
 
 =head2 named
 
