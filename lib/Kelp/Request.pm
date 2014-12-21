@@ -101,7 +101,7 @@ A reference to the Kelp application.
 
 =head2 stash
 
-Returns a hashref, which represents stash the current the request
+Returns a hashref, which represents the stash of the current the request
 
 An all use, utility hash to use to pass information between routes. The stash
 is a concept originally conceived by the developers of L<Catalyst>. It's a hash
