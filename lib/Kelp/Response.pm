@@ -360,6 +360,11 @@ before that.
     get '/image/:name' => sub {
         my $content = File::Slurp::read_file("$name.jpg");
         res->set_content_type('image/jpeg')->render_binary( $content );
+
+        # the same, but probably more effective way (PSGI-server dependent)
+        open( my $handle, "<:raw", "$name.png" )
+            or die("cannot open $name: $!");
+        res->set_content_type('image/png')->render_binary( $handle );
     };
 
 =head2 render_error
