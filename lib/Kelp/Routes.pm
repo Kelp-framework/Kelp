@@ -184,12 +184,18 @@ sub dispatch {
     unless ( ref $to ) {
 
         # Check if the destination function exists
-        unless ( exists &$to ) {
+        if ( exists &$to ) {
+            # Move to reference
+            $to = \&{$to};
+        }
+        elsif ($app->can($to)) {
+            # $to is an inherited method
+            $to = $app->can($to);
+        }
+        else {
             die sprintf( 'Route not found %s for %s', $to, $req->path );
         }
 
-        # Move to reference
-        $to = \&{$to};
     }
 
     return $to->( $app, @{ $route->param } );
