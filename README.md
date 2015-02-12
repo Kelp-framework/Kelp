@@ -588,7 +588,7 @@ will perform all tests using our `$app` instance.
 [request](https://metacpan.org/pod/Kelp::Test#request) method. It takes only one argument, an
 HTTP::Request object. It is very convenient to use the [HTTP::Request::Common](https://metacpan.org/pod/HTTP::Request::Common)
 module here, because you can create common requests using abridged syntax,
-i.e. `GET`, `POST`, etc.  The line `$t->request( GET '/path' )` fist
+i.e. `GET`, `POST`, etc.  The line `$t->request( GET '/path' )` first
 creates a HTTP::Request GET object, and then passes it to the `request` method.
 - After we send the request, we can test the response using any of the `Test::`
 modules, or via the methods provided by [Kelp::Test](https://metacpan.org/pod/Kelp::Test).
@@ -784,7 +784,7 @@ If we instruct our web application to load the `JSON` module, it will have a
 new method `json` which will be a link to the `JSON` object initialized in the
 module.
 
-See more exampled and POD at [Kelp::Module](https://metacpan.org/pod/Kelp::Module).
+See more examples and POD at [Kelp::Module](https://metacpan.org/pod/Kelp::Module).
 
 ### How to load modules using the config
 
@@ -845,8 +845,8 @@ the `loaded_modules` hash will look like this:
 }
 ```
 
-This can come handy if your module does more than just registering a new method
-into the application. Then, you can use its object instance to do access that
+This can come in handy if your module does more than just registering a new method
+into the application. Then, you can use its object instance to access that
 additional functionality.
 
 ## path
@@ -870,7 +870,7 @@ anything else. The charset could also be changed in the config files.
 ## long\_error
 
 When a route dies, Kelp will by default display a short error message. Set this
-attribute to a true value, if you need to see a full stack trace of the error.
+attribute to a true value if you need to see a full stack trace of the error.
 The `KELP_LONG_ERROR` environment variable can also set this attribute.
 
 ## req
@@ -903,7 +903,7 @@ sub some_route {
 
 ## build
 
-On it's own the `build` method doesn't do anything. It is called by the
+On it's own, the `build` method doesn't do anything. It is called by the
 constructor, so it can be overridden to add route destinations and
 initializations.
 
@@ -938,7 +938,7 @@ $self->load_module("Redis", server => '127.0.0.1');
 ```
 
 Options for the module may be specified after its name, or in the
-`modules_init` hash in the config. The precedence is given to the
+`modules_init` hash in the config. Precedence is given to the
 inline options.
 See [Kelp::Module](https://metacpan.org/pod/Kelp::Module) for more information on making and using modules.
 
@@ -962,7 +962,7 @@ sub build_request {
 
 ## before\_finalize
 
-Override this method, to modify the response object just before it gets
+Override this method to modify the response object just before it gets
 finalized.
 
 ```perl
