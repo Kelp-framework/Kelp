@@ -878,7 +878,7 @@ At this point we are ready to send requests to the app via the
 L<request|Kelp::Test/request> method. It takes only one argument, an
 HTTP::Request object. It is very convenient to use the L<HTTP::Request::Common>
 module here, because you can create common requests using abridged syntax,
-i.e. C<GET>, C<POST>, etc.  The line C<$t-E<gt>request( GET '/path' )> fist
+i.e. C<GET>, C<POST>, etc.  The line C<$t-E<gt>request( GET '/path' )> first
 creates a HTTP::Request GET object, and then passes it to the C<request> method.
 
 =cut
@@ -1068,7 +1068,7 @@ If we instruct our web application to load the C<JSON> module, it will have a
 new method C<json> which will be a link to the C<JSON> object initialized in the
 module.
 
-See more exampled and POD at L<Kelp::Module>.
+See more examples and POD at L<Kelp::Module>.
 
 =head3 How to load modules using the config
 
@@ -1123,8 +1123,8 @@ the C<loaded_modules> hash will look like this:
         JSON     => Kelp::Module::JSON=HASH(0x209d454)
     }
 
-This can come handy if your module does more than just registering a new method
-into the application. Then, you can use its object instance to do access that
+This can come in handy if your module does more than just registering a new method
+into the application. Then, you can use its object instance to access that
 additional functionality.
 
 
@@ -1147,7 +1147,7 @@ anything else. The charset could also be changed in the config files.
 =head2 long_error
 
 When a route dies, Kelp will by default display a short error message. Set this
-attribute to a true value, if you need to see a full stack trace of the error.
+attribute to a true value if you need to see a full stack trace of the error.
 The C<KELP_LONG_ERROR> environment variable can also set this attribute.
 
 =head2 req
@@ -1176,7 +1176,7 @@ contain a reference to the current L<Kelp::Response> instance.
 
 =head2 build
 
-On it's own the C<build> method doesn't do anything. It is called by the
+On its own, the C<build> method doesn't do anything. It is called by the
 constructor, so it can be overridden to add route destinations and
 initializations.
 
@@ -1207,7 +1207,7 @@ namespace.
     # Will look for and load Kelp::Module::Redis
 
 Options for the module may be specified after its name, or in the
-C<modules_init> hash in the config. The precedence is given to the
+C<modules_init> hash in the config. Precedence is given to the
 inline options.
 See L<Kelp::Module> for more information on making and using modules.
 
@@ -1229,7 +1229,7 @@ environment. You can override this method to use a custom request module.
 
 =head2 before_finalize
 
-Override this method, to modify the response object just before it gets
+Override this method to modify the response object just before it gets
 finalized.
 
     package MyApp;
@@ -1338,6 +1338,8 @@ Ruslan Zakirov
 Christian Froemmel (senfomat)
 
 Ivan Baidakou (basiliscos)
+
+roy-tate
 
 =head1 LICENSE
 
