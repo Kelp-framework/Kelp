@@ -23,6 +23,9 @@ attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 
+# Rethrow exceptions 
+attr rethrow_on_error => $ENV{KELP_RETHROW_ON_ERROR} // 0;
+
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
     $_[0]->config("charset") // 'UTF-8';
@@ -207,6 +210,9 @@ sub psgi {
 
         # Log error
         $self->logger( 'critical', $message ) if $self->can('logger');
+
+        # rethrow if KELP_RETHROW_ON_ERROR is enabled
+        die $_ if $self->rethrow_on_error;
 
         # Render 500
         # Force stringificaion to avoid possible exception in class
