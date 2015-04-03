@@ -121,51 +121,45 @@ sub load {
     return $hash;
 }
 
-sub build {
-    my ( $self, %args ) = @_;
+sub process_mode {
+    my ( $self, $mode ) = @_;
 
-    # Get an easy access reference to the data
-    my $data_ref = $self->data;
-
-    # Create a private sub that searches for a file in all the paths
-    # specified in $self->path
-    my $find = sub {
-        my $name = shift;
+    my $filename =  sub {
         my @paths = ref( $self->path ) ? @{ $self->path } : ( $self->path );
         for my $path (@paths) {
             next unless defined $path;
-            my $filename = sprintf( '%s/%s.%s', $path, $name, $self->ext );
+            my $filename = sprintf( '%s/%s.%s', $path, $mode, $self->ext );
             return $filename if -r $filename;
         }
-    };
+    }->();
 
-    # Create a private sub that parses a config file
-    my $process = sub {
-        my $name   = shift;
-        my $parsed = {};
-        try {
-            $parsed = $self->load($name);
+    unless ( $filename ) {
+        if ( $ENV{KELP_CONFIG_WARN} ) {
+            my $message =
+              $mode eq 'config'
+              ? "Main config file not found or not readable"
+              : "Config file for mode '$mode' not found or not readable";
+            warn $message;
         }
-        catch {
-            die "Parsing $name died with error: '${_}'";
-        };
-        $data_ref = _merge( $data_ref, $parsed );
+        return;
+    }
+
+    my $parsed = {};
+    try {
+        $parsed = $self->load($filename);
+    }
+    catch {
+        die "Parsing $filename died with error: '${_}'";
     };
+    $self->data( _merge( $self->data, $parsed ) );
+}
+
+sub build {
+    my ( $self, %args ) = @_;
 
     # Find, parse and merge 'config' and mode files
     for my $name ( 'config', $self->app->mode ) {
-        if ( my $filename = $find->($name) ) {
-            $process->($filename);
-        }
-        else {
-            if ( $ENV{KELP_CONFIG_WARN} ) {
-                my $message =
-                  $name eq 'config'
-                  ? "Main config file not found or not readable"
-                  : "Config file for mode '$name' not found or not readable";
-                  warn $message;
-            }
-        }
+        $self->process_mode( $name );
     }
 
     # Undocumented! Add 'extra' argument to unlock these special features:
@@ -482,6 +476,19 @@ L</separator> attribute.
 C<load(filename)>
 
 Loads, and parses the file C<$filename> and returns a hash reference.
+
+=head2 process_mode
+
+C<process_mode($mode)>
+
+Finds the file (if it exists) corresponding to C<$mode>, parses it and merges
+it into the data. Useful, when you want to process and extra config file during
+the application initialization.
+
+    # lib/MyApp.pm
+    sub build {
+        $self->loaded_modules->{Config}->process_mode( 'more_config' );
+    }
 
 =head1 DEFAULTS
 

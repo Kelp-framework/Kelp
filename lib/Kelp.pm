@@ -46,9 +46,9 @@ attr res => undef;
 sub new {
     my $self = shift->SUPER::new(@_);
 
-    # Always load these modules
-    $self->load_module( $self->config_module, extra => $self->__config );
-    $self->load_module('Routes');
+    # Always load these modules, but allow client to override
+    $self->_load_config();
+    $self->_load_routes();
 
     # Load the modules from the config
     if ( defined( my $modules = $self->config('modules') ) ) {
@@ -57,6 +57,16 @@ sub new {
 
     $self->build();
     return $self;
+}
+
+sub _load_config {
+    my $self = shift;
+    $self->load_module( $self->config_module, extra => $self->__config );
+}
+
+sub _load_routes {
+    my $self = shift;
+    $self->load_module('Routes');
 }
 
 # Create a shallow copy of the app, optionally blessed into a
