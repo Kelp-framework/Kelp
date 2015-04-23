@@ -203,16 +203,16 @@ sub psgi {
         $self->finalize;
     }
     catch {
-        my $message = $self->long_error ? longmess($_) : $_;
+        my $e = $_;
+
+        # Stringify error for logger
+        my $message = $self->long_error ? longmess("$e") : "$_";
 
         # Log error
         $self->logger( 'critical', $message ) if $self->can('logger');
 
         # Render 500
-        # Force stringificaion to avoid possible exception in class
-        # JSONization, which in case of fail will become null, but that
-        # is useless
-        $self->res->render_500("$message");
+        $self->res->render_500($message);
         $self->finalize;
     };
 }
