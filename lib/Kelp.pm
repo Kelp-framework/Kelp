@@ -9,8 +9,6 @@ use Try::Tiny;
 use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
-use Kelp::Request;
-use Kelp::Response;
 
 our $VERSION = 0.9051;
 
@@ -19,6 +17,9 @@ attr -host => hostname;
 attr  mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
 attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
+attr  request_obj  => 'Kelp::Request';
+attr  response_obj => 'Kelp::Response';
+
 
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
@@ -112,13 +113,17 @@ sub build {
 # Override to use a custom request object
 sub build_request {
     my ( $self, $env ) = @_;
-    return Kelp::Request->new( app => $self, env => $env );
+    my $package = $self->request_obj;
+    eval qq{require $package};
+    return $package->new( app => $self, env => $env);
 }
 
 # Override to use a custom response object
 sub build_response {
     my $self = shift;
-    return Kelp::Response->new( app => $self );
+    my $package = $self->response_obj;
+    eval qq{require $package};
+    return $package->new( app => $self );
 }
 
 # Override to manipulate the end response
@@ -1115,6 +1120,16 @@ L<Kelp::Module::Config> for more information.
     # conf/config.pl and conf/development.pl are merged with priority
     # given to the second one.
 
+=head2 request_obj
+
+Proide a custom package name to define the global ::Request object. Defaults to
+L<Kelp::Request>.
+
+=head2 response_obj
+
+Proide a custom package name to define the global ::Response object. Defaults to
+L<Kelp::Response>.
+
 =head2 config_module
 
 Sets of gets the class of the configuration module to be loaded on startup. The
@@ -1224,8 +1239,11 @@ See L<Kelp::Module> for more information on making and using modules.
 =head2 build_request
 
 This method is used to create the request object for each HTTP request. It
-returns an instance of L<Kelp::Request>, initialized with the current request's
-environment. You can override this method to use a custom request module.
+returns an instance of the class defined in the request_obj attribute (defaults to
+L<Kelp::Request>), initialized with the current request's environment. You can
+override this method to use a custom request module if you need to do something
+interesting. Though there is a provided attribute that can be used to overide
+the class of the object used. 
 
     package MyApp;
     use MyApp::Request;
@@ -1257,8 +1275,10 @@ every route.
 =head2 build_response
 
 This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is L<Kelp::Response>. Much like L</build_request>, the
-response can also be overridden to use a custom response object.
+By default the object created is L<Kelp::Response> though this can be
+overwritten via the respone_obj attribute. Much like L</build_request>, the
+response can also be overridden to use a custom response object if you need
+something completely custom.
 
 =head2 run
 
