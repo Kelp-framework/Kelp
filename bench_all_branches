@@ -9,7 +9,7 @@ my ($count) = $ARGV[0] // 100;
 my $this_br; # to allow to have git return to the current co branch
 sub mk_test {
     my $br = shift;
-    return sub{ qx{git checkout -q $br && prove -qql} }
+    return sub{ qx{git checkout -q $br && prove -Ql} }
 }
 my %test_set = map{ chomp;                              # drop the newline
                     ($this_br) = $1 if m/^[*]\s+(.*)$/; # capture the branch that we are currently on
