@@ -68,7 +68,7 @@ sub _parse_route {
 
     # Format destination
     if ( !ref $val->{to} ) {
-        my $sigil = $val->{to} =~ s/^(\+)// ? $1 : undef;
+        my $sigil = defined $val->{to} && $val->{to} =~ s/^(\+)// ? $1 : undef;
         $val->{to} = _camelize( $val->{to}, $sigil ? undef : $self->base );
 
         # Load the class, if there is one and it is not 'main'
