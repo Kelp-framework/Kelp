@@ -141,6 +141,11 @@ sub render_404 {
 
 sub render_500 {
     my ( $self, $message ) = @_;
+    # Force stringificaion to avoid possible exception in class
+    # JSONization, which in case of fail will become null, but that
+    # is useless
+    $message = "$message";
+    
     if ( $self->app->mode ne 'deployment' ) {
         if ($message) {
             return $self->set_code(500)->render($message);
