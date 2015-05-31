@@ -1375,6 +1375,10 @@ Ivan Baidakou (basiliscos)
 
 roy-tate
 
+Konstantin Yakunin (twinhooker)
+
+Benjamin Hengst (notbenh)
+
 =head1 LICENSE
 
 This module and all the modules in this package are governed by the same license
