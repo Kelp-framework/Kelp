@@ -19,6 +19,7 @@ $app->add_route(
 $t->request( GET '/bridge' )->code_is(401);
 $t->request( GET '/bridge/route' )->code_is(401);
 $t->request( GET '/bridge/route?code=404' )->code_is(404);
+$t->request( GET '/bridge/not_existing_route?ok=1' )->code_is(404);
 
 $t->request( GET '/bridge/route?ok=1' )
   ->code_is(200)

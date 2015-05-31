@@ -208,11 +208,18 @@ sub psgi {
             }
         }
 
-        # If nothing got rendered, die with error
+        # If nothing got rendered
         if ( !$self->res->rendered ) {
-            die $match->[-1]->to
+            # render 404 if only briges matched
+            if ( $match->[-1]->bridge ) {
+                $res->render_404;
+            }
+            # or die with error
+            else {
+              die $match->[-1]->to
               . " did not render for method "
               . $req->method;
+            }
         }
 
         $self->finalize;
