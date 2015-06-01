@@ -35,6 +35,16 @@ BEGIN {
       ->code_is(500)
       ->content_unlike(qr/Five Hundred/, "Message trums default template in dev")
       ->content_like(qr/Foo/);
+
+    $r->add("/exception_text", sub { die "Text exception"; });
+    $t->request( GET '/exception_text' )
+      ->code_is(500)
+      ->content_like(qr/Five Hundred/);
+
+    $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
+    $t->request( GET '/exception_obj' )
+      ->code_is(500)
+      ->content_like(qr/Five Hundred/);
 }
 
 # No error templates
@@ -63,6 +73,16 @@ BEGIN {
       ->code_is(500)
       ->content_unlike(qr/Five Hundred/, "Default 500 template engaged")
       ->content_like(qr/Foo/);
+
+    $r->add("/exception_text", sub { die "Text exception"; });
+    $t->request( GET '/exception_text' )
+      ->code_is(500)
+      ->content_like(qr/500 - Text exception/);
+    
+    $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
+    $t->request( GET '/exception_obj' )
+      ->code_is(500)
+      ->content_like(qr/500 - Exception=HASH/);
 }
 
 # Deployment
@@ -79,6 +99,16 @@ BEGIN {
       ->code_is(500)
       ->content_like(qr/Five Hundred/, "Custom 500 template engaged")
       ->content_unlike(qr/Foo/);
+
+    $r->add("/exception_text", sub { die bless {}, 'Exception'; });
+    $t->request( GET '/exception_text' )
+      ->code_is(500)
+      ->content_like(qr/Five Hundred/);
+
+    $r->add("/exception_obj", sub { die "Text exception"; });
+    $t->request( GET '/exception_obj' )
+      ->code_is(500)
+      ->content_like(qr/Five Hundred/);
 }
 
 
