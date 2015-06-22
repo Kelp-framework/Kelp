@@ -5,6 +5,7 @@ use Kelp::Base 'Plack::Response';
 use Encode;
 use Carp;
 use Try::Tiny;
+use Scalar::Util;
 
 attr -app => sub { croak "app is required" };
 attr rendered => 0;
@@ -114,12 +115,14 @@ sub render_error {
     my ( $self, $code, $error ) = @_;
 
     $code  //= 500;
-    $error //= "Internal Server Error";
+    $error = "Internal Server Error"
+        if !defined $error || Scalar::Util::blessed $error;
 
     $self->set_code($code);
 
     # Look for a template and if not found, then show a generic text
     try {
+        local $SIG{__DIE__};  # Silence StackTrace
         my $filename = "error/$code";
         $self->template(
             $filename, {
@@ -141,16 +144,12 @@ sub render_404 {
 
 sub render_500 {
     my ( $self, $message ) = @_;
-    if ( $self->app->mode ne 'deployment' ) {
-        if ($message) {
-            return $self->set_code(500)->render($message);
-        }
-        else {
-            local $SIG{__DIE__};    # Silence StackTrace
-            return $self->render_error( 500, $message );
-        }
+
+    if ( $self->app->mode ne 'deployment' && $message ) {
+        return $self->set_code(500)->render($message);
     }
-    $self->render_error;
+
+    return $self->render_error;
 }
 
 sub render_401 {
