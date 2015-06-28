@@ -231,7 +231,7 @@ sub psgi {
         $self->logger( 'critical', $message ) if $self->can('logger');
 
         # Render 500
-        $self->res->render_error(500, $message);
+        $self->res->render_error(500, $_);
         $self->finalize;
     };
 }

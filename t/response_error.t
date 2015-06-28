@@ -87,7 +87,7 @@ BEGIN {
     $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
     $t->request( GET '/exception_obj' )
       ->code_is(500)
-      ->content_like(qr/500 - Internal Server Error/);
+      ->content_like(qr/500 - Exception=HASH/);
 }
 
 # Deployment
@@ -118,6 +118,7 @@ BEGIN {
 
 # StackTrace enabled
 {
+    local *STDERR;
     $ENV{KELP_CONFIG_DIR} = "$Bin/conf/stack_trace_enabled";
     my $app = Kelp->new( mode => 'test' );
     my $r   = $app->routes;

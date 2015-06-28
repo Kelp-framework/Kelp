@@ -115,8 +115,10 @@ sub render_error {
     my ( $self, $code, $error ) = @_;
 
     $code  //= 500;
-    $error = "Internal Server Error"
-        if !defined $error || Scalar::Util::blessed $error;
+    if (($code == 500 && $self->app->mode eq 'deployment')
+    ||  !defined $error) {
+        $error = "Internal Server Error"
+    }
 
     $self->set_code($code);
 
