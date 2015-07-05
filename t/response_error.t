@@ -39,12 +39,12 @@ BEGIN {
     $r->add("/exception_text", sub { die "Text exception"; });
     $t->request( GET '/exception_text' )
       ->code_is(500)
-      ->content_like(qr/Five Hundred/);
+      ->content_like(qr/Text exception/);
 
     $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
     $t->request( GET '/exception_obj' )
       ->code_is(500)
-      ->content_like(qr/Five Hundred/);
+      ->content_like(qr/Exception=HASH/);
 }
 
 # No error templates
@@ -82,12 +82,12 @@ BEGIN {
     $r->add("/exception_text", sub { die "Text exception"; });
     $t->request( GET '/exception_text' )
       ->code_is(500)
-      ->content_like(qr/500 - Text exception/);
+      ->content_like(qr/Text exception/);
     
     $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
     $t->request( GET '/exception_obj' )
       ->code_is(500)
-      ->content_like(qr/500 - Exception=HASH/);
+      ->content_like(qr/Exception=HASH/);
 }
 
 # Deployment
@@ -150,8 +150,9 @@ BEGIN {
       ->content_unlike(qr/500 - Internal Server Error/);
 }
 
-
 # Deployment no error templates
+# Any unknown(500) error in deployment mode with out templates
+# must show stock "Internal Server Error" message
 {
     $ENV{KELP_CONFIG_DIR} = "$Bin/conf/deployment_no_templates";
     my $app = Kelp->new( mode => 'deployment' );
@@ -181,6 +182,5 @@ BEGIN {
       ->code_is(500)
       ->content_like(qr/500 - Internal Server Error/);
 }
-
 
 done_testing;
