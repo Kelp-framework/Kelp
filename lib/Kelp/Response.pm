@@ -144,16 +144,14 @@ sub render_404 {
 sub render_500 {
     my ( $self, $error ) = @_;
 
-    if ( $self->app->mode eq 'deployment') { # || !defined $error) {
+    if ( !defined $error || $self->app->mode eq 'deployment' ) {
         return $self->render_error;
     }
+
+    # if render_500 gets blessed object as error stringify it
+    $error = ref $error if Scalar::Util::blessed $error;
     
-    if ( defined $error ) {
-        $error .= '' if Scalar::Util::blessed $error;
-        return $self->set_code(500)->render($error);
-    }
-    
-    return $self->render_error;
+    return $self->set_code(500)->render($error);
 }
 
 sub render_401 {

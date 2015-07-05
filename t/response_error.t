@@ -44,7 +44,7 @@ BEGIN {
     $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
     $t->request( GET '/exception_obj' )
       ->code_is(500)
-      ->content_like(qr/Exception=HASH/);
+      ->content_like(qr/Exception/);
 }
 
 # No error templates
@@ -87,7 +87,7 @@ BEGIN {
     $r->add("/exception_obj", sub { die bless {}, 'Exception'; });
     $t->request( GET '/exception_obj' )
       ->code_is(500)
-      ->content_like(qr/Exception=HASH/);
+      ->content_like(qr/Exception/);
 }
 
 # Deployment
