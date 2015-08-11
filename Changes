@@ -1,3 +1,13 @@
+2015-08-10: Version 0.9071
+            [Bug Fixes]
+
+            - Bridges will correctly return 401 (instead of 500) when non existing location is accessed (Konstantin Yakunin)
+            - Undefined value warning fixed. (Ben Hengst)
+            - Correct handle errors on deployment and silence STDERR in Stack Trace tests (Konstantin Yakunin)
+
+            [New Features]
+            - New attributes request_obj and response_obj used to specify the name of the request and response classes. (Ben Hengst)
+
 2015-04-02: Version 0.9051
             [Bug Fixes]
 

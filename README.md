@@ -825,6 +825,16 @@ my $app = MyApp->new( mode => 'development' );
 # given to the second one.
 ```
 
+## request\_obj
+
+Proide a custom package name to define the global ::Request object. Defaults to
+[Kelp::Request](https://metacpan.org/pod/Kelp::Request).
+
+## response\_obj
+
+Proide a custom package name to define the global ::Response object. Defaults to
+[Kelp::Response](https://metacpan.org/pod/Kelp::Response).
+
 ## config\_module
 
 Sets of gets the class of the configuration module to be loaded on startup. The
@@ -903,7 +913,7 @@ sub some_route {
 
 ## build
 
-On it's own, the `build` method doesn't do anything. It is called by the
+On its own, the `build` method doesn't do anything. It is called by the
 constructor, so it can be overridden to add route destinations and
 initializations.
 
@@ -945,8 +955,11 @@ See [Kelp::Module](https://metacpan.org/pod/Kelp::Module) for more information o
 ## build\_request
 
 This method is used to create the request object for each HTTP request. It
-returns an instance of [Kelp::Request](https://metacpan.org/pod/Kelp::Request), initialized with the current request's
-environment. You can override this method to use a custom request module.
+returns an instance of the class defined in the request\_obj attribute (defaults to
+[Kelp::Request](https://metacpan.org/pod/Kelp::Request)), initialized with the current request's environment. You can
+override this method to use a custom request module if you need to do something
+interesting. Though there is a provided attribute that can be used to overide
+the class of the object used. 
 
 ```perl
 package MyApp;
@@ -982,8 +995,10 @@ every route.
 ## build\_response
 
 This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is [Kelp::Response](https://metacpan.org/pod/Kelp::Response). Much like ["build\_request"](#build_request), the
-response can also be overridden to use a custom response object.
+By default the object created is [Kelp::Response](https://metacpan.org/pod/Kelp::Response) though this can be
+overwritten via the respone\_obj attribute. Much like ["build\_request"](#build_request), the
+response can also be overridden to use a custom response object if you need
+something completely custom.
 
 ## run
 
@@ -1072,6 +1087,12 @@ Ruslan Zakirov
 Christian Froemmel (senfomat)
 
 Ivan Baidakou (basiliscos)
+
+roy-tate
+
+Konstantin Yakunin (twinhooker)
+
+Benjamin Hengst (notbenh)
 
 # LICENSE
 
