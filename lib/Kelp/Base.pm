@@ -77,7 +77,7 @@ Kelp::Base - Simple lazy attributes
     attr source => 'dbi:mysql:users';
     attr user   => 'test';
     attr pass   => 'secret';
-    attr opts   => { PrintError => 1, RaiseError => 1 };
+    attr opts => sub { { PrintError => 1, RaiseError => 1 } }
 
     attr dbh => sub {
         my $self = shift;
