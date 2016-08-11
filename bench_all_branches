@@ -1,0 +1,40 @@
+#!/usr/bin/env perl
+use strict;
+use warnings;
+use Benchmark qw(:all) ;
+
+die qx{perldoc $0} if grep{m/-h/} @ARGV;
+
+my ($count) = $ARGV[0] // 100;
+my $this_br; # to allow to have git return to the current co branch
+sub mk_test {
+    my $br = shift;
+    return sub{ qx{git checkout -q $br && prove -Ql} }
+}
+my %test_set = map{ chomp;                              # drop the newline
+                    ($this_br) = $1 if m/^[*]\s+(.*)$/; # capture the branch that we are currently on
+                    s/^.*\s+//;                         # clean up the branches to only be the branch name
+                    $_ => mk_test($_);                  # build our test
+                  } qx{git branch};
+
+cmpthese($count, \%test_set);
+
+qx{git checkout -q $this_br}; # got back to the branch you were on
+
+
+__END__
+=head1 USEAGE
+
+  bench_all_branches -h 
+  bench_all_branches [test run count]
+
+If -h is found in @ARGV then you will see this help text
+
+The default value for [test run count] is 100 if not specified.
+
+Will checkout all branches and then run prove [test run count] times as a way to quickly test how slow your change will likely be.
+
+When done it will return to the branch you were on.
+
+
+
