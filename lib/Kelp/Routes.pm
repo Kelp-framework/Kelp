@@ -184,12 +184,18 @@ sub dispatch {
     unless ( ref $to ) {
 
         # Check if the destination function exists
-        unless ( exists &$to ) {
+        if ( exists &$to ) {
+            # Move to reference
+            $to = \&{$to};
+        }
+        elsif ($app->can($to)) {
+            # $to is an inherited method
+            $to = $app->can($to);
+        }
+        else {
             die sprintf( 'Route not found %s for %s', $to, $req->path );
         }
 
-        # Move to reference
-        $to = \&{$to};
     }
 
     return $to->( $app, @{ $route->param } );
@@ -528,7 +534,7 @@ Adds a new route definition to the routes array.
 C<$path> can be a path string, e.g. C<'/user/view'> or an ARRAY containing a
 method and a path, e.g. C<[ PUT =E<gt> '/item' ]>.
 
-The route destination is very flexible. It can be one of these three things:
+The route destination is very flexible. It can be one of these four things:
 
 =over
 
@@ -539,6 +545,16 @@ to replace C<::> is also allowed, in which case the name will get converted.
 C<"users#item"> becomes C<"Users::item">.
 
     $r->add( '/home' => 'user#home' );
+
+=cut
+
+=item
+
+A string name of a method. Instead of the name of a subroutine in the
+current package, or of a fully qualified subroutine, you can use the
+name of a method. The method can be inherited from a base class.
+
+    $r->add( '/home' => 'some_inherited_method' );
 
 =cut
 

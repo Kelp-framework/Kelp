@@ -617,10 +617,10 @@ C<$self-E<gt>routes>:
 
 =head3 Destinations
 
-You can direct HTTP paths to subroutines in your classes or, you can use inline
-code.
+You can direct HTTP paths to subroutines or methods of your classes, or you can
+use inline code.
 
-    $r->add( "/home", "home" );  # goes to sub home
+    $r->add( "/home", "home" );  # goes to sub home or to $app->home
     $r->add( "/legal", "Legal::view" ); # goes to MyApp::Legal::view
     $r->add( "/about", sub { "Content for about" }); # inline
 
