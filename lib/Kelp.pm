@@ -193,7 +193,7 @@ sub psgi {
             # to allow the rest of the routes to run.
             if ( $route->bridge ) {
                 if ( !$data ) {
-                    $res->render_401 unless $res->rendered;
+                    $res->render_403 unless $res->rendered;
                     last;
                 }
                 next;
