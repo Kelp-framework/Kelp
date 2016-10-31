@@ -158,6 +158,10 @@ sub render_401 {
     $_[0]->render_error( 401, "Unauthorized" );
 }
 
+sub render_403 {
+    $_[0]->render_error( 403, "Forbidden" );
+}
+
 sub redirect {
     my $self = shift;
     $self->rendered(1);
