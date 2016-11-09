@@ -1,3 +1,9 @@
+2016-11-08: Version 0.9091
+            [Changes]
+            - Change bridge error respose. Bridges will return 403 Forbidden (Konstantin Yakunin)
+            - attr can be ether scalar, undef or CODEref but not HASHREF or ARRAYREF (Nikolay Mishin)
+            - POD (Nikolay Mishin)
+
 2015-08-10: Version 0.9071
             [Bug Fixes]
 
