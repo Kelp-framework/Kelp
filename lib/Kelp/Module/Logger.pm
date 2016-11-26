@@ -94,7 +94,7 @@ Kelp::Module::Logger - Logger for Kelp applications
 =head1 DESCRIPTION
 
 This module provides an log interface for Kelp web application. It uses
-L<Log::Dispatcher> as underlying logging module.
+L<Log::Dispatch> as underlying logging module.
 
 =head1 REGISTERED METHODS
 
