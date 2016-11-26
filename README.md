@@ -68,7 +68,7 @@ placeholders, wildcards, or just regular expressions.
 environment, e.g. development, deployment, etc. Merge a temporary configuration
 into your current one for testing and debugging purposes.
 - **Enhanced Logging**. Log messages at different levels of emergency. Log to a
-file, screen, or anything supported by Log::Dispatcher.
+file, screen, or anything supported by Log::Dispatch.
 - **Powerful Rendering**. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.
 - **JSON encoder/decoder**. Kelp comes with JSON, but you can easily plug in JSON::XS
