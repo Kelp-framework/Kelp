@@ -367,7 +367,7 @@ into your current one for testing and debugging purposes.
 =item
 
 B<Enhanced Logging>. Log messages at different levels of emergency. Log to a
-file, screen, or anything supported by Log::Dispatcher.
+file, screen, or anything supported by Log::Dispatch.
 
 =cut
 
