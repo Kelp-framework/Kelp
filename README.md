@@ -6,46 +6,54 @@ Kelp - A web framework light, yet rich in nutrients.
 
 First ...
 
-    # lib/MyApp.pm
-    package MyApp;
-    use parent 'Kelp';
+```perl
+# lib/MyApp.pm
+package MyApp;
+use parent 'Kelp';
 
-    sub build {
-        my $self = shift;
-        my $r = $self->routes;
-        $r->add( "/hello", sub { "Hello, world!" } );
-        $r->add( '/hello/:name', 'greet' );
-    }
+sub build {
+    my $self = shift;
+    my $r = $self->routes;
+    $r->add( "/hello", sub { "Hello, world!" } );
+    $r->add( '/hello/:name', 'greet' );
+}
 
-    sub greet {
-        my ( $self, $name ) = @_;
-        "Hello, $name!";
-    }
+sub greet {
+    my ( $self, $name ) = @_;
+    "Hello, $name!";
+}
 
-    1;
+1;
+```
 
 Then ...
 
-    # app.psgi
-    use MyApp;
-    my $app = MyApp->new;
-    $app->run;
+```perl
+# app.psgi
+use MyApp;
+my $app = MyApp->new;
+$app->run;
+```
 
 Finally ...
 
-    > plackup app.psgi
+```
+> plackup app.psgi
+```
 
 Or, for quick prototyping use [Kelp::Less](https://metacpan.org/pod/Kelp::Less):
 
-    # app.psgi
-    use Kelp::Less;
+```perl
+# app.psgi
+use Kelp::Less;
 
-    get '/hello/?name' => sub {
-        my ( $self, $name ) = @_;
-        "Hello " . $name // 'world';
-    };
+get '/hello/?name' => sub {
+    my ( $self, $name ) = @_;
+    "Hello " . $name // 'world';
+};
 
-    run;
+run;
+```
 
 # DESCRIPTION
 
@@ -105,18 +113,24 @@ and a small footprint, and it's completely object manager agnostic.
 The easiest way to create the directory structure and a general application
 skeleton is by using the `Kelp` script, which comes with this package.
 
-    > Kelp MyApp
+```
+> Kelp MyApp
+```
 
 This will create `lib/MyApp.pm`, `app.psgi` and some other files (explained
 below).
 
 To create a [Kelp::Less](https://metacpan.org/pod/Kelp::Less) app, use:
 
-    > Kelp --less MyApp
+```
+> Kelp --less MyApp
+```
 
 Get help by typing:
 
-    > Kelp --help
+```
+> Kelp --help
+```
 
 ## Directory structure
 
@@ -124,21 +138,23 @@ Before you begin writing the internals of your app, you need to create the
 directory structure either by hand, or by using the above described `Kelp`
 utility script.
 
-     .
-     |--/lib
-     |   |--MyApp.pm
-     |   |--/MyApp
-     |
-     |--/conf
-     |   |--config.pl
-     |   |--test.pl
-     |   |--development.pl
-     |   |--deployment.pl
-     |
-     |--/view
-     |--/log
-     |--/t
-     |--app.psgi
+```
+ .
+ |--/lib
+ |   |--MyApp.pm
+ |   |--/MyApp
+ |
+ |--/conf
+ |   |--config.pl
+ |   |--test.pl
+ |   |--development.pl
+ |   |--deployment.pl
+ |
+ |--/view
+ |--/log
+ |--/t
+ |--app.psgi
+```
 
 - **/lib**
 
@@ -154,11 +170,15 @@ utility script.
     To change the running environment, you can specify the app `mode`, or you can
     set the `PLACK_ENV` environment variable.
 
-        my $app = MyApp->new( mode => 'development' );
+    ```perl
+    my $app = MyApp->new( mode => 'development' );
+    ```
 
     or
 
-        > PLACK_ENV=development plackup app.psgi
+    ```
+    > PLACK_ENV=development plackup app.psgi
+    ```
 
 - **/view**
 
@@ -180,11 +200,13 @@ utility script.
     This is the [PSGI](https://metacpan.org/pod/PSGI) file, of the app, which you will deploy. In it's most basic
     form it should look like this:
 
-        use lib './lib';
-        use MyApp;
+    ```perl
+    use lib './lib';
+    use MyApp;
 
-        my $app = MyApp->new;
-        $app->run;
+    my $app = MyApp->new;
+    $app->run;
+    ```
 
 ## The application classes
 
@@ -193,36 +215,38 @@ in our example `MyApp.pm`, initializes any modules and variables that your
 app will use. Here is an example that uses `Moose` to create lazy attributes
 and initialize a database connection:
 
-    package MyApp;
+```perl
+package MyApp;
 
-    use parent Kelp;
-    use Moose;
+use parent Kelp;
+use Moose;
 
-    has dbh => (
-        is      => 'ro',
-        isa     => 'DBI',
-        lazy    => 1,
-        default => sub {
-            my $self   = shift;
-            my @config = @{ $self->config('dbi') };
-            return DBI->connect(@config);
-        }
-    );
-
-    sub build {
-        my $self = shift;
-        $self->routes->add("/read/:id", "read");
+has dbh => (
+    is      => 'ro',
+    isa     => 'DBI',
+    lazy    => 1,
+    default => sub {
+        my $self   = shift;
+        my @config = @{ $self->config('dbi') };
+        return DBI->connect(@config);
     }
+);
 
-    sub read {
-        my ( $self, $id ) = @_;
-        $self->dbh->selectrow_array(q[
-            SELECT * FROM problems
-            WHERE id = ?
-        ], $id);
-    }
+sub build {
+    my $self = shift;
+    $self->routes->add("/read/:id", "read");
+}
 
-    1;
+sub read {
+    my ( $self, $id ) = @_;
+    $self->dbh->selectrow_array(q[
+        SELECT * FROM problems
+        WHERE id = ?
+    ], $id);
+}
+
+1;
+```
 
 What is happening here?
 
@@ -241,14 +265,16 @@ up to you to use Moose, another object manager, or no object manager at all.
 The above example will be just as successful if you used our own little
 [Kelp::Base](https://metacpan.org/pod/Kelp::Base):
 
-    package MyApp;
-    use Kelp::Base 'Kelp';
+```perl
+package MyApp;
+use Kelp::Base 'Kelp';
 
-    attr dbi => sub {
-        ...
-    };
+attr dbi => sub {
+    ...
+};
 
-    1;
+1;
+```
 
 ## Routing
 
@@ -263,15 +289,19 @@ are assumed to be inside the ["build"](#build) method and `$r` is equal to
 You can direct HTTP paths to subroutines in your classes or, you can use inline
 code.
 
-    $r->add( "/home", "home" );  # goes to sub home
-    $r->add( "/legal", "Legal::view" ); # goes to MyApp::Legal::view
-    $r->add( "/about", sub { "Content for about" }); # inline
+```perl
+$r->add( "/home", "home" );  # goes to sub home
+$r->add( "/legal", "Legal::view" ); # goes to MyApp::Legal::view
+$r->add( "/about", sub { "Content for about" }); # inline
+```
 
 ### Restrict HTTP methods
 
 Make a route only catch a specific HTTP method:
 
-    $r->add( [ POST => '/update' ], "update_user" );
+```perl
+$r->add( [ POST => '/update' ], "update_user" );
+```
 
 ### Named captures
 
@@ -281,26 +311,32 @@ ever want to maintain your code.
 
 #### Explicit
 
-    $r->add( "/update/:id", "update" );
+```perl
+$r->add( "/update/:id", "update" );
 
-    # Later
-    sub update {
-        my ( $self, $id ) = @_;
-        # Do something with $id
-    }
+# Later
+sub update {
+    my ( $self, $id ) = @_;
+    # Do something with $id
+}
+```
 
 #### Optional
 
-    $r->add( "/person/?name", sub {
-        my ( $self, $name ) = @_;
-        return "I am " . $name // "nobody";
-    });
+```perl
+$r->add( "/person/?name", sub {
+    my ( $self, $name ) = @_;
+    return "I am " . $name // "nobody";
+});
+```
 
 This will handle `/person`, `/person/` and `/person/jack`.
 
 #### Wildcards
 
-    $r->add( '/*article/:id', 'Articles::view' );
+```
+$r->add( '/*article/:id', 'Articles::view' );
+```
 
 This will handle `/bar/foo/baz/500` and send it to `MyApp::Articles::view`
 with parameters `$article` equal to `bar/foo/baz` and `$id` equal to 500.
@@ -309,12 +345,14 @@ with parameters `$article` equal to `bar/foo/baz` and `$id` equal to 500.
 
 Paths' named placeholders can be restricted by providing regular expressions.
 
-    $r->add( '/user/:id', {
-        check => { id => '\d+' },
-        to    => "Users::get"
-    });
+```perl
+$r->add( '/user/:id', {
+    check => { id => '\d+' },
+    to    => "Users::get"
+});
 
-    # Matches /user/1000, but not /user/abc
+# Matches /user/1000, but not /user/abc
+```
 
 ### Placeholder defaults
 
@@ -322,21 +360,25 @@ This only applies to optional placeholders, or those prefixed with a question ma
 If a default value is provided for any of them, it will be used in case the
 placeholder value is missing.
 
-    $r->add( '/:id/?other', defaults => { other => 'info' } );
+```perl
+$r->add( '/:id/?other', defaults => { other => 'info' } );
 
-    # GET /100;
-    # { id => 100, other => 'info' }
+# GET /100;
+# { id => 100, other => 'info' }
 
-    # GET /100/delete;
-    # { id => 100, other => 'delete' }
+# GET /100/delete;
+# { id => 100, other => 'delete' }
+```
 
 ### Bridges
 
 A _bridge_ is a route that has to return a true value in order for the next
 route in line to be processed.
 
-    $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
-    $r->add( '/users/:action' => 'Users::dispatch' );
+```perl
+$r->add( '/users', { to => 'Users::auth', bridge => 1 } );
+$r->add( '/users/:action' => 'Users::dispatch' );
+```
 
 See ["BRIDGES" in Kelp::Routes](https://metacpan.org/pod/Kelp::Routes#BRIDGES) for more information.
 
@@ -345,11 +387,13 @@ See ["BRIDGES" in Kelp::Routes](https://metacpan.org/pod/Kelp::Routes#BRIDGES) f
 Each path can be given a name and later a URL can be built using that name and
 the necessary arguments.
 
-    $r->add( "/update/:id", { name => 'update', to => 'User::update' } );
+```perl
+$r->add( "/update/:id", { name => 'update', to => 'User::update' } );
 
-    # Later
+# Later
 
-    my $url = $self->route->url('update', id => 1000); # /update/1000
+my $url = $self->route->url('update', id => 1000); # /update/1000
+```
 
 ## Reblessing the app into a controller class
 
@@ -360,46 +404,52 @@ use the custom router class [Kelp::Routes::Controller](https://metacpan.org/pod/
 
 ### Step 1: Specify the custom router class in the config
 
-    # config.pl
-    {
-        modules_init => {
-            Routes => {
-                router => 'Controller'
-            }
+```perl
+# config.pl
+{
+    modules_init => {
+        Routes => {
+            router => 'Controller'
         }
     }
+}
+```
 
 ### Step 2: Create a main controller class
 
 This class must inherit from Kelp.
 
-    # lib/MyApp/Controller.pm
-    package MyApp::Controller;
-    use Kelp::Base 'MyApp';
+```perl
+# lib/MyApp/Controller.pm
+package MyApp::Controller;
+use Kelp::Base 'MyApp';
 
-    # Now $self is an instance of 'MyApp::Controller';
-    sub service_method {
-        my $self = shift;
-        ...;
-    }
+# Now $self is an instance of 'MyApp::Controller';
+sub service_method {
+    my $self = shift;
+    ...;
+}
 
-    1;
+1;
+```
 
 ### Step 3: Create any number of controller classes
 
 They all must inherit from your main controller class.
 
-    # lib/MyApp/Controller/Users.pm
-    package MyApp::Controller::Users;
-    use Kelp::Base 'MyApp::Controller';
+```perl
+# lib/MyApp/Controller/Users.pm
+package MyApp::Controller::Users;
+use Kelp::Base 'MyApp::Controller';
 
-    # Now $self is an instance of 'MyApp::Controller::Users'
-    sub authenticate {
-        my $self = shift;
-        ...;
-    }
+# Now $self is an instance of 'MyApp::Controller::Users'
+sub authenticate {
+    my $self = shift;
+    ...;
+}
 
-    1;
+1;
+```
 
 ## Quick development using Kelp::Less
 
@@ -408,20 +458,22 @@ could use [Kelp::Less](https://metacpan.org/pod/Kelp::Less). In this case all of
 Look up the POD for `Kelp::Less` for many examples, but to get you started off,
 here is a quick one:
 
-    # app.psgi
-    use Kelp::Less;
+```perl
+# app.psgi
+use Kelp::Less;
 
-    get '/api/:user/?action' => sub {
-        my ( $self, $user, $action ) = @_;
-        my $json = {
-            success => \1,
-            user    => $user,
-            action  => $action // 'ask'
-        };
-        return $json;
+get '/api/:user/?action' => sub {
+    my ( $self, $user, $action ) = @_;
+    my $json = {
+        success => \1,
+        user    => $user,
+        action  => $action // 'ask'
     };
+    return $json;
+};
 
-    run;
+run;
+```
 
 ## Adding middleware
 
@@ -438,42 +490,48 @@ you. This way you can load different middleware for each running mode, e.g.
 Add middleware names to the `middleware` array in your configuration file and
 the corresponding initializing arguments in the `middleware_init` hash:
 
-    # conf/development.pl
-    {
-        middleware      => [qw/Session Debug/],
-        middleware_init => {
-            Session => { store => 'File' }
-        }
+```perl
+# conf/development.pl
+{
+    middleware      => [qw/Session Debug/],
+    middleware_init => {
+        Session => { store => 'File' }
     }
+}
+```
 
 The middleware will be added in the order you specify in the `middleware`
 array.
 
 ### In `app.psgi`:
 
-    # app.psgi
-    use MyApp;
-    use Plack::Builder;
+```perl
+# app.psgi
+use MyApp;
+use Plack::Builder;
 
-    my $app = MyApp->new();
+my $app = MyApp->new();
 
-    builder {
-        enable "Plack::Middleware::ContentLength";
-        $app->run;
-    };
+builder {
+    enable "Plack::Middleware::ContentLength";
+    $app->run;
+};
+```
 
 ### By overriding the ["run"](#run) subroutine in `lib/MyApp.pm`:
 
 Make sure you call `SUPER` first, and then wrap new middleware around the
 returned app.
 
-    # lib/MyApp.pm
-    sub run {
-        my $self = shift;
-        my $app = $self->SUPER::run(@_);
-        $app = Plack::Middleware::ContentLength->wrap($app);
-        return $app;
-    }
+```perl
+# lib/MyApp.pm
+sub run {
+    my $self = shift;
+    my $app = $self->SUPER::run(@_);
+    $app = Plack::Middleware::ContentLength->wrap($app);
+    return $app;
+}
+```
 
 Note that any middleware defined in your config file will be added first.
 
@@ -482,7 +540,9 @@ Note that any middleware defined in your config file will be added first.
 Deploying a Kelp application is done the same way any other Plack application is
 deployed:
 
-    > plackup -E deployment -s Starman app.psgi
+```
+> plackup -E deployment -s Starman app.psgi
+```
 
 ## Testing
 
@@ -494,23 +554,25 @@ analyzing the response. Therefore, each test usually begins with the
 It sends the request to the web app and saves the response as an
 [HTTP::Response](https://metacpan.org/pod/HTTP::Response) object.
 
-    # file t/test.t
-    use MyApp;
-    use Kelp::Test;
-    use Test::More;
-    use HTTP::Request::Common;
+```perl
+# file t/test.t
+use MyApp;
+use Kelp::Test;
+use Test::More;
+use HTTP::Request::Common;
 
-    my $app = MyApp->new( mode => 'test' );
-    my $t = Kelp::Test->new( app => $app );
+my $app = MyApp->new( mode => 'test' );
+my $t = Kelp::Test->new( app => $app );
 
-    $t->request( GET '/path' )
-      ->code_is(200)
-      ->content_is("It works");
+$t->request( GET '/path' )
+  ->code_is(200)
+  ->content_is("It works");
 
-    $t->request( POST '/api' )
-      ->json_cmp({auth => 1});
+$t->request( POST '/api' )
+  ->json_cmp({auth => 1});
 
-    done_testing;
+done_testing;
+```
 
 What is happening here?
 
@@ -535,7 +597,9 @@ returned content was `It works`.
 
 Run the rest as usual, using `prove`:
 
-    > prove -l t/test.t
+```
+> prove -l t/test.t
+```
 
 Take a look at the [Kelp::Test](https://metacpan.org/pod/Kelp::Test) for details and more examples.
 
@@ -553,60 +617,76 @@ Your routes don't always have to set the `response` object. You could just
 return a simple scalar value or a reference to a hash, array or anything that
 can be converted to JSON.
 
-    # Content-type automatically set to "text/html"
-    sub text_route {
-        return "There, there ...";
-    }
+```perl
+# Content-type automatically set to "text/html"
+sub text_route {
+    return "There, there ...";
+}
 
-    # Content-type automatically set to "application/json"
-    sub json_route {
-        return { error => 1,  message => "Fail" };
-    }
+# Content-type automatically set to "application/json"
+sub json_route {
+    return { error => 1,  message => "Fail" };
+}
+```
 
 ### Rendering text
 
-    # Render simple text
-    $self->res->text->render("It works!");
+```perl
+# Render simple text
+$self->res->text->render("It works!");
+```
 
 ### Rendering HTML
 
-    $self->res->html->render("<h1>It works!</h1>");
+```perl
+$self->res->html->render("<h1>It works!</h1>");
+```
 
 ### Custom content type
 
-    $self->res->set_content_type('image/png');
+```perl
+$self->res->set_content_type('image/png');
+```
 
 ### Return 404 or 500 errors
 
-    sub some_route {
-        my $self = shift;
-        if ($missing) {
-            return $self->res->render_404;
-        }
-        if ($broken) {
-            return $self->res->render_500;
-        }
+```perl
+sub some_route {
+    my $self = shift;
+    if ($missing) {
+        return $self->res->render_404;
     }
+    if ($broken) {
+        return $self->res->render_500;
+    }
+}
+```
 
 ### Templates
 
-    sub hello {
-        my ( $self, $name ) = @_;
-        $self->res->template( 'hello.tt', { name => $name } );
-    }
+```perl
+sub hello {
+    my ( $self, $name ) = @_;
+    $self->res->template( 'hello.tt', { name => $name } );
+}
+```
 
 The above example will render the contents of `hello.tt`, and it will set the
 content-type to `text/html`. To set a different content-type, use
 `set_content_type` or any of its aliases:
 
-    sub hello_txt {
-        my ( $self, $name ) = @_;
-        $self->res->text->template( 'hello_txt.tt', { name => $name } );
-    }
+```perl
+sub hello_txt {
+    my ( $self, $name ) = @_;
+    $self->res->text->template( 'hello_txt.tt', { name => $name } );
+}
+```
 
 ### Headers
 
-    $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
+```perl
+$self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
+```
 
 ### Serving static files
 
@@ -615,16 +695,18 @@ middleware that comes with Plack. Here is an example configuration that serves
 files in your `public` folder (under the Kelp root folder) from URLs that
 begin with `/public`:
 
-    # conf/config.pl
-    {
-        middleware      => [qw/Static/],
-        middleware_init => {
-            Static => {
-                path => qr{^/public/},
-                root => '.',
-            }
+```perl
+# conf/config.pl
+{
+    middleware      => [qw/Static/],
+    middleware_init => {
+        Static => {
+            path => qr{^/public/},
+            root => '.',
         }
-    };
+    }
+};
+```
 
 ### Uploading files
 
@@ -632,33 +714,39 @@ File uploads are handled by [Kelp::Request](https://metacpan.org/pod/Kelp::Reque
 and has its `uploads|Plack::Request/uploads` property. The uploads property returns a
 reference to a hash containing all uploads.
 
-    sub upload {
-        my $self = shift;
-        my $uploads  = $self->req->uploads;
+```perl
+sub upload {
+    my $self = shift;
+    my $uploads  = $self->req->uploads;
 
-        # Now $uploads is a hashref to all uploads
-        ...
-    }
+    # Now $uploads is a hashref to all uploads
+    ...
+}
+```
 
 For [Kelp::Less](https://metacpan.org/pod/Kelp::Less), then you can use the `req` reserved word:
 
-    get '/upload' => sub {
-        my $uploads = req->uploads;
-    };
+```perl
+get '/upload' => sub {
+    my $uploads = req->uploads;
+};
+```
 
 ### Delayed responses
 
 To send a delayed response, have your route return a subroutine.
 
-    sub delayed {
-        my $self = shift;
-        return sub {
-            my $responder = shift;
-            $self->res->code(200);
-            $self->res->text->body("Better late than never.");
-            $responder->($self->res->finalize);
-        };
-    }
+```perl
+sub delayed {
+    my $self = shift;
+    return sub {
+        my $responder = shift;
+        $self->res->code(200);
+        $self->res->text->body("Better late than never.");
+        $responder->($self->res->finalize);
+    };
+}
+```
 
 See the [PSGI](https://metacpan.org/pod/PSGI#Delayed-Response-and-Streaming-Body) pod for more
 information and examples.
@@ -670,19 +758,21 @@ of the `Kelp::Module` namespace. Modules' job is to initialize and register new
 methods into the web application class. The following is the full code of the
 [Kelp::Module::JSON](https://metacpan.org/pod/Kelp::Module::JSON) for example:
 
-    package Kelp::Module::JSON;
+```perl
+package Kelp::Module::JSON;
 
-    use Kelp::Base 'Kelp::Module';
-    use JSON;
+use Kelp::Base 'Kelp::Module';
+use JSON;
 
-    sub build {
-        my ( $self, %args ) = @_;
-        my $json = JSON->new;
-        $json->property( $_ => $args{$_} ) for keys %args;
-        $self->register( json => $json );
-    }
+sub build {
+    my ( $self, %args ) = @_;
+    my $json = JSON->new;
+    $json->property( $_ => $args{$_} ) for keys %args;
+    $self->register( json => $json );
+}
 
-    1;
+1;
+```
 
 What is happening here?
 
@@ -714,12 +804,14 @@ examples.
 
 Gets the current hostname.
 
-    sub some_route {
-        my $self = shift;
-        if ( $self->hostname eq 'prod-host' ) {
-            ...
-        }
+```perl
+sub some_route {
+    my $self = shift;
+    if ( $self->hostname eq 'prod-host' ) {
+        ...
     }
+}
+```
 
 ## mode
 
@@ -727,9 +819,11 @@ Sets or gets the current mode. The mode is important for the app to know what
 configuration file to merge into the main configuration. See
 [Kelp::Module::Config](https://metacpan.org/pod/Kelp::Module::Config) for more information.
 
-    my $app = MyApp->new( mode => 'development' );
-    # conf/config.pl and conf/development.pl are merged with priority
-    # given to the second one.
+```perl
+my $app = MyApp->new( mode => 'development' );
+# conf/config.pl and conf/development.pl are merged with priority
+# given to the second one.
+```
 
 ## request\_obj
 
@@ -754,10 +848,12 @@ A hashref containing the names and instances of all loaded modules. For example,
 if you have these two modules loaded: Template and JSON, then a dump of
 the `loaded_modules` hash will look like this:
 
-    {
-        Template => Kelp::Module::Template=HASH(0x208f6e8),
-        JSON     => Kelp::Module::JSON=HASH(0x209d454)
-    }
+```perl
+{
+    Template => Kelp::Module::Template=HASH(0x208f6e8),
+    JSON     => Kelp::Module::JSON=HASH(0x209d454)
+}
+```
 
 This can come in handy if your module does more than just registering a new method
 into the application. Then, you can use its object instance to access that
@@ -772,7 +868,9 @@ Gets the current path of the application. That would be the path to `app.psgi`
 Gets or sets the name of the application. If not set, the name of the main
 class will be used.
 
-    my $app = MyApp->new( name => 'Twittar' );
+```perl
+my $app = MyApp->new( name => 'Twittar' );
+```
 
 ## charset
 
@@ -790,22 +888,26 @@ The `KELP_LONG_ERROR` environment variable can also set this attribute.
 This attribute only makes sense if called within a route definition. It will
 contain a reference to the current [Kelp::Request](https://metacpan.org/pod/Kelp::Request) instance.
 
-    sub some_route {
-        my $self = shift;
-        if ( $self->req->is_json ) {
-            ...
-        }
+```perl
+sub some_route {
+    my $self = shift;
+    if ( $self->req->is_json ) {
+        ...
     }
+}
+```
 
 ## res
 
 This attribute only makes sense if called within a route definition. It will
 contain a reference to the current [Kelp::Response](https://metacpan.org/pod/Kelp::Response) instance.
 
-    sub some_route {
-        my $self = shift;
-        $self->res->json->render( { success => 1 } );
-    }
+```perl
+sub some_route {
+    my $self = shift;
+    $self->res->json->render( { success => 1 } );
+}
+```
 
 # METHODS
 
@@ -815,21 +917,23 @@ On its own, the `build` method doesn't do anything. It is called by the
 constructor, so it can be overridden to add route destinations and
 initializations.
 
-    package MyApp;
+```perl
+package MyApp;
 
-    sub build {
-        my $self = shift;
-        my $r = $self->routes;
+sub build {
+    my $self = shift;
+    my $r = $self->routes;
 
-        # Load some modules
-        $self->load_module("MongoDB");
-        $self->load_module("Validate");
+    # Load some modules
+    $self->load_module("MongoDB");
+    $self->load_module("Validate");
 
-        # Add all route destinations
-        $r->add("/one", "one");
-        ...
+    # Add all route destinations
+    $r->add("/one", "one");
+    ...
 
-    }
+}
+```
 
 ## load\_module
 
@@ -838,8 +942,10 @@ initializations.
 Used to load a module. All modules must be under the `Kelp::Module::`
 namespace.
 
-    $self->load_module("Redis", server => '127.0.0.1');
-    # Will look for and load Kelp::Module::Redis
+```perl
+$self->load_module("Redis", server => '127.0.0.1');
+# Will look for and load Kelp::Module::Redis
+```
 
 Options for the module may be specified after its name, or in the
 `modules_init` hash in the config. Precedence is given to the
@@ -855,29 +961,33 @@ override this method to use a custom request module if you need to do something
 interesting. Though there is a provided attribute that can be used to overide
 the class of the object used. 
 
-    package MyApp;
-    use MyApp::Request;
+```perl
+package MyApp;
+use MyApp::Request;
 
-    sub build_request {
-        my ( $self, $env ) = @_;
-        return MyApp::Request->new( app => $app, env => $env );
-    }
+sub build_request {
+    my ( $self, $env ) = @_;
+    return MyApp::Request->new( app => $app, env => $env );
+}
 
-    # Now each request will be handled by MyApp::Request
+# Now each request will be handled by MyApp::Request
+```
 
 ## before\_finalize
 
 Override this method to modify the response object just before it gets
 finalized.
 
-    package MyApp;
+```perl
+package MyApp;
 
-    sub before_finalize {
-        my $self = shift;
-        $self->res->set_header("X-App-Name", "MyApp");
-    }
+sub before_finalize {
+    my $self = shift;
+    $self->res->set_header("X-App-Name", "MyApp");
+}
 
-    ...
+...
+```
 
 The above is an example of how to insert a custom header into the response of
 every route.
@@ -899,12 +1009,14 @@ include middleware. See ["Adding middleware"](#adding-middleware) for an example
 
 A shortcut to `$self->req->param`:
 
-    sub some_route {
-        my $self = shift;
-        if ( $self->param('age') > 18 ) {
-            $self->can_watch_south_path(1);
-        }
+```perl
+sub some_route {
+    my $self = shift;
+    if ( $self->param('age') > 18 ) {
+        $self->can_watch_south_path(1);
     }
+}
+```
 
 See [Kelp::Request](https://metacpan.org/pod/Kelp::Request) for more information and examples.
 
@@ -932,18 +1044,20 @@ See ["named" in Kelp::Request](https://metacpan.org/pod/Kelp::Request#named) for
 A safe shortcut to `$self->routes->url`. Builds a URL from path and
 arguments.
 
-    sub build {
-        my $self = shift;
-        $self->routes->add("/:name/:id", { name => 'name', to => sub {
-            ...
-        }});
-    }
+```perl
+sub build {
+    my $self = shift;
+    $self->routes->add("/:name/:id", { name => 'name', to => sub {
+        ...
+    }});
+}
 
-    sub check {
-        my $self = shift;
-        my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
-        $self->res->redirect_to( $url_for_name );
-    }
+sub check {
+    my $self = shift;
+    my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
+    $self->res->redirect_to( $url_for_name );
+}
+```
 
 # SUPPORT
 
@@ -976,7 +1090,7 @@ Ivan Baidakou (basiliscos)
 
 roy-tate
 
-Konstantin Yakunin (twinhooker)
+Konstantin Yakunin (@yakunink)
 
 Benjamin Hengst (notbenh)
 

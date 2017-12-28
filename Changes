@@ -1,3 +1,6 @@
+2017-12-29: Version 1.01
+            No changes. Stable version.
+            
 2016-11-08: Version 0.9091
             [Changes]
             - Change bridge error respose. Bridges will return 403 Forbidden (Konstantin Yakunin)

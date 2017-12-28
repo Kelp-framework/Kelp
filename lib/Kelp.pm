@@ -10,7 +10,7 @@ use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 
-our $VERSION = 0.9081;
+our $VERSION = 1.01;
 
 # Basic attributes
 attr -host => hostname;
@@ -1375,7 +1375,7 @@ Ivan Baidakou (basiliscos)
 
 roy-tate
 
-Konstantin Yakunin (twinhooker)
+Konstantin Yakunin (@yakunink)
 
 Benjamin Hengst (notbenh)
 
