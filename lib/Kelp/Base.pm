@@ -4,6 +4,7 @@ use strict ();
 use warnings ();
 use feature ();
 use Carp;
+use namespace::autoclean ();
 
 sub import {
     my $class = shift;
@@ -29,6 +30,10 @@ sub import {
     strict->import;
     warnings->import;
     feature->import(':5.10');
+
+    namespace::autoclean->import(
+        -cleanee => scalar(caller),
+    );
 }
 
 sub new {

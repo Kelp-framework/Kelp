@@ -1,6 +1,7 @@
 package MyApp;
 use Kelp::Base 'Kelp';
 use MyApp::Response;
+use UtilPackage;
 
 sub before_finalize {
     my $self = shift;
@@ -22,5 +23,13 @@ sub build {
     # Controller routes
     $r->add("/blessed", "blessed");
 }
+
+sub blessed {
+    my ( $self ) = @_;
+
+    $self->template('home');
+}
+
+sub check_util_fun { path; }
 
 1;
