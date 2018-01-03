@@ -9,8 +9,10 @@ perl:
   - "5.22"
   - "5.24"
 before-install:
-  - eval $(curl https://travis-perl.github.io/init) --auto
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init
 script:
+  - cpan-install --deps
   - prove -l 
 sudo: false
 
