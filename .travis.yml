@@ -1,12 +1,19 @@
 language: perl
 perl:
-    - "5.10"
-    - "5.12"
-    - "5.14"
-    - "5.16"
-    - "5.18"
-
+  - "5.10"
+  - "5.12"
+  - "5.14"
+  - "5.16"
+  - "5.18"
+  - "5.20"
+  - "5.22"
+  - "5.24"
 before_install:
-    - cpanm -n Kelp
+  - git clone git://github.com/travis-perl/helpers ~/travis-perl-helpers
+  - source ~/travis-perl-helpers/init --auto
+before_script:
+  - cpan-install --deps
+script:
+  - prove -l 
+sudo: false
 
-install: true
