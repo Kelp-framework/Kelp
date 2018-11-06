@@ -5,7 +5,7 @@ use Getopt::Long;
 use File::Path 'make_path';
 use Kelp::Template;
 use File::Basename;
-use File::Slurp 'write_file';
+use Path::Tiny;
 
 my $path = '.';
 my $verbose = 1;
@@ -91,7 +91,7 @@ while ( my ( $filename, $lines ) = each %$files ) {
     }
 
     _say("Writing file: $filename");
-    write_file( $filename, $lines );
+    path($filename)->spew(@{ $lines });
 }
 
 sub _say {
