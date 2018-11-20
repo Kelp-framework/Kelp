@@ -164,7 +164,7 @@ variables.
         ...
     }
 
-Note. If you're running the web app behind nginx (or another web server), you need
+Note. If you're running the web app behind C<nginx> (or another web server), you need
 to use L<Plack::Middleware::ReverseProxy>.
 
     # app.psgi

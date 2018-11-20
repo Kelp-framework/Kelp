@@ -109,8 +109,8 @@ the routes definitions.
 
     base => 'MyApp'
 
-Now when defining a route you can only type 'myroute' to denote
-'MyApp::myroute'.
+Now when defining a route you can only type C<myroute> to denote
+C<MyApp::myroute>.
 
 
 =cut
