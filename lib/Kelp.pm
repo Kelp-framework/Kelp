@@ -1126,12 +1126,12 @@ L<Kelp::Module::Config> for more information.
 
 =head2 request_obj
 
-Proide a custom package name to define the global ::Request object. Defaults to
+Provide a custom package name to define the global ::Request object. Defaults to
 L<Kelp::Request>.
 
 =head2 response_obj
 
-Proide a custom package name to define the global ::Response object. Defaults to
+Provide a custom package name to define the global ::Response object. Defaults to
 L<Kelp::Response>.
 
 =head2 config_module
