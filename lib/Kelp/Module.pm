@@ -91,6 +91,7 @@ Then ...
     use parent 'Kelp';
 
     sub build {
+        my $self = shift;
         $self->load_module("Month");
     }
 
