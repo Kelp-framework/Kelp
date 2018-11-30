@@ -14,7 +14,7 @@ sub _logger {
 
 sub build {
     my ( $self, %args ) = @_;
-    my $logger = $self->{logger} = $self->_logger(%args);
+    $self->{logger} = $self->_logger(%args);
 
     # Register a few levels
     my @levels_to_register = qw/debug info error/;
@@ -23,7 +23,7 @@ sub build {
     my %LEVELS = map {
         my $level = $_;
         $level => sub {
-            my $app = shift;
+            shift;
             $self->message( $level, @_ );
         };
     } @levels_to_register;
