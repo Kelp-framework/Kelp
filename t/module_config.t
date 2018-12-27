@@ -10,11 +10,10 @@ use Plack::Util;
 use FindBin '$Bin';
 use Test::More;
 use Test::Exception;
+use Kelp;
 
 # Basic
-my $app = Plack::Util::inline_object(
-    mode => sub { "test" }
-);
+my $app = Kelp->new( mode => 'test' );
 my $c = Kelp::Module::Config->new( app => $app );
 isa_ok $c, 'Kelp::Module::Config';
 

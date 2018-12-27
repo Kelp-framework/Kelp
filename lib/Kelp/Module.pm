@@ -22,20 +22,17 @@ sub register {
         no strict 'refs';
         no warnings 'redefine';
 
-        my $app  = ref $self->app;
-        my $glob = "${app}::$name";
-
         # Manually check if the glob is being redefined
         if ( !$ENV{KELP_REDEFINE} && $self->app->can($name) ) {
-            croak "Redefining of $glob not allowed";
+            croak "Redefining of $name not allowed";
         }
 
         if ( ref $item eq 'CODE' ) {
-            *{$glob} = $item;
+            $self->app->registered_methods->{$name} = $item;
         }
         else {
             $self->app->{$name} = $item;
-            *{$glob} = sub { $_[0]->{$name} }
+            $self->app->registered_methods->{$name} = sub { $_[0]->{$name} };
         }
     }
 }

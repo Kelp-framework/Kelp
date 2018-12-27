@@ -43,6 +43,8 @@ attr -loaded_modules => sub { {} };
 attr req => undef;
 attr res => undef;
 
+attr -registered_methods => sub { {} };
+
 # Initialization
 sub new {
     my $self = shift->SUPER::new(@_);
@@ -78,6 +80,30 @@ sub _clone {
 
     ref $self or croak '_clone requires instance';
     return bless { %$self }, $subclass;
+}
+
+# Check our instance-registered methods for can()
+sub can {
+    my ($self, $name) = @_;
+    if (ref $self) {
+        my $method = $self->registered_methods->{$name};
+        return $method if defined $method;
+    }
+    return $self->SUPER::can($name);
+}
+
+# Check our instance-registered methods for implementations
+our $AUTOLOAD;
+sub AUTOLOAD {
+    my $self = shift;
+
+    my $name = $AUTOLOAD =~ s/.*:://r;
+    return if $name eq "DESTROY";
+
+    my $method = $self->can($name);
+    return $self->$method(@_) if $method;
+    die sprintf('Can\'t locate object method "%s" via package "%s"',
+                $name, ref $self);
 }
 
 sub load_module {
