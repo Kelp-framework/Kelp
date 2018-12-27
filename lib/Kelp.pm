@@ -132,6 +132,35 @@ sub before_finalize {
     $self->res->header('X-Framework' => 'Perl Kelp');
 }
 
+# Override this to update how the route is logged
+sub log_route {
+    my ($self, $route) = @_;
+
+    return unless $self->can('logger');
+
+    my $req = $self->req;
+
+    $self->info(
+        sprintf( "%s - %s %s - %s",
+            $req->address, $req->method,
+            $req->path,    $route->to )
+    );
+}
+
+# Render a 500 error when an exception is thrown
+sub render_error {
+    my ($self, $err) = @_;
+
+    if ($self->can('logger')) {
+        my $message = $self->long_error ? longmess($err) : $err;
+
+        # Log error
+        $self->logger( 'critical', $message );
+    }
+
+    $self->res->render_500( $err );
+}
+
 # Override this to wrap more middleware around the app
 sub run {
     my $self = shift;
@@ -180,14 +209,7 @@ sub psgi {
             $self->req->named( $route->named );
             my $data = $self->routes->dispatch( $self, $route );
 
-            # Log info about the route
-            if ( $self->can('logger') ) {
-                $self->info(
-                    sprintf( "%s - %s %s - %s",
-                        $req->address, $req->method,
-                        $req->path,    $route->to )
-                );
-            }
+            $self->log_route( $route );
 
             # Is it a bridge? Bridges must return a true value
             # to allow the rest of the routes to run.
@@ -225,13 +247,9 @@ sub psgi {
         $self->finalize;
     }
     catch {
-        my $message = $self->long_error ? longmess($_) : $_;
+        my $err = $_;
 
-        # Log error
-        $self->logger( 'critical', $message ) if $self->can('logger');
-
-        # Render 500
-        $self->res->render_500($_);
+        $self->render_error( $err );
         $self->finalize;
     };
 }
@@ -1338,6 +1356,19 @@ arguments.
         my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
         $self->res->redirect_to( $url_for_name );
     }
+
+=head2 log_route
+
+Provides a hook to log a route after it has been dispatched.  Takes a
+single argument - the route being handled (L<Kelp::Routes::Pattern>).
+By default, checks if the L<Kelp::Module::Logger> is installed and if
+so, logs a string with that module.
+
+=head2 render_error
+
+Renders an exception to an error page.  Takes a single argument - the
+exception.  By default, simply asks the response object to render a
+500 with the exception string.
 
 =head1 SUPPORT
 
