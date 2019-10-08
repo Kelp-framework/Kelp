@@ -388,7 +388,7 @@ specified path. If that route is marked as a bridge, then L</match> will
 continue looking for another match, and will eventually return an array of one or
 more routes. Bridges can be used for authentication or other route preprocessing.
 
-    $r->add( '/users', { to => 'Users::auth', bridge => 1 } );
+    $r->add( '/users/*', { to => 'Users::auth', bridge => 1 } );
     $r->add( '/users/:action' => 'Users::dispatch' );
 
 The above example will require F</users/profile> to go through two
@@ -403,7 +403,7 @@ A quick way to add bridges is to use the L</tree> option. It allows you to
 define all routes under a bridge. Example:
 
     $r->add(
-        '/users' => {
+        '/users/*' => {
             to   => 'users#auth',
             name => 'users',
             tree => [
