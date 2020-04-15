@@ -14,6 +14,9 @@ attr stash => sub { {} };
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
 
+# The name of the matched route for this request
+attr route_name => sub { undef };
+
 # If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
 sub address     { $_[0]->env->{REMOTE_ADDR} }
 sub remote_host { $_[0]->env->{REMOTE_HOST} }
@@ -121,6 +124,11 @@ that you can use to pass data from one route to another.
 
 This hash is initialized with the named placeholders of the path that the
 current route is processing.
+
+=head2 route_name
+
+Contains a string name of the route matched for this request. Contains route pattern
+if the route was not named.
 
 =head2 param
 
