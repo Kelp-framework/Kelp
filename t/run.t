@@ -39,6 +39,49 @@ for my $a (qw{boo дума 123}) {
       ->content_is("Got: $a");
 }
 
+# Route name
+my $route_name_sub = sub {
+    my $self = shift;
+    return "Got: " . $self->req->route_name;
+};
+
+$app->add_route("/bridge", {
+    name => 'named_bridge',
+    to => sub { 1 },
+    bridge => 1,
+});
+
+$app->add_route("/bridge/name", {
+    name => 'named_route',
+    to => $route_name_sub,
+});
+
+$app->add_route("/unnamed", $route_name_sub);
+
+$t->request( GET "/bridge/name" )
+  ->code_is(200)
+  ->content_is("Got: named_route");
+
+$t->request( GET "/unnamed" )
+  ->code_is(200)
+  ->content_is("Got: /unnamed");
+
+# Route name - tree
+$app->add_route("/tree", {
+    name => 'tree_bridge',
+    to => sub { 1 },
+    tree => [
+        "/name" => {
+            name => 'tree_route',
+            to => $route_name_sub,
+        },
+    ],
+});
+
+$t->request( GET "/tree/name" )
+  ->code_is(200)
+  ->content_is("Got: tree_bridge_tree_route");
+
 # Array of placeholders
 $app->add_route("/array/:a/:b", sub {
     my ($self, $a, $b) = @_;

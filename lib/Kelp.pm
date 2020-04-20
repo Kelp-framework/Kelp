@@ -178,6 +178,7 @@ sub psgi {
 
             # Dispatch
             $self->req->named( $route->named );
+            $self->req->route_name( $route->name );
             my $data = $self->routes->dispatch( $self, $route );
 
             # Log info about the route
@@ -1247,7 +1248,7 @@ returns an instance of the class defined in the request_obj attribute (defaults 
 L<Kelp::Request>), initialized with the current request's environment. You can
 override this method to use a custom request module if you need to do something
 interesting. Though there is a provided attribute that can be used to overide
-the class of the object used. 
+the class of the object used.
 
     package MyApp;
     use MyApp::Request;
