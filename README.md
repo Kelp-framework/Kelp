@@ -462,6 +462,8 @@ here is a quick one:
 # app.psgi
 use Kelp::Less;
 
+module 'JSON';
+
 get '/api/:user/?action' => sub {
     my ( $self, $user, $action ) = @_;
     my $json = {
@@ -959,7 +961,7 @@ returns an instance of the class defined in the request\_obj attribute (defaults
 [Kelp::Request](https://metacpan.org/pod/Kelp::Request)), initialized with the current request's environment. You can
 override this method to use a custom request module if you need to do something
 interesting. Though there is a provided attribute that can be used to overide
-the class of the object used. 
+the class of the object used.
 
 ```perl
 package MyApp;

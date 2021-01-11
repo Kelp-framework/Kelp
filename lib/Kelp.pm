@@ -769,6 +769,8 @@ here is a quick one:
     # app.psgi
     use Kelp::Less;
 
+    module 'JSON';
+
     get '/api/:user/?action' => sub {
         my ( $self, $user, $action ) = @_;
         my $json = {
