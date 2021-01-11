@@ -10,7 +10,7 @@ use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 
-our $VERSION = 1.02;
+our $VERSION = 1.03;
 
 # Basic attributes
 attr -host => hostname;
@@ -768,6 +768,8 @@ here is a quick one:
 
     # app.psgi
     use Kelp::Less;
+
+    module 'JSON';
 
     get '/api/:user/?action' => sub {
         my ( $self, $user, $action ) = @_;
