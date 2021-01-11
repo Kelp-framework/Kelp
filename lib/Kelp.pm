@@ -10,7 +10,7 @@ use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 
-our $VERSION = 1.02;
+our $VERSION = 1.03;
 
 # Basic attributes
 attr -host => hostname;

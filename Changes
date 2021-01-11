@@ -1,10 +1,17 @@
+2021-01-11: Version 1.03
+            [New Features]
+            - Kelp::Request now holds the name of a route
+
+            [Changes]
+            - POD fixes
+
 2018-01-08: Version 1.02
             [Bug fixes]
             - clean namespace inside import, fix for Path::Tiny
 
 2017-12-29: Version 1.01
             No changes. Stable version.
-            
+
 2016-11-08: Version 0.9091
             [Changes]
             - Change bridge error respose. Bridges will return 403 Forbidden (Konstantin Yakunin)
@@ -27,7 +34,7 @@
             - Stringify 500 errors avoiding the JSON-ification of returned structures and blessed objects. (basiliscos)
             - Increate the level of Test::Bulder in Kelp::Test, providing more relevant messages upon error. (basiliscos)
             - POD typos corrected
-            
+
             [New Features]
             - Add json_content method to Kelp::Test, allowing for the testing of the returned JSON structure.
             - Abstract the initialization of the Config and Routes modules
