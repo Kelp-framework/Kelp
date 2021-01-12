@@ -1,7 +1,11 @@
 2021-01-11: Version 1.03
             [New Features]
             - Kelp::Request now holds the name of a route
-			- Kelp script can now use tabs for indentation with --tabs flag
+            - Kelp script can now use tabs for indentation with --tabs flag
+
+            [New Documentation]
+            - Added Kelp::Manual - moved from old Kelp POD
+            - Added Kelp::Manual::Cookbook
 
             [Changes]
             - POD fixes
