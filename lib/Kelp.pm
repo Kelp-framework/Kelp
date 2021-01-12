@@ -313,6 +313,7 @@ First ...
 Then ...
 
     # app.psgi
+    use lib 'lib';
     use MyApp;
     my $app = MyApp->new;
     $app->run;
@@ -355,51 +356,37 @@ B<Advanced Routing>. Create intricate, yet simple ways to capture HTTP requests
 and route them to their designated code. Use explicit and optional named
 placeholders, wildcards, or just regular expressions.
 
-=cut
-
 =item
 
 B<Flexible Configuration>. Use different configuration file for each
 environment, e.g. development, deployment, etc. Merge a temporary configuration
 into your current one for testing and debugging purposes.
 
-=cut
-
 =item
 
 B<Enhanced Logging>. Log messages at different levels of emergency. Log to a
 file, screen, or anything supported by Log::Dispatch.
-
-=cut
 
 =item
 
 B<Powerful Rendering>. Use the built-in auto-rendering logic, or the template
 module of your choice to return rich text, html and JSON responses.
 
-=cut
-
 =item
 
 B<JSON encoder/decoder>. Kelp comes with JSON, but you can easily plug in JSON::XS
 or any decoder of your choice.
-
-=cut
 
 =item
 
 B<Extendable Core>. Kelp uses pluggable modules for everything. This allows
 anyone to add a module for a custom interface. Writing Kelp modules is easy.
 
-=cut
-
 =item
 
 B<Sleek Testing>. Kelp takes Plack::Test and wraps it in an object oriented
 class of convenience methods. Testing is done via sending requests to your
 routes, then analyzing the response.
-
-=cut
 
 =back
 
@@ -471,8 +458,6 @@ utility script.
 The C<lib> folder contains your application modules and any local modules
 that you want your app to use.
 
-=cut
-
 =item B</conf>
 
 The C<conf> folder is where Kelp will look for configuration files. You need one
@@ -488,28 +473,20 @@ or
 
     > PLACK_ENV=development plackup app.psgi
 
-=cut
-
 =item B</view>
 
 This is where the C<Template> module will look for template files.
-
-=cut
 
 =item B</log>
 
 This is where the C<Logger> module will create C<error.log>, C<debug.log> and
 any other log files that were defined in the configuration.
 
-=cut
-
 =item B</t>
 
 The C<t> folder is traditionally used to hold test files. It is up to you to use
 it or not, although we strongly recommend that you write some automated test
 units for your web app.
-
-=cut
 
 =item B<app.psgi>
 
@@ -521,8 +498,6 @@ form it should look like this:
 
     my $app = MyApp->new;
     $app->run;
-
-=cut
 
 =back
 
@@ -576,21 +551,15 @@ variable. Notice also that the reason we define C<dbh> as a I<lazy> attribute
 is that C<config> will not yet be initialized. All modules are initialized upon
 the creation of the object instance, e.g. when we call C<MyApp-E<gt>new>;
 
-=cut
-
 =item
 
 Then, we override Kelp's L</build> subroutine to create a single route
 C</read/:id>, which is assigned to the subroutine C<read> in the current class.
 
-=cut
-
 =item
 
 The C<read> subroutine, takes C<$self> and C<$id> (the named placeholder from the
 path), and uses C<$self-E<gt>dbh> to retrieve data.
-
-=cut
 
 =back
 
@@ -885,14 +854,10 @@ The test configuration can contain anything you see fit. Perhaps you want to
 disable certain modules, or maybe you want to make DBI connect to a different
 database.
 
-=cut
-
 =item
 
 Second, we create an instance of the C<Kelp::Test> class and tell it that it
 will perform all tests using our C<$app> instance.
-
-=cut
 
 =item
 
@@ -903,16 +868,12 @@ module here, because you can create common requests using abridged syntax,
 i.e. C<GET>, C<POST>, etc.  The line C<$t-E<gt>request( GET '/path' )> first
 creates a HTTP::Request GET object, and then passes it to the C<request> method.
 
-=cut
-
 =item
 
 After we send the request, we can test the response using any of the C<Test::>
 modules, or via the methods provided by L<Kelp::Test>.
 In the above example, we test if we got a code 200 back from C</path> and if the
 returned content was C<It works>.
-
-=cut
 
 =back
 
@@ -1075,14 +1036,10 @@ What is happening here?
 
 First we create a class C<Kelp::Module::JSON> which inherits C<Kelp::Module>.
 
-=cut
-
 =item
 
 Then, we override the C<build> method (of C<Kelp::Module>), create a new JSON
 object and register it into the web application via the C<register> method.
-
-=cut
 
 =back
 
@@ -1383,6 +1340,8 @@ Konstantin Yakunin (@yakunink)
 Benjamin Hengst (notbenh)
 
 Nikolay Mishin (@mishin)
+
+Bartosz Jarzyna (@brtastic)
 
 =head1 LICENSE
 
