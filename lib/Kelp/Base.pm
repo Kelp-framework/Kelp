@@ -4,6 +4,7 @@ use strict ();
 use warnings ();
 use feature ();
 use Carp;
+use namespace::autoclean ();
 
 sub import {
     my $class = shift;
@@ -29,6 +30,10 @@ sub import {
     strict->import;
     warnings->import;
     feature->import(':5.10');
+
+    namespace::autoclean->import(
+        -cleanee => scalar(caller),
+    );
 }
 
 sub new {
@@ -77,7 +82,7 @@ Kelp::Base - Simple lazy attributes
     attr source => 'dbi:mysql:users';
     attr user   => 'test';
     attr pass   => 'secret';
-    attr opts   => { PrintError => 1, RaiseError => 1 };
+    attr opts   =>  sub { { PrintError => 1, RaiseError => 1 } };
 
     attr dbh => sub {
         my $self = shift;

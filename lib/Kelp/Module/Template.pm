@@ -150,8 +150,6 @@ template files.
 
     attr ext => 'haml';
 
-=cut
-
 =item
 
 Overrides the L</build_engine> method and creates an instance of the new
@@ -161,8 +159,6 @@ template engine.
         my ( $self, %args ) = @_;
         return Text::Haml->new( %args );
     }
-
-=cut
 
 =item
 
@@ -180,8 +176,6 @@ Overrides the L</render> method and renders using C<$self-E<gt>engine>.
           ? $haml->render( $$template, %$vars )
           : $haml->render_file( $template, %$vars );
     }
-
-=cut
 
 =back
 

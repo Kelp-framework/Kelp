@@ -14,6 +14,9 @@ attr stash => sub { {} };
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
 
+# The name of the matched route for this request
+attr route_name => sub { undef };
+
 # If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
 sub address     { $_[0]->env->{REMOTE_ADDR} }
 sub remote_host { $_[0]->env->{REMOTE_HOST} }
@@ -122,6 +125,11 @@ that you can use to pass data from one route to another.
 This hash is initialized with the named placeholders of the path that the
 current route is processing.
 
+=head2 route_name
+
+Contains a string name of the route matched for this request. Contains route pattern
+if the route was not named.
+
 =head2 param
 
 Returns the HTTP parameters of the request. This method delegates all the work
@@ -142,16 +150,12 @@ called in scalar context.
     my $json = $self->param;    # $json = { bar => 1, foo => 2 }
 
 
-=cut
-
 =item
 
 If a single argument is passed, then the corresponding value in the JSON
 document is returned.
 
     my $bar = $self->param('bar');  # $bar = 1
-
-=cut
 
 =back
 
@@ -164,7 +168,7 @@ variables.
         ...
     }
 
-Note. If you're running the web app behind nginx (or another web server), you need
+Note. If you're running the web app behind C<nginx> (or another web server), you need
 to use L<Plack::Middleware::ReverseProxy>.
 
     # app.psgi
@@ -234,19 +238,13 @@ In your config file:
         }
     }
 
-=cut
-
 =item Delete session value
 
     delete $self->req->session->{'useless'};
 
-=cut
-
 =item Remove all session values
 
     $self->req->session( {} );
-
-=cut
 
 =back
 

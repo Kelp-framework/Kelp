@@ -59,7 +59,7 @@ Kelp::Routes::Controller - Routes and controller for Kelp
     package MyApp::Controller::Users;
     use Kelp::Base 'MyApp::Controller';
 
-    my read {
+    sub read {
         my $self = shift;   # $self is an instance of 'MyApp::Controller::Users'
         ...
     }

@@ -5,6 +5,7 @@ use Kelp::Base 'Plack::Response';
 use Encode;
 use Carp;
 use Try::Tiny;
+use Scalar::Util;
 
 attr -app => sub { croak "app is required" };
 attr rendered => 0;
@@ -120,6 +121,7 @@ sub render_error {
 
     # Look for a template and if not found, then show a generic text
     try {
+        local $SIG{__DIE__};  # Silence StackTrace
         my $filename = "error/$code";
         $self->template(
             $filename, {
@@ -140,21 +142,24 @@ sub render_404 {
 }
 
 sub render_500 {
-    my ( $self, $message ) = @_;
-    if ( $self->app->mode ne 'deployment' ) {
-        if ($message) {
-            return $self->set_code(500)->render($message);
-        }
-        else {
-            local $SIG{__DIE__};    # Silence StackTrace
-            return $self->render_error( 500, $message );
-        }
+    my ( $self, $error ) = @_;
+
+    if ( !defined $error || $self->app->mode eq 'deployment' ) {
+        return $self->render_error;
     }
-    $self->render_error;
+
+    # if render_500 gets blessed object as error stringify it
+    $error = ref $error if Scalar::Util::blessed $error;
+
+    return $self->set_code(500)->render($error);
 }
 
 sub render_401 {
     $_[0]->render_error( 401, "Unauthorized" );
+}
+
+sub render_403 {
+    $_[0]->render_error( 403, "Forbidden" );
 }
 
 sub redirect {
@@ -290,8 +295,6 @@ is does:
 
 If the response code was not previously set, this method will set it to 200.
 
-=cut
-
 =item
 
 If no content-type is previously set, C<render> will set is based on the type of
@@ -301,13 +304,9 @@ C<application/json>, otherwise it will be set to C<text/html>.
     # Will set the content-type to json
     $res->render( { numbers => [ 1, 2, 3 ] } );
 
-=cut
-
 =item
 
 Last, the data will be encoded with the charset specified by the app.
-
-=cut
 
 =back
 
@@ -360,6 +359,11 @@ before that.
     get '/image/:name' => sub {
         my $content = File::Slurp::read_file("$name.jpg");
         res->set_content_type('image/jpeg')->render_binary( $content );
+
+        # the same, but probably more effective way (PSGI-server dependent)
+        open( my $handle, "<:raw", "$name.png" )
+            or die("cannot open $name: $!");
+        res->set_content_type('image/png')->render_binary( $handle );
     };
 
 =head2 render_error

@@ -1,3 +1,46 @@
+2021-01-11: Version 1.03
+            [New Features]
+            - Kelp::Request now holds the name of a route
+			- Kelp script can now use tabs for indentation with --tabs flag
+
+            [Changes]
+            - POD fixes
+
+2018-01-08: Version 1.02
+            [Bug fixes]
+            - clean namespace inside import, fix for Path::Tiny
+
+2017-12-29: Version 1.01
+            No changes. Stable version.
+
+2016-11-08: Version 0.9091
+            [Changes]
+            - Change bridge error respose. Bridges will return 403 Forbidden (Konstantin Yakunin)
+            - attr can be ether scalar, undef or CODEref but not HASHREF or ARRAYREF (Nikolay Mishin)
+            - POD (Nikolay Mishin)
+
+2015-08-10: Version 0.9071
+            [Bug Fixes]
+
+            - Bridges will correctly return 401 (instead of 500) when non existing location is accessed (Konstantin Yakunin)
+            - Undefined value warning fixed. (Ben Hengst)
+            - Correct handle errors on deployment and silence STDERR in Stack Trace tests (Konstantin Yakunin)
+
+            [New Features]
+            - New attributes request_obj and response_obj used to specify the name of the request and response classes. (Ben Hengst)
+
+2015-04-02: Version 0.9051
+            [Bug Fixes]
+
+            - Stringify 500 errors avoiding the JSON-ification of returned structures and blessed objects. (basiliscos)
+            - Increate the level of Test::Bulder in Kelp::Test, providing more relevant messages upon error. (basiliscos)
+            - POD typos corrected
+
+            [New Features]
+            - Add json_content method to Kelp::Test, allowing for the testing of the returned JSON structure.
+            - Abstract the initialization of the Config and Routes modules
+            - More POD and examples added (roy-tate, Christian Froemmel, Perlover)
+
 2014-12-14: Version 0.9021
 
             [Bug Fixes]

@@ -84,7 +84,7 @@ A shortcut to the L<Kelp::Routes/add> method.
 
 =head2 CONFIGURATION
 
-The configuration for this module containes the following keys:
+The configuration for this module contains the following keys:
 
 =head3 router
 
@@ -109,8 +109,8 @@ the routes definitions.
 
     base => 'MyApp'
 
-Now when defining a route you can only type 'myroute' to denote
-'MyApp::myroute'.
+Now when defining a route you can only type C<myroute> to denote
+C<MyApp::myroute>.
 
 
 =cut

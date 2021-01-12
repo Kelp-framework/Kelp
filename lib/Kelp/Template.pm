@@ -68,11 +68,11 @@ This module provides basic template rendering using L<Template::Tiny>.
 
 =head1 ATTRIBUTES
 
-=head1 paths
+=head2 paths
 
 An arrayref of paths to use when looking for template files.
 
-=head1 encoding
+=head2 encoding
 
 Specifies the text encoding of the template files. The default value is C<utf8>.
 

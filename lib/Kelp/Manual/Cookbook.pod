@@ -1,0 +1,202 @@
+=pod
+
+=head1 NAME
+
+Kelp::Manual::Cookbook - Recipes for Kelp dishes
+
+=head1 DESCRIPTION
+
+This document lists solutions to common problems you may encounter while
+developing your own Kelp web application. Since Kelp leaves a lot for you to
+figure out yourself (also known as I<not getting in your way>) many of these
+will be just a proposed solutions, not an official way of solving a problem.
+
+=head1 RECIPES
+
+=head2 Connecting to DBI
+
+There are multiple ways to do it, like the one below:
+
+    # Private attribute holding DBI handle
+    # anonymous sub is a default value builder
+    attr _dbh => sub {
+        shift->_dbi_connect;
+    };
+
+    # Private sub to connect to DBI
+    sub _dbi_connect {
+        my $self = shift;
+
+        my @config = @{ $self->config('dbi') };
+        return DBI->connect(@config);
+    }
+
+    # Public method to use when you need dbh
+    sub dbh {
+        my $self = shift;
+
+        # ping is likely not required, but just in case...
+        if (!$self->_dbh->ping) {
+            # reload the dbh, since ping failed
+            $self->_dbh($self->_dbi_connect);
+        }
+
+        $self->_dbh;
+    }
+
+    # Use $self->dbh from here on ...
+
+    sub some_route {
+        my $self = shift;
+
+        $self->dbh->selectrow_array(q[
+            SELECT * FROM users
+            WHERE clue > 0
+        ]);
+    }
+
+A slightly shorter version with state variables and no ping:
+
+    # Public method to use when you need dbh
+    sub dbh {
+        my ($self, $reconnect) = @_;
+
+        state $handle;
+        if (!defined $handle || $reconnect) {
+            my @config = @{ $self->config('dbi') };
+            $handle = DBI->connect(@config);
+        }
+
+        return $handle;
+    }
+
+    # Use $self->dbh from here on ...
+
+    sub some_route {
+        my $self = shift;
+
+        $self->dbh->selectrow_array(q[
+            SELECT * FROM users
+            WHERE clue > 0
+        ]);
+    }
+
+Same methods can be used for accessing the schema of <DBIx::Class>.
+
+=head2 Custom 404 and 500 error pages
+
+=head3 Error templates
+
+The easiest way to set up custom error pages is to create templates in
+views/error/ with the code of the error. For example: views/error/404.tt and
+views/error/500.tt. You can render those manually using $self->res->render_404
+and $self->res->render_500. To render another error code, you can use
+$self->res->render_error.
+
+=head3 Within the route
+
+You can set the response headers and content within the route:
+
+    sub some_route {
+        my $self = shift;
+        $self->res->set_code(404)->template('my_404_template');
+    }
+
+=head3 By overriding the Kelp::Response class
+
+To make custom 500, 404 and other error pages, you will have to subclass the Kelp::Response module and override the render_404 and render_500 subroutines. Let's say your app's name is Foo and its class is in lib/Foo.pm. Now create a file lib/Foo/Response.pm:
+
+    package Foo::Response;
+    use Kelp::Base 'Kelp::Response';
+
+    sub render_404 {
+        my $self = shift;
+        $self->template('my_custom_404');
+    }
+
+    sub render_500 {
+        my $self = shift;
+        $self->template('my_custom_500');
+    }
+
+Then, in lib/Foo.pm, you have to tell Kelp to use your custom response class like this:
+
+    sub response {
+        my $self = shift;
+        return Foo::Response->new( app => $self );
+    }
+
+Don't forget you need to create views/my_custom_404.tt and views/my_custom_500.tt. You can add other error rendering subroutines too, for example:
+
+    sub render_401 {
+        # Render your custom 401 error here
+    }
+
+=head2 Alter the behavior of a Kelp class method
+
+The easiest solution would be to use <KelpX::Hooks> module:
+
+    use KelpX::Hooks;
+    use parent "Kelp";
+
+    # Change how template rendering function is called
+    hook "template" => sub {
+        my ($orig, $self, @args) = @_;
+
+        # $args[0] is template name
+        # $args[1] is a list of template variables
+        $args[1] = {
+            (defined $args[1] ? %{$args[1]} : ()),
+            "my_var" => $self->do_something,
+        };
+
+        # call the original $self->template again
+        # with modified arguments
+        return $self->$orig(@args);
+    };
+
+=head2 Handle websocket connections
+
+Since Kelp is a Plack-based project, its support for websockets is very
+limited. First of all, you would need a Plack server with support for the psgi
+I<streaming>, I<io> and I<nonblocking>, like L<Twiggy>. Then, you could
+integrate Kelp application with a websocket application via
+L<Kelp::Module::Websocket::AnyEvent> (if the server was written using
+AnyEvent):
+
+    sub build {
+        my ($self) = @_;
+
+        my $ws = $self->websocket;
+        $ws->add(message => sub {
+            my ($conn, $msg) = @_;
+
+            $conn->send({echo => $msg});
+        });
+
+        $self->symbiosis->mount("/ws" => $ws);
+    }
+
+Keep in mind that Plack websockets are a burden because of lack of preforking
+server implementations capable of running them. If you want to use them heavily
+you're better off using L<Mojolicious> instead or integrating a
+L<Mojo::Server::Hypnotoad> with a small Mojo application alongside Kelp as a
+websocket handler.
+
+=head1 SEE ALSO
+
+L<Kelp::Manual>
+
+L<Kelp>
+
+L<Plack>
+
+=head1 SUPPORT
+
+=over
+
+=item * GitHub: https://github.com/sginx/kelp
+
+=item * Mailing list: https://groups.google.com/forum/?fromgroups#!forum/perl-kelp
+
+=back

@@ -14,7 +14,7 @@ sub _logger {
 
 sub build {
     my ( $self, %args ) = @_;
-    my $logger = $self->{logger} = $self->_logger(%args);
+    $self->{logger} = $self->_logger(%args);
 
     # Register a few levels
     my @levels_to_register = qw/debug info error/;
@@ -23,7 +23,7 @@ sub build {
     my %LEVELS = map {
         my $level = $_;
         $level => sub {
-            my $app = shift;
+            shift;
             $self->message( $level, @_ );
         };
     } @levels_to_register;
@@ -94,7 +94,7 @@ Kelp::Module::Logger - Logger for Kelp applications
 =head1 DESCRIPTION
 
 This module provides an log interface for Kelp web application. It uses
-L<Log::Dispatcher> as underlying logging module.
+L<Log::Dispatch> as underlying logging module.
 
 =head1 REGISTERED METHODS
 
