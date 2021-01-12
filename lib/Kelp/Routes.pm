@@ -636,7 +636,7 @@ Set default values for optional placeholders.
 
 =head4 bridge
 
-If set to 1 this route will be treated as a bridge. Please see L<BRIDGES>
+If set to 1 this route will be treated as a bridge. Please see L</BRIDGES>
 for more information.
 
 =head4 tree
