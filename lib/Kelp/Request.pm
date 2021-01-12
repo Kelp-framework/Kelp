@@ -150,16 +150,12 @@ called in scalar context.
     my $json = $self->param;    # $json = { bar => 1, foo => 2 }
 
 
-=cut
-
 =item
 
 If a single argument is passed, then the corresponding value in the JSON
 document is returned.
 
     my $bar = $self->param('bar');  # $bar = 1
-
-=cut
 
 =back
 
@@ -242,19 +238,13 @@ In your config file:
         }
     }
 
-=cut
-
 =item Delete session value
 
     delete $self->req->session->{'useless'};
 
-=cut
-
 =item Remove all session values
 
     $self->req->session( {} );
-
-=cut
 
 =back
 

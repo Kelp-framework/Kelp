@@ -11,13 +11,15 @@ my $path = '.';
 my $verbose = 1;
 my $force = 0;
 my $less = 0;
+my $tabs = 0;
 my $help = 0;
 
 GetOptions(
     "path=s"   => \$path,
+    "less"     => \$less,
     "verbose!" => \$verbose,
     "force!"   => \$force,
-    "less"     => \$less,
+    "tabs!"    => \$tabs,
     "help"     => \$help
 );
 
@@ -32,6 +34,7 @@ Options:
     --less          Create a Kelp::Less application files
     --(no)verbose   Display information
     --force         Force overwriting existing files
+    --tabs          Use tabs for indentation instead of spaces
     --help          This help screen
 ];
     say $usage;
@@ -58,6 +61,13 @@ my $files = do {
             less        => $less
         }
     );
+
+    # replace spaces with tabs
+    # each 4 spaces will become a tab character
+    # last 2 spaces will also become a tab due to rounding (+0.5)
+    $output =~ s{ ^ ((?: [ ]{4} | [ ]{2} )+) }{ "\t" x (length($1) / 4 + 0.5) }xmeg
+      if $tabs;
+
     my %result = ();
     my $key;
     for my $line (split(/\n/, $output)) {

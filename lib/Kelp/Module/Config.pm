@@ -336,8 +336,6 @@ C<+> in front of the name will add the elements to the array:
         '+middleware' => ['Baz']    # Add 'Baz' in development
     }
 
-=cut
-
 =item
 
 C<-> in front of the name will remove the elements from the array:
@@ -352,8 +350,6 @@ C<-> in front of the name will remove the elements from the array:
         '-modules' => [qw/Logger/]  # Remove the Logger modules in test mode
     }
 
-=cut
-
 =item
 
 No sigil will cause the array to be completely replaced:
@@ -367,8 +363,6 @@ No sigil will cause the array to be completely replaced:
     {
         middleware => []    # No middleware in CLI
     }
-
-=cut
 
 =back
 
