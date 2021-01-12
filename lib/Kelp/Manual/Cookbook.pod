@@ -134,7 +134,7 @@ Don't forget you need to create views/my_custom_404.tt and views/my_custom_500.t
 
 =head2 Alter the behavior of a Kelp class method
 
-The easiest solution would be to use <KelpX::Hooks> module:
+The easiest solution would be to use L<KelpX::Hooks> module:
 
     use KelpX::Hooks;
     use parent "Kelp";
