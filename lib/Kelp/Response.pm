@@ -150,7 +150,7 @@ sub render_500 {
 
     # if render_500 gets blessed object as error stringify it
     $error = ref $error if Scalar::Util::blessed $error;
-    
+
     return $self->set_code(500)->render($error);
 }
 
@@ -295,8 +295,6 @@ is does:
 
 If the response code was not previously set, this method will set it to 200.
 
-=cut
-
 =item
 
 If no content-type is previously set, C<render> will set is based on the type of
@@ -306,13 +304,9 @@ C<application/json>, otherwise it will be set to C<text/html>.
     # Will set the content-type to json
     $res->render( { numbers => [ 1, 2, 3 ] } );
 
-=cut
-
 =item
 
 Last, the data will be encoded with the charset specified by the app.
-
-=cut
 
 =back
 

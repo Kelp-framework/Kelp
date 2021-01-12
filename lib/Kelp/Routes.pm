@@ -241,8 +241,6 @@ Then you add your application's routes and their descriptions:
     $r->add( '/path' => 'Module::function' );
     ...
 
-=cut
-
 =item B<Matching>
 
 Once you have your routes added, you can match with the L</match> subroutine.
@@ -253,8 +251,6 @@ The Kelp framework already does matching for you, so you may never
 have to do your own matching. The above example is provided only for
 reference.
 
-=cut
-
 =item B<Building URLs from routes>
 
 You can name each of your routes, and use that name later to build a URL:
@@ -264,8 +260,6 @@ You can name each of your routes, and use that name later to build a URL:
 
 This can be used in views and other places where you need the full URL of
 a route.
-
-=cut
 
 =back
 
@@ -438,8 +432,6 @@ parent, so the following five new routes are created:
     /users/settings/email   -> MyApp::Users::email
     /users/settings/login   -> MyApp::Users::login
 
-=cut
-
 =item
 
 The names of the routes are joined via C<_> with the name of their parent:
@@ -450,14 +442,10 @@ The names of the routes are joined via C<_> with the name of their parent:
     /users/settings/email   -> 'users_settings_email'
     /users/settings/login   -> 'users_settings_login'
 
-=cut
-
 =item
 
 The C</users> and C</users/settings> routes are automatically marked as
 bridges, because they contain a tree.
-
-=cut
 
 =back
 
@@ -497,11 +485,17 @@ faster. The C<cache> attribute can optionally be initialized with an instance of
 a caching module with interface similar to L<CHI> and L<Cache>.
 The module interface should at the very least provide the following methods:
 
-=head3 get($key) - retrieve a key from the cache
+=head3 get($key)
 
-=head3 set($key, $value, $expiration) - set a key in the cache
+retrieve a key from the cache
 
-=head3 clear() - clear all cache
+=head3 set($key, $value, $expiration)
+
+set a key in the cache
+
+=head3 clear()
+
+clear all cache
 
 The caching module should be initialized in the config file:
 
@@ -540,15 +534,11 @@ C<"users#item"> becomes C<"Users::item">.
 
     $r->add( '/home' => 'user#home' );
 
-=cut
-
 =item
 
 A code reference.
 
     $r->add( '/system' => sub { return \%ENV } );
-
-=cut
 
 =item
 
@@ -563,8 +553,6 @@ A hashref with options.
     );
 
 See L</Destination Options> for details.
-
-=cut
 
 =back
 
@@ -648,12 +636,18 @@ Set default values for optional placeholders.
 
 =head4 bridge
 
-If set to one this route will be treated as a bridge. Please see L</bridges>
+If set to 1 this route will be treated as a bridge. Please see L<BRIDGES>
 for more information.
 
 =head4 tree
 
-Creates a tree of sub-routes. See L</trees> for more information and examples.
+Creates a tree of sub-routes. See L</TREES> for more information and examples.
+
+=head2 url
+
+    my $url = $r->url($path, @arguments);
+
+Builds an url from path and arguments. If the request is named a name can be specified instead.
 
 =head2 match
 
@@ -672,6 +666,12 @@ L<Kelp::Routes::Pattern/param>.
 Routes that used regular expressions instead of patterns will only initialize
 the C<param> array with the regex captures, unless those patterns are using
 named captures in which case the C<named> hash will also be initialized.
+
+=head2 dispatch
+
+    my $result = $r->dispatch($kelp, $route_pattern);
+
+Dispatches an instance of L<Kelp::Routes::Pattern> by running the route destination specified in L<Kelp::Routes::Pattern/to>
 
 =head1 EXTENDING
 
