@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<title>Welcome to Kelp</title>
+<style>
+    * { box-sizing: border-box; }
+    .color, a {
+        color: #0298c3;
+        text-decoration: none;
+    }
+    .color-alt {
+        color: #2ca02c;
+    }
+    html {
+        padding: 0;
+        background-color: #0298c3;
+        height: 100%;
+    }
+    body {
+        width: 70%;
+        min-width: 700px;
+        background-color: #fafafa;
+        margin: 0 auto;
+        padding: 10px 30px;
+        min-height: 100%;
+    }
+    h1, h2 {
+        font-size: 3rem;
+        font-weight: normal;
+        margin: 15px auto;
+        text-align: center;
+    }
+    h2 {
+        font-size: 1.6rem;
+    }
+    p {
+        margin: 10px auto;
+    }
+    table {
+        width: 100%;
+        table-layout: fixed;
+        margin: 10px auto;
+    }
+    table thead tr th {
+        text-align: left;
+        color: #0298c3;
+    }
+</style>
+</head>
+
+<body>
+    <h1 class="color">Welcome to the Kelp web framework!</h1>
+    <h2>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" style="width: 1.5rem; height: auto" viewbox="0 0 20 20">
+        <g stroke="#2ca02c" stroke-width="2.3" fill="rgba(0,0,0,0)">
+        <circle cx="10" cy="10" r="8.5"/>
+        <path d="M5.2,10 8.5,13.4 14.8,7.2"/>
+        </g>
+        </svg>
+        [% name %] is ready to grow
+    </h2>
+
+    <p>
+        Your application has been configured successfully and is now operational. Thank you for choosing Kelp.
+    </p>
+    <p>
+        This document has been rendered from <i>views/welcome.tt</i> using <a href="https://metacpan.org/pod/Template::Tiny" title="Template::Tiny on metacpan">Template::Tiny</a>.
+    </p>
+    <p>
+        Please consult <a href="https://metacpan.org/pod/Kelp::Manual" title="Kelp::Manual on metacpan">our extensive manual</a> to get started. <a href="https://metacpan.org/pod/Kelp::Manual::Cookbook" title="Kelp::Manual::Cookbook on metacpan">The cookbook</a> is worth looking into if you're dealing with a more difficult problem.
+    </p>
+
+    <hr class="color-alt">
+    <p>
+        The list of registered routes is printed below:
+    </p>
+    <table>
+    <thead>
+        <tr>
+            <th>Method</th>
+            <th>Route</th>
+            <th>Handler</th>
+        </tr>
+    </thead>
+    <tbody>
+        [% FOREACH route IN routes %]
+        <tr>
+            <td>[% route.method %]</td>
+            <td><a href="[% route.route %]">[% route.route %]</a></td>
+            <td>[% route.handler %]</td>
+        </tr>
+        [% END %]
+    </tbody>
+    </table>
+
+    <hr class="color-alt">
+    <p>
+        The current configuration is printed below:
+    </p>
+    <pre><code>[% config %]</code></pre>
+</body>
+
+</html>

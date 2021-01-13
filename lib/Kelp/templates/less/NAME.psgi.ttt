@@ -1,0 +1,9 @@
+use Kelp::Less;
+
+module 'Logger::Simple';
+
+get '/' => sub {
+    "Hello, world!";
+};
+
+run;

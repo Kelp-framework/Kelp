@@ -2,9 +2,7 @@
 
 use Kelp::Base -strict;
 use Getopt::Long;
-use File::Path 'make_path';
-use Kelp::Template;
-use File::Basename;
+use Kelp::Generator;
 use Path::Tiny;
 
 my $path = '.';
@@ -26,18 +24,8 @@ GetOptions(
 my $name = $ARGV[0] || do { $help = 1; '' };
 
 if ( $help ) {
-    my $usage = q[
-Usage: Kelp [options] <name>
-
-Options:
-    --path=s        Path where to create the files
-    --less          Create a Kelp::Less application files
-    --(no)verbose   Display information
-    --force         Force overwriting existing files
-    --tabs          Use tabs for indentation instead of spaces
-    --help          This help screen
-];
-    say $usage;
+    my @usage = <DATA>;
+    say @usage;
     exit;
 }
 
@@ -49,59 +37,41 @@ my @parts = split( /::/, $name );
 my $module_file = pop @parts;
 my $module_path = join( '/', @parts );
 
-# Template
-my $files = do {
-    my $template = Kelp::Template->new();
-    my $output = $template->process(
-        \*DATA, {
-            module_file => $module_file,
-            module_path => $module_path,
-            path        => $path,
-            name        => $name,
-            less        => $less
-        }
-    );
+my $files = Kelp::Generator->get_template($less ? 'less' : 'normal', {
+    name => $name,
+    module_path => $module_path,
+    module_file => $module_file,
+});
+
+for my $filedata (@$files) {
+    my ($filename, $contents) = @$filedata;
 
     # replace spaces with tabs
     # each 4 spaces will become a tab character
     # last 2 spaces will also become a tab due to rounding (+0.5)
-    $output =~ s{ ^ ((?: [ ]{4} | [ ]{2} )+) }{ "\t" x (length($1) / 4 + 0.5) }xmeg
-      if $tabs;
+    $contents =~ s{ ^ ((?: [ ]{4} | [ ]{2} )+) }{ "\t" x (length($1) / 4 + 0.5) }xmeg
+        if $tabs;
 
-    my %result = ();
-    my $key;
-    for my $line (split(/\n/, $output)) {
-        if ( $line =~ /^\s*\:(.+)/ ) {
-            $key = $1;
-            $result{$key} = [];
-            next;
-        }
-        if ( defined $key ) {
-            push @{$result{$key}}, $line, "\n";
-        }
-        else {
-            die "No filename for line [$line]";
-        }
-    }
+    my $dir = $path . path("/$filename")->parent;
+    my $file = path($path . '/' . $filename);
 
-    \%result;
-};
-
-while ( my ( $filename, $lines ) = each %$files ) {
-    my $dir = $path . '/' . dirname($filename);
-    $filename = $path . '/' . $filename;
-    if ( !-d $dir ) {
+    if (!-d $dir) {
         _say("Creating folder: $dir");
-        make_path($dir);
+        path($dir)->mkpath;
     }
 
-    if ( -e $filename && !$force) {
-        say "File $filename exists. Use --force to overwrite.";
+    if ($file->is_dir) {
+        say "$filename is a directory - manual action required. Skipping...";
+        next;
+    }
+
+    if ($file->exists && !$force) {
+        say "File $filename exists. Use --force to overwrite. Skipping...";
         next;
     }
 
     _say("Writing file: $filename");
-    path($filename)->spew(@{ $lines });
+    $file->spew($contents);
 }
 
 sub _say {
@@ -112,146 +82,12 @@ sub _say {
 }
 
 __DATA__
-[% IF less -%]
-:[% name %].psgi
-use Kelp::Less;
+Usage: Kelp [options] <name>
 
-module 'Logger::Simple';
-
-get '/' => sub {
-    "Hello, world!";
-};
-
-run;
-[% ELSE -%]
-:app.psgi
-use lib 'lib';
-use [% name %];
-
-my $app = [% name %]->new();
-$app->run;
-:lib/[% module_path %]/[% module_file %].pm
-package [% name %];
-use Kelp::Base 'Kelp';
-
-sub build {
-    my $self = shift;
-    my $r    = $self->routes;
-    $r->add( '/home', 'home' );
-    $r->add( '/config', sub { $_[0]->config_hash } );
-}
-
-sub home {
-    my $self = shift;
-    $self->template('home');
-}
-
-1;
-:conf/config.pl
-# Common settings
-{
-    modules      => [qw/Template JSON Logger/],
-    modules_init => {
-
-        # One log for errors and one for debug
-        Logger => {
-            outputs => [
-                [
-                    'File',
-                    name      => 'debug',
-                    filename  => 'log/debug.log',
-                    min_level => 'debug',
-                    mode      => '>>',
-                    newline   => 1,
-                    binmode   => ":encoding(UTF-8)"
-                ], [
-                    'File',
-                    name      => 'error',
-                    filename  => 'log/error.log',
-                    min_level => 'error',
-                    mode      => '>>',
-                    newline   => 1,
-                    binmode   => ":encoding(UTF-8)"
-                ],
-            ]
-        },
-
-        # JSON prints pretty
-        JSON => {
-            pretty => 1
-        },
-
-        # Enable UTF-8 in Template
-        Template => {
-            encoding => 'utf8'
-        }
-    }
-};
-:conf/deployment.pl
-# Options specific to deployment only
-{
-    modules_init => {
-
-        # In deployment, only log the errors
-        Logger => {
-            outputs => [
-                [
-                    'File',
-                    name      => 'error',
-                    filename  => 'log/error.log',
-                    min_level => 'error',
-                    mode      => '>>',
-                    newline   => 1,
-                    binmode   => ":encoding(UTF-8)"
-                ],
-            ]
-        },
-
-        # Compress JSON output in deployment
-        JSON => {
-            pretty => 0
-        },
-    }
-};
-:conf/development.pl
-# Options specific to development only
-{
-    # Add StackTrace in development
-    "+middleware"   => ['StackTrace'],
-    middleware_init => {
-        StackTrace => {
-            force => 1
-        }
-    }
-};
-:conf/test.pl
-# Options specific to testing only
-{
-    # No Logger when testing
-    "-modules" => ['Logger']
-}
-:views/home.tt
-Hello, world!
-:log/keep
-keeper
-:t/main.t
-use Kelp::Base -strict;
-use Kelp::Test;
-use Test::More;
-use HTTP::Request::Common;
-use [% name %];
-
-# Create an application object
-my $app = [% name %]->new( mode => 'test' );
-
-# Feed it into a test object
-my $t = Kelp::Test->new( app => $app );
-
-# Send a GET request to /home and test the response
-$t->request( GET '/home' )
-  ->code_is(200)
-  ->content_type_is('text/html')
-  ->content_like(qr/Hello, world!/);
-
-done_testing;
-[% END %]
+Options:
+    --path=s        Path where to create the files
+    --less          Create a Kelp::Less application files
+    --(no)verbose   Display information
+    --force         Force overwriting existing files
+    --tabs          Use tabs for indentation instead of spaces
+    --help          This help screen
