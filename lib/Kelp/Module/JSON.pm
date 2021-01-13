@@ -1,6 +1,8 @@
 package Kelp::Module::JSON;
 
 use Kelp::Base 'Kelp::Module';
+
+BEGIN { $ENV{PERL_JSON_BACKEND} //= 'Cpanel::JSON::XS,JSON::XS,JSON::PP' }
 use JSON;
 
 sub build {
@@ -31,5 +33,9 @@ Kelp::Module::JSON - Simple JSON module for a Kelp application
 =head1 REGISTERED METHODS
 
 This module registers only one method into the application: C<json>.
+
+The module will try to use backends in this order: I<Cpanel::JSON::XS, JSON::XS, JSON::PP>.
+It can be changed by explicitly setting the I<PERL_JSON_BACKEND> environmental variable.
+See L<JSON/CHOOSING BACKEND> for more details.
 
 =cut
