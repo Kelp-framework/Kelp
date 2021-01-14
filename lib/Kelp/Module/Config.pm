@@ -1,8 +1,11 @@
 package Kelp::Module::Config;
+
 use Kelp::Base 'Kelp::Module';
 use Carp;
 use Try::Tiny;
 use Test::Deep;
+use Path::Tiny;
+
 
 # Extension to look for
 attr ext => 'pl';
@@ -90,14 +93,15 @@ sub load {
     my ( $self, $filename ) = @_;
 
     # Open and read file
-    open( my $in, "<:encoding(UTF-8)", $filename )
-      or do {
+    my $text;
+    try {
+        $text = path($filename)->slurp_utf8;
+    };
+
+    if (!defined $text) {
         warn "Can not read config file " . $filename;
         return {};
-      };
-
-    my $text = do { local $/ = undef; <$in> };
-    close($in);
+    }
 
     my ( $hash, $error );
     {

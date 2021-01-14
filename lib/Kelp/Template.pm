@@ -2,6 +2,7 @@ package Kelp::Template;
 
 use Kelp::Base;
 use Template::Tiny;
+use Path::Tiny;
 
 attr paths => sub { [] };
 attr encoding => 'utf8';
@@ -34,16 +35,16 @@ sub process {
     return $output;
 }
 
-# File::Slurp does not work well in OSX, so we go old school here
 sub _read_file {
     my ( $self, $file ) = @_;
-    my $fh = ref $file ? $file : do {
-        open my $h, "<:encoding(" . $self->encoding . ")", $file or die $!;
-        $h;
-    };
-    local $/;
-    my $text = <$fh>;
-    close $fh unless ref $file;
+
+    local $/ = undef;
+    my $text =
+        ref $file
+        ? <$file>
+        : path($file)->slurp({ binmode => ':encoding(' . $self->encoding . ')' })
+    ;
+
     return \$text;
 }
 

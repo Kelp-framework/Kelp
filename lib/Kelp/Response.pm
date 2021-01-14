@@ -357,7 +357,7 @@ before that.
     use Kelp::Less;
 
     get '/image/:name' => sub {
-        my $content = File::Slurp::read_file("$name.jpg");
+        my $content = Path::Tiny::path("$name.jpg")->slurp_raw;
         res->set_content_type('image/jpeg')->render_binary( $content );
 
         # the same, but probably more effective way (PSGI-server dependent)
