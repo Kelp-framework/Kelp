@@ -1,15 +1,20 @@
 package Kelp::Generator;
 
-use Kelp::Base -strict;
+use Kelp::Base;
 use Path::Tiny;
 use Kelp::Template;
 use Carp;
 
+our $scenarios_dir = path(__FILE__)->parent . '/templates';
+
+sub list_scenarios {
+    return map { path($_)->basename } glob "$scenarios_dir/*";
+}
+
 sub get_scenario_files {
     my ($self, $scenario) = @_;
 
-    my $templates = path(__FILE__)->parent . '/templates';
-    return glob "$templates/$scenario/*";
+    return glob "$scenarios_dir/$scenario/*";
 }
 
 sub get_template {
