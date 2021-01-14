@@ -15,7 +15,10 @@ will be just a proposed solutions, not an official way of solving a problem.
 
 =head2 Setting up a common layout for all templates
 
-Kelp does not implement template layouts by itself, so it's up to templating engine to deliver that behavior. For example, L<Template::Toolkit> allows for C<WRAPPER> directive, which can be used like this (with L<Kelp::Module::Template::Toolkit>):
+Kelp does not implement template layouts by itself, so it's up to templating
+engine to deliver that behavior. For example, L<Template::Toolkit> allows for
+C<WRAPPER> directive, which can be used like this (with
+L<Kelp::Module::Template::Toolkit>):
 
     # in config
     modules => [qw(Template::Toolkit)],
@@ -116,7 +119,10 @@ You can set the response headers and content within the route:
 
 =head3 By overriding the Kelp::Response class
 
-To make custom 500, 404 and other error pages, you will have to subclass the Kelp::Response module and override the render_404 and render_500 subroutines. Let's say your app's name is Foo and its class is in lib/Foo.pm. Now create a file lib/Foo/Response.pm:
+To make custom 500, 404 and other error pages, you will have to subclass the
+Kelp::Response module and override the render_404 and render_500 subroutines.
+Let's say your app's name is Foo and its class is in lib/Foo.pm. Now create a
+file lib/Foo/Response.pm:
 
     package Foo::Response;
     use Kelp::Base 'Kelp::Response';
@@ -131,14 +137,17 @@ To make custom 500, 404 and other error pages, you will have to subclass the Kel
         $self->template('my_custom_500');
     }
 
-Then, in lib/Foo.pm, you have to tell Kelp to use your custom response class like this:
+Then, in lib/Foo.pm, you have to tell Kelp to use your custom response class
+like this:
 
     sub response {
         my $self = shift;
         return Foo::Response->new( app => $self );
     }
 
-Don't forget you need to create views/my_custom_404.tt and views/my_custom_500.tt. You can add other error rendering subroutines too, for example:
+Don't forget you need to create views/my_custom_404.tt and
+views/my_custom_500.tt. You can add other error rendering subroutines too, for
+example:
 
     sub render_401 {
         # Render your custom 401 error here
