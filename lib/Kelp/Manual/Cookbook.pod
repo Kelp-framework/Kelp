@@ -216,8 +216,8 @@ L<Plack>
 
 =over
 
-=item * GitHub: https://github.com/sginx/kelp
+=item * GitHub: L<https://github.com/sgnix/kelp>
 
-=item * Mailing list: https://groups.google.com/forum/?fromgroups#!forum/perl-kelp
+=item * Mailing list: L<https://groups.google.com/forum/?fromgroups#!forum/perl-kelp>
 
 =back
