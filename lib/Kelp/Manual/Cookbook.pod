@@ -13,6 +13,18 @@ will be just a proposed solutions, not an official way of solving a problem.
 
 =head1 RECIPES
 
+=head2 Setting up a common layout for all templates
+
+Kelp does not implement template layouts by itself, so it's up to templating engine to deliver that behavior. For example, L<Template::Toolkit> allows for C<WRAPPER> directive, which can be used like this (with L<Kelp::Module::Template::Toolkit>):
+
+    # in config
+    modules => [qw(Template::Toolkit)],
+    modules_init => {
+        'Template::Toolkit' => {
+            WRAPPER => 'layouts/main.tt',
+        },
+    },
+
 =head2 Connecting to DBI
 
 There are multiple ways to do it, like the one below:
@@ -132,7 +144,7 @@ Don't forget you need to create views/my_custom_404.tt and views/my_custom_500.t
         # Render your custom 401 error here
     }
 
-=head2 Alter the behavior of a Kelp class method
+=head2 Altering the behavior of a Kelp class method
 
 The easiest solution would be to use L<KelpX::Hooks> module:
 
@@ -155,7 +167,7 @@ The easiest solution would be to use L<KelpX::Hooks> module:
         return $self->$orig(@args);
     };
 
-=head2 Handle websocket connections
+=head2 Handling websocket connections
 
 Since Kelp is a Plack-based project, its support for websockets is very
 limited. First of all, you would need a Plack server with support for the psgi
