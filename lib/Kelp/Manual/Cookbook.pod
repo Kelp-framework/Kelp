@@ -16,9 +16,9 @@ will be just a proposed solutions, not an official way of solving a problem.
 =head2 Setting up a common layout for all templates
 
 Kelp does not implement template layouts by itself, so it's up to templating
-engine to deliver that behavior. For example, L<Template::Toolkit> allows for
-C<WRAPPER> directive, which can be used like this (with
-L<Kelp::Module::Template::Toolkit>):
+engine or contributed module to deliver that behavior. For example,
+L<Template::Toolkit> allows for C<WRAPPER> directive, which can be used like
+this (with L<Kelp::Module::Template::Toolkit>):
 
     # in config
     modules => [qw(Template::Toolkit)],
@@ -103,10 +103,10 @@ Same methods can be used for accessing the schema of <DBIx::Class>.
 =head3 Error templates
 
 The easiest way to set up custom error pages is to create templates in
-views/error/ with the code of the error. For example: views/error/404.tt and
-views/error/500.tt. You can render those manually using $self->res->render_404
-and $self->res->render_500. To render another error code, you can use
-$self->res->render_error.
+I<views/error/> with the code of the error. For example: I<views/error/404.tt> and
+I<views/error/500.tt>. You can render those manually using C<< $self->res->render_404 >>
+and C<< $self->res->render_500 >>. To render another error code, you can use
+C<< $self->res->render_error >>.
 
 =head3 Within the route
 
@@ -120,9 +120,9 @@ You can set the response headers and content within the route:
 =head3 By overriding the Kelp::Response class
 
 To make custom 500, 404 and other error pages, you will have to subclass the
-Kelp::Response module and override the render_404 and render_500 subroutines.
-Let's say your app's name is Foo and its class is in lib/Foo.pm. Now create a
-file lib/Foo/Response.pm:
+L<Kelp::Response> module and override the I<render_404> and I<render_500> subroutines.
+Let's say your app's name is Foo and its class is in I<lib/Foo.pm>. Now create a
+file I<lib/Foo/Response.pm>:
 
     package Foo::Response;
     use Kelp::Base 'Kelp::Response';
@@ -137,7 +137,7 @@ file lib/Foo/Response.pm:
         $self->template('my_custom_500');
     }
 
-Then, in lib/Foo.pm, you have to tell Kelp to use your custom response class
+Then, in I<lib/Foo.pm>, you have to tell Kelp to use your custom response class
 like this:
 
     sub response {
@@ -145,8 +145,8 @@ like this:
         return Foo::Response->new( app => $self );
     }
 
-Don't forget you need to create views/my_custom_404.tt and
-views/my_custom_500.tt. You can add other error rendering subroutines too, for
+Don't forget you need to create I<views/my_custom_404.tt> and
+I<views/my_custom_500.tt>. You can add other error rendering subroutines too, for
 example:
 
     sub render_401 {
@@ -155,7 +155,7 @@ example:
 
 =head2 Altering the behavior of a Kelp class method
 
-The easiest solution would be to use L<KelpX::Hooks> module:
+The easiest solution would be to use L<KelpX::Hooks> module available on CPAN:
 
     use KelpX::Hooks;
     use parent "Kelp";
@@ -182,8 +182,8 @@ Since Kelp is a Plack-based project, its support for websockets is very
 limited. First of all, you would need a Plack server with support for the psgi
 I<streaming>, I<io> and I<nonblocking>, like L<Twiggy>. Then, you could
 integrate Kelp application with a websocket application via
-L<Kelp::Module::Websocket::AnyEvent> (if the server was written using
-AnyEvent):
+L<Kelp::Module::Websocket::AnyEvent> CPAN module (if the server implementation
+is compatible with L<AnyEvent>):
 
     sub build {
         my ($self) = @_;
@@ -203,6 +203,17 @@ server implementations capable of running them. If you want to use them heavily
 you're better off using L<Mojolicious> instead or integrating a
 L<Mojo::Server::Hypnotoad> with a small Mojo application alongside Kelp as a
 websocket handler.
+
+=head2 Deploying
+
+Deploying a Kelp application is done the same way any other Plack application is
+deployed:
+
+    > plackup -E deployment -s Gazelle app.psgi
+
+In production environments, it is usually a good idea to set up a proxy between
+the PSGI server and the World Wide Web. Popular choices are I<apache2> and
+I<nginx>.
 
 =head1 SEE ALSO
 
