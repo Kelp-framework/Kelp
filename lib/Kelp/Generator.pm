@@ -38,10 +38,10 @@ sub get_template {
         $dest_file =~ s/PATH/$vars->{module_path}/ge;
         $dest_file =~ s/FILE/$vars->{module_file}/ge;
 
-        # process the template, if it is .ttt (to distinguish from .tt)
+        # process the template, if it is .gen (generated)
         my $contents = $file->slurp;
-        if ($dest_file =~ /\.ttt$/) {
-            $dest_file =~ s/\.ttt$//;
+        if ($dest_file =~ /\.gen$/) {
+            $dest_file =~ s/\.gen$//;
             $contents = $template->process(\$contents, $vars);
         }
 
