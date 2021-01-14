@@ -565,6 +565,11 @@ arguments.
         $self->res->redirect_to( $url_for_name );
     }
 
+=head2 abs_url
+
+Same as L</url_for>, but returns the full absolute URI for the current
+application (based on configuration).
+
 =head1 AUTHOR
 
 Stefan Geneshky - minimal <at> cpan.org
