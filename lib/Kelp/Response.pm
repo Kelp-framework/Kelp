@@ -73,21 +73,21 @@ sub render {
     # Set code 200 if the code has not been set
     $self->set_code(200) unless $self->code;
 
-    # If no content_type is set, then set it based on
-    # the type of $body - JSON or HTML.
-    unless ( $self->content_type ) {
-        ref( $body ) ? $self->json : $self->html;
-    }
+    my $is_json = $self->content_type eq 'application/json';
+    my $guess_json = !$self->content_type && ref($body);
+    my $guess_html = !$self->content_type && !ref($body);
 
     # If the content has been determined as JSON, then encode it
-    if ( $self->content_type eq 'application/json' ) {
+    if ( $is_json || $guess_json ) {
         die "No JSON decoder" unless $self->app->can('json');
         die "Data must be a reference" unless ref($body);
         my $json = $self->app->json;
         $body = $json->encode($body);
         $body = encode($self->app->charset, $body) unless $json->get_utf8;
+        $self->json if $guess_json;
         $self->body( $body );
     } else {
+        $self->html if $guess_html;
         $self->body( encode( $self->app->charset, $body ) );
     }
 
