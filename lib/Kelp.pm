@@ -60,6 +60,32 @@ sub new {
     return $self;
 }
 
+my $last_anon = 0;
+sub new_anon {
+    my $class = shift;
+
+    # make sure we don't eval something dodgy
+    die "invalid class $class"
+        unless !ref $class && $class->isa(__PACKAGE__);
+
+    my $anon_class = "Kelp::Anonymous::$class" . ++$last_anon;
+    my $err = do {
+        local $@;
+        eval qq[
+            {
+                package $anon_class;
+                use parent -norequire, '$class';
+            }
+        ];
+        $@;
+    };
+
+    die "Couldn't create anonymous Kelp instance: $err"
+        if $err;
+
+    return $anon_class->new(@_);
+}
+
 sub _load_config {
     my $self = shift;
     $self->load_module( $self->config_module, extra => $self->__config );
