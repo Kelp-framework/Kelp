@@ -455,6 +455,25 @@ contain a reference to the current L<Kelp::Response> instance.
 
 =head1 METHODS
 
+=head2 new
+
+    my $the_only_kelp = KelpApp->new;
+
+A standard constructor. B<Cannot> be called multiple times: see L</new_anon>.
+
+=head2 new_anon
+
+    my $kelp1 = KelpApp->new_anon(config => 'conf1');
+    my $kelp2 = KelpApp->new_anon(config => 'conf2');
+
+A constructor that can be called repeatedly. Cannot be mixed with L</new>.
+
+It works by creating a new anonymous class extending the class of your
+application and running I<new> on it. C<ref $kelp> will return I<something
+else> than the name of your Kelp class, but C<< $kelp->isa('KelpApp') >> will
+be true. This will likely be useful during testing or when running multiple
+instances of the same application with different configurations.
+
 =head2 build
 
 On its own, the C<build> method doesn't do anything. It is called by the
