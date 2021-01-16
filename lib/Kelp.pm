@@ -71,17 +71,20 @@ sub new_anon {
     my $anon_class = "Kelp::Anonymous::$class" . ++$last_anon;
     my $err = do {
         local $@;
-        eval qq[
+        my $eval_status = eval qq[
             {
                 package $anon_class;
                 use parent -norequire, '$class';
             }
+            1;
         ];
-        $@;
+        $@ || !$eval_status;
     };
 
-    die "Couldn't create anonymous Kelp instance: $err"
-        if $err;
+    if ($err) {
+        die "Couldn't create anonymous Kelp instance: " .
+            (length $err > 1 ? $err : 'unknown error');
+    }
 
     return $anon_class->new(@_);
 }
