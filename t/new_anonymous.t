@@ -32,6 +32,11 @@ isnt
     scalar @{$app2->routes->routes},
     'routes storage ok';
 
+# Check for possible string eval problems
+throws_ok sub {
+    Kelp::new_anon(qq[';#\ndie 'not what was expected']); # <- try hack the class name
+}, qr/^invalid class ';/, 'eval checks ok';
+
 # The limitation is that we can't mix ->new and ->new_anon
 throws_ok sub {
     $app1 = Kelp->new( mode => 'test' );
