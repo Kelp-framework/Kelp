@@ -139,7 +139,7 @@ below).
 
 To create a L<Kelp::Less> app, use:
 
-    > Kelp --less MyApp
+    > Kelp --type=less MyApp
 
 Get help by typing:
 

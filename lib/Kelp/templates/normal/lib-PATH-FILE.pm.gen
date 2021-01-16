@@ -1,0 +1,49 @@
+package [% name %];
+use Kelp::Base 'Kelp';
+
+sub build {
+    my $self = shift;
+    my $r    = $self->routes;
+
+    $r->add('/', 'welcome');
+
+    $r->add('/routes', {
+        method => 'GET',
+        to => 'list_routes',
+    });
+
+    $r->add('/hello', sub { 'Hello World!' });
+}
+
+sub list_routes {
+    my $self = shift;
+
+    my @routes = map {
+        {
+            method  => $_->method // '*',
+            route   => $_->pattern,
+            handler => ref($_->to) eq 'CODE' ? '(anonymous)' : $_->to,
+        }
+    } grep {
+        not $_->bridge
+    } @{$self->routes->routes};
+
+    return \@routes;
+}
+
+sub welcome {
+    my $self = shift;
+
+    use Data::Dumper;
+    my $config = Data::Dumper->new([$self->config_hash], ['config']);
+    $config->Indent(1);
+    $config->Sortkeys(1);
+
+    $self->template('welcome', {
+        name => __PACKAGE__,
+        routes => $self->list_routes,
+        config => $config->Dump,
+    });
+}
+
+1;
