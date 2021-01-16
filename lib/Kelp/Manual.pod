@@ -53,9 +53,9 @@ Or, for quick prototyping use L<Kelp::Less>:
 =head1 DESCRIPTION
 
 If you're going to be deploying a Perl based web application, chances are that
-you will be using Plack. Plack has almost all necessary tools to create and
+you will be using L<Plack>. Plack has almost all necessary tools to create and
 maintain a healthy web app. Tons of middleware is written for it, and there are
-several very well tested high performance preforking servers, such as Starman.
+several very well tested high performance preforking servers, such as L<Gazelle>.
 
 Plack, however, is not a web framework, hence its creators have intentionally
 omitted adding certain components. This is where Kelp gets to shine. It provides
@@ -522,13 +522,6 @@ returned app.
 
 Note that any middleware defined in your config file will be added first.
 
-=head2 Deploying
-
-Deploying a Kelp application is done the same way any other Plack application is
-deployed:
-
-    > plackup -E deployment -s Starman app.psgi
-
 =head2 Testing
 
 Kelp provides a test class called C<Kelp::Test>. It is object oriented, and all
@@ -785,15 +778,17 @@ L<Kelp::Manual::Cookbook>
 
 L<Kelp>
 
+L<Kelp::Routes>
+
 L<Plack>
 
 =head1 SUPPORT
 
 =over
 
-=item * GitHub: https://github.com/sginx/kelp
+=item * GitHub: L<https://github.com/sgnix/kelp>
 
-=item * Mailing list: https://groups.google.com/forum/?fromgroups#!forum/perl-kelp
+=item * Mailing list: L<https://groups.google.com/forum/?fromgroups#!forum/perl-kelp>
 
 =back
 

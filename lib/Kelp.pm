@@ -10,7 +10,7 @@ use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 
-our $VERSION = 1.03;
+our $VERSION = '1.03_1';
 
 # Basic attributes
 attr -host => hostname;
@@ -612,6 +612,11 @@ arguments.
         my $url_for_name = $self->url_for('name', name => 'jake', id => 1003);
         $self->res->redirect_to( $url_for_name );
     }
+
+=head2 abs_url
+
+Same as L</url_for>, but returns the full absolute URI for the current
+application (based on configuration).
 
 =head1 AUTHOR
 

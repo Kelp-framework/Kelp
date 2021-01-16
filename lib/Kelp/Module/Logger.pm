@@ -2,7 +2,6 @@ package Kelp::Module::Logger;
 
 use Kelp::Base 'Kelp::Module';
 
-use File::Path;
 use Carp;
 use Log::Dispatch;
 use Data::Dumper;
