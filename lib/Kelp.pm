@@ -9,6 +9,7 @@ use Try::Tiny;
 use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
+use Class::Inspector;
 
 our $VERSION = '1.03_1';
 
@@ -65,8 +66,12 @@ sub new_anon {
     my $class = shift;
 
     # make sure we don't eval something dodgy
-    die "invalid class $class"
-        unless !ref $class && $class->isa(__PACKAGE__);
+    die "invalid class for new_anon"
+        if ref $class                         # not a string
+        || !$class                            # not an empty string, undef or 0
+        || !Class::Inspector->loaded($class)  # not a loaded class
+        || !$class->isa(__PACKAGE__)          # not a correct class
+    ;
 
     my $anon_class = "Kelp::Anonymous::$class" . ++$last_anon;
     my $err = do {
