@@ -14,7 +14,20 @@ sub list_scenarios {
 sub get_scenario_files {
     my ($self, $scenario) = @_;
 
-    return glob "$scenarios_dir/$scenario/*";
+    # instead of just globbing for files, introduce scenario files that will
+    # list all the files for a scenario (otherwise any old files will just stay
+    # there and be generated in new versions)
+    my ($index_file) = map { "$scenarios_dir/$_/template" }
+        grep { $_ eq $scenario }
+        list_scenarios
+    ;
+    return unless $index_file;
+
+    my $index = path($index_file);
+    return unless $index->is_file;
+
+    return map { s/^\s+//; s/\s+$//; "$scenarios_dir/$scenario/$_" }
+        $index->lines({chomp => 1});
 }
 
 sub get_template {
@@ -52,3 +65,5 @@ sub get_template {
 }
 
 1;
+
+# TODO: Document template plugin mechanism for module authors

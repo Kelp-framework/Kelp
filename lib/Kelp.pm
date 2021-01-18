@@ -9,8 +9,9 @@ use Try::Tiny;
 use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
+use Class::Inspector;
 
-our $VERSION = '1.03_1';
+our $VERSION = '1.04';
 
 # Basic attributes
 attr -host => hostname;
@@ -65,8 +66,12 @@ sub new_anon {
     my $class = shift;
 
     # make sure we don't eval something dodgy
-    die "invalid class $class"
-        unless !ref $class && $class->isa(__PACKAGE__);
+    die "invalid class for new_anon"
+        if ref $class                         # not a string
+        || !$class                            # not an empty string, undef or 0
+        || !Class::Inspector->loaded($class)  # not a loaded class
+        || !$class->isa(__PACKAGE__)          # not a correct class
+    ;
 
     my $anon_class = "Kelp::Anonymous::$class" . ++$last_anon;
     my $err = do {
@@ -276,7 +281,13 @@ sub finalize {
 #----------------------------------------------------------------
 # Request and Response shortcuts
 #----------------------------------------------------------------
-sub param { shift->req->param(@_) }
+sub param {
+    my $self = shift;
+    unshift @_, $self->req;
+
+    # goto will allow carp show the correct caller
+    goto $_[0]->can('param');
+}
 
 sub session { shift->req->session(@_) }
 
@@ -574,7 +585,8 @@ A shortcut to C<$self-E<gt>req-E<gt>param>:
         }
     }
 
-See L<Kelp::Request> for more information and examples.
+This function can be tricky to use because of context sensivity. See
+L<Kelp::Request/param> for more information and examples.
 
 =head2 session
 

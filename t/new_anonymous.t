@@ -35,12 +35,16 @@ isnt
 # Check for possible string eval problems
 throws_ok sub {
     Kelp::new_anon(qq[';#\ndie 'not what was expected']); # <- try hack the class name
-}, qr/^invalid class ';/, 'eval checks ok';
+}, qr/invalid class for new_anon/i, 'eval checks ok';
+
+throws_ok sub {
+    Kelp::new_anon(undef); # <- silly but possible usage
+}, qr/invalid class for new_anon/i, 'eval checks ok';
 
 # The limitation is that we can't mix ->new and ->new_anon
 throws_ok sub {
     $app1 = Kelp->new( mode => 'test' );
     $app2 = Kelp->new_anon( mode => 'test' );
-}, qr/Redefining of .+ not allowed/, 'limitations ok';
+}, qr/redefining of .+ not allowed/i, 'limitations ok';
 
 done_testing;
