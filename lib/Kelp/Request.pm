@@ -72,7 +72,6 @@ sub param {
 
     # safe method without calling PLack::Request::param
     return $self->parameters->get($_[0]) if @_;
-    return $self->parameters if !wantarray && $safe_param;
     return keys %{ $self->parameters };
 }
 
