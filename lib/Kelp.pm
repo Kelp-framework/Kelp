@@ -281,7 +281,13 @@ sub finalize {
 #----------------------------------------------------------------
 # Request and Response shortcuts
 #----------------------------------------------------------------
-sub param { shift->req->param(@_) }
+sub param {
+    my $self = shift;
+    unshift @_, $self->req;
+
+    # goto will allow carp show the correct caller
+    goto $_[0]->can('param');
+}
 
 sub session { shift->req->session(@_) }
 
