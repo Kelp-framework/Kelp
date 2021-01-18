@@ -585,7 +585,8 @@ A shortcut to C<$self-E<gt>req-E<gt>param>:
         }
     }
 
-See L<Kelp::Request> for more information and examples.
+This function can be tricky to use because of context sensivity. See
+L<Kelp::Request/param> for more information and examples.
 
 =head2 session
 
