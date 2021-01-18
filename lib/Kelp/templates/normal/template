@@ -1,0 +1,9 @@
+app.psgi.gen
+conf-config.pl.gen
+conf-deployment.pl.gen
+conf-development.pl.gen
+conf-test.pl.gen
+lib-PATH-FILE.pm.gen
+log-keep.gen
+t-main.t.gen
+views-welcome.tt
