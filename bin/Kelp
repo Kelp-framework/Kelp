@@ -8,7 +8,7 @@ use Path::Tiny;
 my $path = '.';
 my $verbose = 1;
 my $force = 0;
-my $type = 'normal';
+my $type = 'kelp';
 my $tabs = 0;
 my $help = 0;
 
@@ -88,7 +88,7 @@ Usage: Kelp [options] <name>
 
 Options:
     --path=s        Path where to create the files
-    --type=s        Type of application to create (default: normal)
+    --type=s        Type of application to create (default: kelp)
     --types         List available application types
     --(no)verbose   Display information
     --force         Force overwriting existing files
