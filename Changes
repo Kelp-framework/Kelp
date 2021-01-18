@@ -1,3 +1,25 @@
+2021-01-18: Version 1.04
+            [New Features]
+            - Added new_anon constructor, allowing for multiple instances of an app
+            - Added safe_param configuration - see Kelp::Request::param
+            - Added Kelp::Generator, allowing for pluggable generation templates and custom generation scripts
+            - Rewrote the CLI script using Kelp::Generator
+            - Added a welcome HTML page to generated application listing registered routes and config
+
+            [New Documentation]
+            - Cookbook: template layouts
+            - Cookbook: deploying
+
+            [Changes]
+            - List context Kelp::Request::param call with parameter now is deprecated without safe_param
+            - Kelp::Module::JSON will now prefer Cpanel::JSON::XS before other options
+            - Kelp script now requires --type=less for a Kelp::Less app, instead of --less
+            - All of Kelp file slurping is now done using Path::Tiny
+            - POD fixes and improvements
+
+            [Bug fixes]
+            - exception thrown during response JSON encoding with no explicit content_type will now show correct error cause
+
 2021-01-11: Version 1.03
             [New Features]
             - Kelp::Request now holds the name of a route

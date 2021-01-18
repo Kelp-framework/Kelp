@@ -11,7 +11,7 @@ use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
 
-our $VERSION = '1.03_1';
+our $VERSION = '1.04';
 
 # Basic attributes
 attr -host => hostname;
