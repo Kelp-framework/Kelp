@@ -41,11 +41,16 @@ sub is_json {
     return lc($self->content_type) =~ qr[^application/json]i;
 }
 
+
 sub param {
     my $self = shift;
+    my $safe_param = $self->app->config('safe_param') // 0;
+    my $warn_message =
+        'Using "param" with argument in list context is deprecated ' .
+        'in Kelp version 1.04. See documentation of for details'
+    ;
 
-    if ( $self->is_json ) {
-        die "No JSON decoder" unless $self->app->can('json');
+    if ( $self->is_json && $self->app->can('json') ) {
         my $hash = try {
             $self->app->json->decode( $self->content );
         }
@@ -53,10 +58,26 @@ sub param {
             {};
         };
         $hash = { ref($hash), $hash } unless ref($hash) eq 'HASH';
-        return @_ ? $hash->{ $_[0] } : ( wantarray ? keys %$hash : $hash );
+
+        return $hash->{ $_[0] } if @_;
+        return $hash if !wantarray;
+        return keys %$hash;
     }
 
-    return $self->SUPER::param(@_);
+    # unsafe method - Plack::Request::param
+    if (@_ && wantarray && !$safe_param) {
+        carp $warn_message;
+        return $self->SUPER::param(@_);
+    }
+
+    # safe method without calling PLack::Request::param
+    return $self->parameters->get($_[0]) if @_;
+    return $self->parameters if !wantarray && $safe_param;
+    return keys %{ $self->parameters };
+}
+
+sub cgi_param {
+    shift->SUPER::param(@_);
 }
 
 sub session {
@@ -132,10 +153,12 @@ if the route was not named.
 
 =head2 param
 
+I<B<Change of behavior> in version 1.04, see below for details>
+
 Returns the HTTP parameters of the request. This method delegates all the work
 to L<Plack::Request/param>, except when the content type of the request is
-C<application/json>. In that case, it will decode the JSON body and return as
-follows:
+C<application/json> and a JSON module is loaded. In that case, it will decode
+the JSON body and return as follows:
 
 =over
 
@@ -157,7 +180,70 @@ document is returned.
 
     my $bar = $self->param('bar');  # $bar = 1
 
+=item
+
+If the root contents of the JSON document is not an C<HASH> (after decoding), then it will be wrapped into a hash with its reftype as a key, for example:
+
+    { ARRAY => [...] } # when JSON contains an array as root element
+    { '' => [...] }    # when JSON contains something that's not a reference
+
+    my $array = $kelp->param('ARRAY');
+
 =back
+
+Since version I<1.04>, a new application configuration field C<safe_param> is
+introduced that B<changes the behavior> of this method:
+
+=over
+
+=item
+
+Without C<safe_param>, method will produce a warning if used in list context
+while passing the first argument, but will continue to work the same. This is
+done to combat a very nasty and easy to make bug:
+
+    $kelp->some_function(
+        param1 => $value,
+        param2 => $kelp->param('key'), # BUG, list context
+    );
+
+Since HTTP requests can accept multiple values for the same key, someone could
+inject additional parameters to the function with the simple query, due to
+array flattening:
+
+    ?key=something&key=additional_hash_key&key=additional_hash_value
+
+=item
+
+With C<safe_param>, a call to C<param> with an argument (a key to fetch from
+the parameters) will no longer return a list but always a scalar value
+regardless of context, even if there are more than one entries of that name
+(will then return the last one). This makes usages like the one above perfectly
+safe.
+
+    my @array = $kelp->param('name'); # changed, will never return more than one scalar
+
+=item
+
+Since this method has so many ways to use it, you're still B<encouraged> to use
+other, more specific methods from L<Plack::Request>.
+
+=back
+
+You are B<strongly advised> to introduce C<safe_param> into your configuration as
+quickly as possible. Currently, a value of C<0> is the default, meaning that
+param will work the same as it did, but produce warnings. In no less than half
+a year from version 1.04 the old behavior of C<param> will be removed
+altogether, and C<safe_param> configuration will no longer cause any change in
+behavior, allowing for its safe removal. Use L</cgi_param> if you'd like to
+retain the old behavior regardless of security risks.
+
+=head2 cgi_param
+
+Calls C<param> in L<Plack::Request>, which is CGI.pm compatible. It is B<not
+recommended> to use this method, unless for some reason you have to maintain
+CGI.pm compatibility. Misusing this method can lead to bugs and security
+vulnerabilities.
 
 =head2 address, remote_host, user
 
