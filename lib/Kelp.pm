@@ -10,6 +10,7 @@ use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
+use Scalar::Util qw(blessed);
 
 our $VERSION = '1.04';
 
@@ -260,13 +261,31 @@ sub psgi {
         $self->finalize;
     }
     catch {
-        my $message = $self->long_error ? longmess($_) : $_;
+        my $exception = $_;
+        my $res = $self->res;
 
-        # Log error
-        $self->logger( 'critical', $message ) if $self->can('logger');
+        if (blessed $exception && $exception->isa('Kelp::Exception')) {
+            my $message = $exception->body;
 
-        # Render 500
-        $self->res->render_500($_);
+            # No logging here, since it is a message for the user with a code
+            # rather than a real exceptional case
+
+            $res->set_code($exception->code);
+            if (defined $message) {
+                $res->render($message);
+            } elsif ($res->content_type) {
+                $res->content_type('');
+            }
+        }
+        else {
+            my $message = $self->long_error ? longmess($exception) : $exception;
+
+            # Log error
+            $self->logger( 'critical', $message ) if $self->can('logger');
+
+            # Render 500
+            $res->render_500($_);
+        }
         $self->finalize;
     };
 }
