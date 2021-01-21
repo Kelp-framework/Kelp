@@ -17,6 +17,7 @@ $t->request( GET "/0" )
 
 $app->add_route( "/1", sub { Kelp::Exception->throw(400) });
 $app->add_route( "/2", sub { Kelp::Exception->throw(403, body => 'body text') });
+$app->add_route( "/2alt", sub { Kelp::Exception->throw(404, body => 'body text') });
 $app->add_route( "/3", sub { Kelp::Exception->throw(501, body => {json => 'object'}) });
 $app->add_route( "/4", sub { Kelp::Exception->throw(503, body => [qw(json array)]) });
 $app->add_route( "/5", sub { shift->res->json; Kelp::Exception->throw(500) });
@@ -32,7 +33,12 @@ for (qw(deployment development)) {
 
     $t->request( GET "/2" )
         ->code_is(403)
-        ->content_is('body text')
+        ->content_is('403 - body text')
+        ->content_type_is('text/html');
+
+    $t->request( GET "/2alt" )
+        ->code_is(404)
+        ->content_like(qr/Four Oh Four/)
         ->content_type_is('text/html');
 
     $t->request( GET "/3" )

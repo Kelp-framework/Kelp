@@ -265,17 +265,11 @@ sub psgi {
         my $res = $self->res;
 
         if (blessed $exception && $exception->isa('Kelp::Exception')) {
-            my $message = $exception->body;
-
             # No logging here, since it is a message for the user with a code
             # rather than a real exceptional case
+            # (Nothing really broke, user code invoked this)
 
-            $res->set_code($exception->code);
-            if (defined $message) {
-                $res->render($message);
-            } elsif ($res->content_type) {
-                $res->content_type('');
-            }
+            $res->render_exception($exception);
         }
         else {
             my $message = $self->long_error ? longmess($exception) : $exception;
