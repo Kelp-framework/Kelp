@@ -1,3 +1,14 @@
+2021-01-21: Version 1.05
+            [New Features]
+            - Added HTTP exceptions through Kelp::Exception
+
+            [New Documentation]
+            - Added Kelp::Generator
+
+            [Changes]
+            - Kelp::Module::JSON now uses JSON::MaybeXS
+            - POD fixes and improvements
+
 2021-01-18: Version 1.04
             [New Features]
             - Added new_anon constructor, allowing for multiple instances of an app
