@@ -73,7 +73,9 @@ Readonly.
 Required. Body of the request - can be a string for HTML and a hashref /
 arrayref for JSON responses.
 
-A string will be passed to C<< $response->render_error >> to be rendered inside an error template, if available. A reference will be JSON encoded if JSON is available, otherwise will produce an exception.
+A string will be passed to C<< $response->render_error >> to be rendered inside
+an error template, if available. A reference will be JSON encoded if JSON is
+available, otherwise will produce an exception.
 
 Content type for the response will be set accordingly.
 
@@ -86,6 +88,24 @@ Content type for the response will be set accordingly.
     die Kelp::Exception->new(...);
 
 Same as simply constructing and calling die on an object.
+
+=head1 CAVEATS
+
+=over
+
+=item
+
+Code 500 exceptions will not be logged, as it is considered something that a
+web developer know about. They are not thrown anywhere in Kelp internal code,
+so only user code can fall victim to this.
+
+=item
+
+If there is no content type set, and the exception body is not a reference,
+then a C<text/html> content type will be guessed and the body text will be
+passed to an error template, if available.
+
+=back
 
 =cut
 
