@@ -9,7 +9,11 @@ use Test::More;
     my $m = $app->load_module('JSON');
     isa_ok $m, "Kelp::Module::JSON";
     can_ok $app, $_ for qw/json/;
-    is ref $app->json, 'Cpanel::JSON::XS';
+    ok
+        $app->json->isa('Cpanel::JSON::XS')
+        || $app->json->isa('JSON::XS')
+        || $app->json->isa('JSON::PP'),
+        'JSON method ok';
 }
 
 done_testing;
