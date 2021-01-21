@@ -167,7 +167,8 @@ Constructs a Kelp::Generator instance. C<templates_dir> is optional.
 
 =head3 templates_dir
 
-Returns the current templates directory. Can be changed by passing an argument of this name to C<new>
+Returns the current templates directory. Can be changed by passing an argument
+of this name to C<new>
 
 =head3 get_template
 
@@ -189,5 +190,12 @@ C<%more_vars> can be specified to insert more variables into the template.
     my @templates = $gen->list_templates;
 
 Discovers and returns all the generation template names as a list.
+
+=head3 get_template_files
+
+    my @files = $gen->get_template_files($template_name);
+
+Returns the list of template files for a given template. Will return full
+paths, not just file names.
 
 =cut
