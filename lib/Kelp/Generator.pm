@@ -5,28 +5,33 @@ use Path::Tiny;
 use Kelp::Template;
 use Carp;
 
-our $scenarios_dir = path(__FILE__)->parent . '/templates';
+attr -templates_dir => sub { path(__FILE__)->parent . '/templates' };
 
 sub list_scenarios {
-    return map { path($_)->basename } glob "$scenarios_dir/*";
+    my ($self) = @_;
+
+    my $dir = $self->templates_dir;
+    return map { path($_)->basename } glob "$dir/*";
 }
 
 sub get_scenario_files {
     my ($self, $scenario) = @_;
 
+    my $dir = $self->templates_dir;
+
     # instead of just globbing for files, introduce scenario files that will
     # list all the files for a scenario (otherwise any old files will just stay
     # there and be generated in new versions)
-    my ($index_file) = map { "$scenarios_dir/$_/template" }
+    my ($index_file) = map { "$dir/$_/template" }
         grep { $_ eq $scenario }
-        list_scenarios
+        $self->list_scenarios
     ;
     return unless $index_file;
 
     my $index = path($index_file);
     return unless $index->is_file;
 
-    return map { s/^\s+//; s/\s+$//; "$scenarios_dir/$scenario/$_" }
+    return map { s/^\s+//; s/\s+$//; "$dir/$scenario/$_" }
         $index->lines({chomp => 1});
 }
 
@@ -79,11 +84,12 @@ Kelp::Generator - Generation templates
 
     use Kelp::Generator;
 
+    my $gen = Kelp::Generator->new;
     # get available templates
-    my @scenarios = Kelp::Generator->list_scenarios;
+    my @scenarios = $gen->list_scenarios;
 
     # get parsed files (ready to be saved)
-    my $files_aref = Kelp::Generator->get_template($scenario, 'App::Name');
+    my $files_aref = $gen->get_template($scenario, 'App::Name');
 
     for my $file (@$files_aref) {
         my ($file_name, $file_contents) = @$file;
@@ -103,12 +109,12 @@ should handle saving them in a destination directory.
 
 This class will look into a directory in its installation tree to discover
 available scenarios. The folder is C<Kelp/templates> by default and can be
-changed by changing the contents of package variable
-C<$Kelp::Generator::scenarios_dir>. This means that CPAN modules can add
-templates to L<Kelp/templates> and they will be discovered as long as they have
-been installed in the same root directory as Kelp without changing the contents
-of the package variable. Any template that can be discovered in the default
-directory will be usable in the Kelp script.
+changed by constructing the object with different C<templates_dir> attribute.
+This means that CPAN modules can add templates to L<Kelp/templates> and they
+will be discovered as long as they have been installed in the same root
+directory as Kelp without changing the contents of the package variable. Any
+template that can be discovered in the default directory will be usable in the
+Kelp script.
 
 =head2 Contents
 
@@ -153,6 +159,16 @@ replaced by C<name>, C<module_file> and C<module_path>.
 
 =head2 Methods
 
+=head3 new
+
+    my $gen = Kelp::Generator->new(templates_dir => $dir);
+
+Constructs a Kelp::Generator instance. C<templates_dir> is optional.
+
+=head3 templates_dir
+
+Returns the current templates directory. Can be changed by passing an argument of this name to C<new>
+
 =head3 get_template
 
     my $template_aref = $gen->get_template($template_name, $application_name, %more_vars);
@@ -173,3 +189,5 @@ C<%more_vars> can be specified to insert more variables into the template.
     my @templates = $gen->list_scenarios;
 
 Discovers and returns all the generation template names as a list.
+
+=cut

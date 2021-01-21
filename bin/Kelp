@@ -22,18 +22,19 @@ GetOptions(
 );
 
 my $name = $ARGV[0] || do { $help = 1; '' };
+my $generator = Kelp::Generator->new;
 
 if ( $help ) {
     my @usage = <DATA>;
     say @usage;
     say 'Available application types:';
-    say for map { ' ' x 4 . $_ } Kelp::Generator->list_scenarios;
+    say for map { ' ' x 4 . $_ } $generator->list_scenarios;
     exit;
 }
 
 # Remove the slash at the end
 $path =~ s{/$}{};
-my $files = Kelp::Generator->get_template($type, $name);
+my $files = $generator->get_template($type, $name);
 
 for my $filedata (@$files) {
     my ($filename, $contents) = @$filedata;
