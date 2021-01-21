@@ -137,6 +137,30 @@ sub render_error {
     return $self;
 }
 
+sub render_exception {
+    my ( $self, $exception ) = @_;
+
+    my $code = $exception->code;
+    my $body = $exception->body;
+
+    $self->set_code($code);
+    if ( defined $body ) {
+        my $is_html = $self->content_type =~ m{^text/html};
+        my $guess_html = !$self->content_type && !ref($body);
+
+        if ( $is_html || $guess_html ) {
+            $self->render_error($code, $body);
+        }
+        else {
+            $self->render($body);
+        }
+
+    }
+    elsif ( $self->content_type ) {
+        $self->content_type('');
+    }
+}
+
 sub render_404 {
     $_[0]->render_error( 404, "File Not Found" );
 }
