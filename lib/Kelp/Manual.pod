@@ -90,8 +90,8 @@ module of your choice to return rich text, html and JSON responses.
 
 =item
 
-B<JSON encoder/decoder>. Kelp comes with JSON, but you can easily plug in JSON::XS
-or any decoder of your choice.
+B<JSON encoder/decoder>. Kelp comes with JSON::MaybeXS, which will
+automatically choose the best (fastest, most secure) backend available.
 
 =item
 
@@ -730,8 +730,9 @@ L<Kelp::Module::JSON> for example:
 
     sub build {
         my ( $self, %args ) = @_;
-        my $json = JSON->new;
-        $json->property( $_ => $args{$_} ) for keys %args;
+        my $json = JSON::MaybeXS->new(
+            map { $_ => $args{$_} } keys %args
+        );
         $self->register( json => $json );
     }
 
@@ -752,8 +753,8 @@ object and register it into the web application via the C<register> method.
 
 =back
 
-If we instruct our web application to load the C<JSON> module, it will have a
-new method C<json> which will be a link to the C<JSON> object initialized in the
+If we instruct our web application to load the C<JSON::MaybeXS> module, it will have a
+new method C<json> which will be a link to the C<JSON::MaybeXS> object initialized in the
 module.
 
 See more examples and POD at L<Kelp::Module>.
