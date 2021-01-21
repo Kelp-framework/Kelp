@@ -90,8 +90,8 @@ module of your choice to return rich text, html and JSON responses.
 
 =item
 
-B<JSON encoder/decoder>. Kelp comes with JSON::MaybeXS, which will
-automatically choose the best (fastest, most secure) backend available.
+B<JSON encoder/decoder>. Kelp comes with JSON, which will automatically choose
+the best (fastest, most secure) backend available (using L<JSON::MaybeXS>).
 
 =item
 
