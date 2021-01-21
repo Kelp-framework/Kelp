@@ -28,7 +28,7 @@ if ( $help ) {
     my @usage = <DATA>;
     say @usage;
     say 'Available application types:';
-    say for map { ' ' x 4 . $_ } $generator->list_scenarios;
+    say for map { ' ' x 4 . $_ } $generator->list_templates;
     exit;
 }
 

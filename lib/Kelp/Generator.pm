@@ -7,48 +7,48 @@ use Carp;
 
 attr -templates_dir => sub { path(__FILE__)->parent . '/templates' };
 
-sub list_scenarios {
+sub list_templates {
     my ($self) = @_;
 
     my $dir = $self->templates_dir;
     return map { path($_)->basename } glob "$dir/*";
 }
 
-sub get_scenario_files {
-    my ($self, $scenario) = @_;
+sub get_template_files {
+    my ($self, $template) = @_;
 
     my $dir = $self->templates_dir;
 
-    # instead of just globbing for files, introduce scenario files that will
-    # list all the files for a scenario (otherwise any old files will just stay
+    # instead of just globbing for files, introduce template files that will
+    # list all the files for a template (otherwise any old files will just stay
     # there and be generated in new versions)
     my ($index_file) = map { "$dir/$_/template" }
-        grep { $_ eq $scenario }
-        $self->list_scenarios
+        grep { $_ eq $template }
+        $self->list_templates
     ;
     return unless $index_file;
 
     my $index = path($index_file);
     return unless $index->is_file;
 
-    return map { s/^\s+//; s/\s+$//; "$dir/$scenario/$_" }
+    return map { s/^\s+//; s/\s+$//; "$dir/$template/$_" }
         $index->lines({chomp => 1});
 }
 
 sub get_template {
-    my ($self, $scenario, $name, %args) = @_;
+    my ($self, $template, $name, %args) = @_;
 
     my $vars = {'name' => $name, %args};
     my @parts = split(/::/, $name);
     $vars->{module_file} = pop @parts;
     $vars->{module_path} = join('/', @parts);
 
-    my @list = $self->get_scenario_files($scenario);
-    croak "There's no generation template for $scenario"
+    my @list = $self->get_template_files($template);
+    croak "There's no generation template for $template"
         unless @list > 0;
 
     my @retval;
-    my $template = Kelp::Template->new();
+    my $tt = Kelp::Template->new();
     for my $path (@list) {
         my $file = path($path);
 
@@ -63,7 +63,7 @@ sub get_template {
         my $contents = $file->slurp;
         if ($dest_file =~ /\.gen$/) {
             $dest_file =~ s/\.gen$//;
-            $contents = $template->process(\$contents, $vars);
+            $contents = $tt->process(\$contents, $vars);
         }
 
         push @retval, [$dest_file, $contents];
@@ -86,10 +86,10 @@ Kelp::Generator - Generation templates
 
     my $gen = Kelp::Generator->new;
     # get available templates
-    my @scenarios = $gen->list_scenarios;
+    my @template = $gen->list_templates;
 
     # get parsed files (ready to be saved)
-    my $files_aref = $gen->get_template($scenario, 'App::Name');
+    my $files_aref = $gen->get_template($template, 'App::Name');
 
     for my $file (@$files_aref) {
         my ($file_name, $file_contents) = @$file;
@@ -108,7 +108,7 @@ should handle saving them in a destination directory.
 =head2 Discovery
 
 This class will look into a directory in its installation tree to discover
-available scenarios. The folder is C<Kelp/templates> by default and can be
+available templates. The folder is C<Kelp/templates> by default and can be
 changed by constructing the object with different C<templates_dir> attribute.
 This means that CPAN modules can add templates to L<Kelp/templates> and they
 will be discovered as long as they have been installed in the same root
@@ -184,9 +184,9 @@ placeholders replaced. File contents will be ready for saving.
 
 C<%more_vars> can be specified to insert more variables into the template.
 
-=head3 list_scenarios
+=head3 list_templates
 
-    my @templates = $gen->list_scenarios;
+    my @templates = $gen->list_templates;
 
 Discovers and returns all the generation template names as a list.
 
