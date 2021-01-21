@@ -33,17 +33,7 @@ if ( $help ) {
 
 # Remove the slash at the end
 $path =~ s{/$}{};
-
-# Get module path and name
-my @parts = split( /::/, $name );
-my $module_file = pop @parts;
-my $module_path = join( '/', @parts );
-
-my $files = Kelp::Generator->get_template($type, {
-    name => $name,
-    module_path => $module_path,
-    module_file => $module_file,
-});
+my $files = Kelp::Generator->get_template($type, $name);
 
 for my $filedata (@$files) {
     my ($filename, $contents) = @$filedata;
