@@ -213,7 +213,18 @@ deployed:
 
 In production environments, it is usually a good idea to set up a proxy between
 the PSGI server and the World Wide Web. Popular choices are I<apache2> and
-I<nginx>.
+I<nginx>. To get full information about incoming requests, you'll also need to
+use L<Plack::Middleware::ReverseProxy>.
+
+    # app.psgi
+
+    builder {
+        enable_if { ! $_[0]->{REMOTE_ADDR} || $_[0]->{REMOTE_ADDR} =~ /127\.0\.0\.1/ }
+        "Plack::Middleware::ReverseProxy";
+        $app->run;
+    };
+
+(REMOTE_ADDR is not set at all when using the proxy via filesocket).
 
 =head1 SEE ALSO
 
