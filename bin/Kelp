@@ -22,28 +22,19 @@ GetOptions(
 );
 
 my $name = $ARGV[0] || do { $help = 1; '' };
+my $generator = Kelp::Generator->new;
 
 if ( $help ) {
     my @usage = <DATA>;
     say @usage;
     say 'Available application types:';
-    say for map { ' ' x 4 . $_ } Kelp::Generator->list_scenarios;
+    say for map { ' ' x 4 . $_ } $generator->list_templates;
     exit;
 }
 
 # Remove the slash at the end
 $path =~ s{/$}{};
-
-# Get module path and name
-my @parts = split( /::/, $name );
-my $module_file = pop @parts;
-my $module_path = join( '/', @parts );
-
-my $files = Kelp::Generator->get_template($type, {
-    name => $name,
-    module_path => $module_path,
-    module_file => $module_file,
-});
+my $files = $generator->get_template($type, $name);
 
 for my $filedata (@$files) {
     my ($filename, $contents) = @$filedata;

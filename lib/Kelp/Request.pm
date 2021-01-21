@@ -253,18 +253,8 @@ variables.
         ...
     }
 
-Note. If you're running the web app behind C<nginx> (or another web server), you need
-to use L<Plack::Middleware::ReverseProxy>.
-
-    # app.psgi
-
-    builder {
-        enable_if { ! $_[0]->{REMOTE_ADDR} || $_[0]->{REMOTE_ADDR} =~ /127\.0\.0\.1/ }
-        "Plack::Middleware::ReverseProxy";
-        $app->run;
-    };
-
-(REMOTE_ADDR is not set at all when using the proxy via filesocket).
+Note: See L<Kelp::Cookbook/Deploying> for configuration required for these
+fields when using a proxy.
 
 =head2 session
 
