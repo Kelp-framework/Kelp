@@ -1,3 +1,7 @@
+2022-05-09: Version 1.06
+            [Changes]
+            - Removed broken homepage link
+
 2021-01-21: Version 1.05
             [New Features]
             - Added HTTP exceptions through Kelp::Exception
@@ -259,3 +263,4 @@
 
 2013-04-12: Version 0.1
             First upload to CPAN
+

@@ -12,7 +12,7 @@ use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
 
-our $VERSION = '1.05';
+our $VERSION = '1.06';
 
 # Basic attributes
 attr -host => hostname;
@@ -653,3 +653,4 @@ This module and all the modules in this package are governed by the same license
 as Perl itself.
 
 =cut
+
