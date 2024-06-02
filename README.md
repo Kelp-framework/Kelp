@@ -43,4 +43,5 @@ Benjamin Hengst (notbenh)
 
 Nikolay Mishin (@mishin)
 
-Bartosz Jarzyna (@brtastic)
+Bartosz Jarzyna (bbrtj)
+
