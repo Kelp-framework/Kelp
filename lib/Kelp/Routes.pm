@@ -3,13 +3,13 @@ package Kelp::Routes;
 use Carp;
 
 use Kelp::Base;
-use Kelp::Routes::Pattern;
 use Plack::Util;
 use Class::Inspector;
 
-attr base    => '';
-attr routes  => sub { [] };
-attr names   => sub { {} };
+attr base        => '';
+attr pattern_obj => 'Kelp::Routes::Pattern';
+attr routes      => sub { [] };
+attr names       => sub { {} };
 
 # Cache
 attr _CACHE => sub { {} };
@@ -119,7 +119,7 @@ sub _parse_route {
     }
 
     # Create pattern object
-    push @{ $self->routes }, Kelp::Routes::Pattern->new(%$val);
+    push @{ $self->routes }, $self->build_pattern( $val );
 
     # Add route index to names
     if ( my $name = $val->{name} ) {
@@ -133,6 +133,14 @@ sub _parse_route {
         my ( $k, $v ) = splice( @$tree, 0, 2 );
         $self->_parse_route( $val, $k, $v );
     }
+}
+
+# Override to use a custom pattern object
+sub build_pattern {
+    my ( $self, $args ) = @_;
+    my $package = $self->pattern_obj;
+    eval qq{require $package};
+    return $package->new( %$args );
 }
 
 sub url {
@@ -687,3 +695,4 @@ the application instance into a controller class.
 This module was inspired by L<Routes::Tiny>.
 
 =cut
+
