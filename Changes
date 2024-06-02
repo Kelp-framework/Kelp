@@ -1,3 +1,7 @@
+2024-06-02: Version 1.07
+            [Changes]
+            - Kelp::Routes now uses a dedicated method to build a pattern object
+
 2022-05-09: Version 1.06
             [Changes]
             - Removed broken homepage link
