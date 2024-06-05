@@ -1,5 +1,10 @@
 # Options specific to testing only
 {
-    # No Logger when testing
-    "-modules" => ['Logger']
+    # No Logger output when testing
+    modules_init => {
+        Logger => {
+            outputs => [],
+        },
+    },
 }
+

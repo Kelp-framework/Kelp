@@ -31,8 +31,8 @@ sub get_template_files {
     my $index = path($index_file);
     return unless $index->is_file;
 
-    return map { s/^\s+//; s/\s+$//; "$dir/$template/$_" }
-        $index->lines({chomp => 1});
+    my @files = map { s/^\s+//; s/\s+$//; $_ } $index->lines({chomp => 1});
+    return map { "$dir/$template/$_" } grep { length } @files;
 }
 
 sub get_template {
@@ -55,9 +55,10 @@ sub get_template {
         # resolve the destination name
         # hyphens become directory separators
         (my $dest_file = $file->basename) =~ s{-}{/}g;
-        $dest_file =~ s/NAME/$vars->{name}/ge;
-        $dest_file =~ s/PATH/$vars->{module_path}/ge;
-        $dest_file =~ s/FILE/$vars->{module_file}/ge;
+        $dest_file =~ s/NAME/$vars->{name}/g;
+        $dest_file =~ s/PATH/$vars->{module_path}/g;
+        $dest_file =~ s/FILE/$vars->{module_file}/g;
+        $dest_file =~ s/DOT/./g;
 
         # process the template, if it is .gen (generated)
         my $contents = $file->slurp;
@@ -152,8 +153,8 @@ extension should not be used in when generating template files using the same
 syntax as L<Template>, because there's no way to tell which directives should
 not be interpreted right away.
 
-Files can also contain NAME, FILE and PATH in their name, which will be
-replaced by C<name>, C<module_file> and C<module_path>.
+Files can also contain NAME, FILE, PATH and DOT in their name, which will be
+replaced by C<name>, C<module_file>, C<module_path> and C<.>.
 
 =head1 INTERFACE
 
@@ -199,3 +200,4 @@ Returns the list of template files for a given template. Will return full
 paths, not just file names.
 
 =cut
+
