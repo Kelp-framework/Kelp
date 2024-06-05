@@ -179,12 +179,11 @@ sub dispatch {
     $route || die "No route pattern instance supplied";
 
     # Shortcuts
-    my $req = $app->req;
     my $to  = $route->to;
 
     # Destination must be either a scalar, or a code reference
-    if ( !$to || ref $to && ref $to ne 'CODE' ) {
-        die 'Invalid destination for ' . $req->path;
+    if ( !$to || ( ref $to && ref $to ne 'CODE' ) ) {
+        die 'Invalid destination for ' . $app->req->path;
     }
 
     # If the destination is not a code reference, then we assume it's
@@ -193,7 +192,7 @@ sub dispatch {
 
         # Check if the destination function exists
         unless ( exists &$to ) {
-            die sprintf( 'Route not found %s for %s', $to, $req->path );
+            die sprintf( 'Route not found %s for %s', $to, $app->req->path );
         }
 
         # Move to reference
