@@ -16,14 +16,10 @@ $app->add_route(
     }
 );
 
-for my $is_safe (0 .. 1) {
-    $app->config_hash->{safe_param} = $is_safe;
-
-    $t->request(GET '/safe/tval?test=sth')
-        ->content_is('tval 1 sth');
-    $t->request(GET '/safe/tval?test=sth&test=sth_else')
-        ->content_is('tval 1 ' . ($is_safe ? 'sth_else' : 'sth sth_else'));
-}
+$t->request(GET '/safe/tval?test=sth')
+    ->content_is('tval 1 sth');
+$t->request(GET '/safe/tval?test=sth&test=sth_else')
+    ->content_is('tval 1 ' . 'sth_else');
 
 done_testing;
 
@@ -36,3 +32,4 @@ sub check_safe {
     my $params = $kelp->param;
     return join ' ', $val, $params, @params;
 }
+

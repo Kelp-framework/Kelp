@@ -1,6 +1,5 @@
 # Common settings
 {
-    safe_param   => 1, # safer param method
     modules      => [qw/Template JSON Logger/],
     modules_init => {
 
@@ -38,3 +37,4 @@
         }
     }
 };
+
