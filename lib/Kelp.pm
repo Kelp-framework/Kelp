@@ -161,6 +161,23 @@ sub build_response {
     return $package->new( app => $self );
 }
 
+# Override to change what happens before the route is handled
+sub before_dispatch {
+    my ( $self, $destination ) = @_;
+
+    # Log info about the route
+    if ( $self->can('logger') ) {
+        my $req = $self->req;
+
+        $self->info(
+            sprintf "%s: %s - %s %s - %s",
+                ref $self,
+                $req->address, $req->method,
+                $req->path,    $destination
+        );
+    }
+}
+
 # Override to manipulate the end response
 sub before_finalize {
     my $self = shift;
@@ -215,15 +232,6 @@ sub psgi {
             $self->req->named( $route->named );
             $self->req->route_name( $route->name );
             my $data = $self->routes->dispatch( $self, $route );
-
-            # Log info about the route
-            if ( $self->can('logger') ) {
-                $self->info(
-                    sprintf( "%s - %s %s - %s",
-                        $req->address, $req->method,
-                        $req->path,    $route->to )
-                );
-            }
 
             # Is it a bridge? Bridges must return a true value
             # to allow the rest of the routes to run.
@@ -556,6 +564,26 @@ the class of the object used.
     }
 
     # Now each request will be handled by MyApp::Request
+
+=head2 before_dispatch
+
+Override this method to modify the behavior before a route is handled. The
+default behavior is to log access (if C<logger> is available).
+
+    package MyApp;
+
+    sub before_dispatch {
+        my ( $self, $destination ) = @_;
+
+        # default access logging is disabled
+    }
+
+The C<$destination> param will depend on the routes implementation used. The
+default router will pass the unchanged L<Kelp::Routes::Pattern/to>.
+L<Kelp::Routes::Controller> will pass the action method name instead, and run
+it on the controller object (allowing overriding C<before_dispatch> on
+controller classes).
+
 
 =head2 before_finalize
 

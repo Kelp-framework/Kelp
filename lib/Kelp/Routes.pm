@@ -199,6 +199,7 @@ sub dispatch {
         $to = \&{$to};
     }
 
+    $app->before_dispatch( $route->to );
     return $to->( $app, @{ $route->param } );
 }
 
