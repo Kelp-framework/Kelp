@@ -1,6 +1,10 @@
 package [% name %];
 use Kelp::Base 'Kelp';
 
+sub before_dispatch {
+    # overriding this method disables access logs
+}
+
 sub build {
     my $self = shift;
     my $r    = $self->routes;
@@ -47,3 +51,4 @@ sub welcome {
 }
 
 1;
+
