@@ -212,8 +212,8 @@ sub psgi {
         for my $route (@$match) {
 
             # Dispatch
-            $self->req->named( $route->named );
-            $self->req->route_name( $route->name );
+            $req->named( $route->named );
+            $req->route_name( $route->name );
             my $data = $self->routes->dispatch( $self, $route );
 
             # Log info about the route
@@ -245,7 +245,7 @@ sub psgi {
         }
 
         # If nothing got rendered
-        if ( !$self->res->rendered ) {
+        if ( !$res->rendered ) {
             # render 404 if only briges matched
             if ( $match->[-1]->bridge ) {
                 $res->render_404;
@@ -262,7 +262,6 @@ sub psgi {
     }
     catch {
         my $exception = $_;
-        my $res = $self->res;
 
         if (blessed $exception && $exception->isa('Kelp::Exception')) {
             # No logging here, since it is a message for the user with a code
