@@ -18,3 +18,6 @@ pm_to_blib
 *.tmp
 *.log
 allprove
+log
+!log/.gitkeep
+
