@@ -3,6 +3,11 @@ use Kelp::Base 'Kelp';
 use MyApp::Response;
 use UtilPackage;
 
+sub before_dispatch {
+    my $self = shift;
+    $self->res->header( 'X-Before-Dispatch', 'MyApp' );
+}
+
 sub before_finalize {
     my $self = shift;
     $self->res->header( 'X-Test', 'MyApp' );
@@ -33,3 +38,4 @@ sub blessed {
 sub check_util_fun { path; }
 
 1;
+
