@@ -16,6 +16,8 @@ sub dispatch {
         or croak "Invalid controller '$to'";
 
     my $controller = $app->_clone($controller_class);
+
+    $controller->before_dispatch($action);
     return $controller->$action(@{ $match->param });
 }
 
@@ -78,3 +80,4 @@ functionality.
 
 
 =cut
+

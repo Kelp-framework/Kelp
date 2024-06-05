@@ -13,6 +13,7 @@ $t->request( GET '/test' )
     ->code_isnt(500)
     ->content_is("OK")
     ->content_isnt("FAIL")
+    ->header_is("X-Before-Dispatch", "MyApp")
     ->header_is("X-Test", "MyApp")
     ->header_isnt("X-Framework", "Perl Kelp");
 
@@ -34,3 +35,4 @@ dies_ok {
 } 'dies when missing class';
 
 done_testing;
+
