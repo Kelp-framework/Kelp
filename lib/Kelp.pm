@@ -578,10 +578,9 @@ default behavior is to log access (if C<logger> is available).
     }
 
 The C<$destination> param will depend on the routes implementation used. The
-default router will pass the unchanged L<Kelp::Routes::Pattern/to>.
-L<Kelp::Routes::Controller> will pass the action method name instead, and run
-it on the controller object (allowing overriding C<before_dispatch> on
-controller classes).
+default router will pass the unchanged L<Kelp::Routes::Pattern/to>. If
+possible, it will be run on the controller object (allowing overriding
+C<before_dispatch> on controller classes).
 
 
 =head2 before_finalize

@@ -1,9 +1,17 @@
 package A;
 sub b { }
+sub c { }
 1;
 
 package Bar;
 sub foo { }
+sub user { }
+sub id { }
+sub edit { }
+sub del { }
+sub change { }
+sub change_name { }
+sub change_email { }
 1;
 
 package Bar::Foo;
@@ -101,7 +109,7 @@ my $r = Kelp::Routes->new;
 # Key trumps method in the value
 {
     $r->clear;
-    $r->add( [ POST => '/a' ] => { to => 'a', method => 'PUT' } );
+    $r->add( [ POST => '/a' ] => { to => 'a#b', method => 'PUT' } );
     is_deeply _d( $r, qw/method/ ), [ { method => 'POST' } ];
 }
 
@@ -190,7 +198,7 @@ my $r = Kelp::Routes->new;
     $r->clear;
     $r->add(
         '/a' => {
-            to   => 'a',
+            to   => 'a#b',
             tree => [
                 '/b' => { name => 'b', to => 'a#b' },
                 '/c' => 'a#c'

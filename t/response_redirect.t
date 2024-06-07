@@ -13,7 +13,7 @@ $t->request( GET '/test' )
     ->header_is('Location', '/example')
     ->code_is(302);
 
-$app->add_route( '/catalogue/:id' => { to => 'test_catalogue', name => 'catalogue', defaults => { id => 'all' }});
+$app->add_route( '/catalogue/:id' => { to => sub { '?' }, name => 'catalogue', defaults => { id => 'all' }});
 $app->add_route( '/test2' => sub { shift->res->redirect_to('catalogue') });
 $t->request( GET '/test2' )
     ->header_is('Location', '/catalogue/all')
@@ -30,3 +30,4 @@ $t->request( GET '/test4' )
     ->code_is(403);
 
 done_testing;
+

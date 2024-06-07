@@ -17,17 +17,6 @@ $t->request( GET '/nothing' )->code_is(500);
 $app->add_route("/not_found", sub {});
 $t->request( GET '/not_found' )->code_is(500);
 
-# Wrong route destination
-$app->add_route("/wrong_to1", "missing");
-$app->add_route("/wrong_to2", { to => [] });
-$app->add_route("/wrong_to3", { to => {} });
-$app->add_route("/wrong_to4", { to => undef });
-$app->add_route("/wrong_to5", { to => 1 });
-$app->add_route("/wrong_to6", { to => 'missing' });
-for ( my $i = 1; $i <= 6; $i++ ) {
-    $t->request( GET "/wrong_to$i" )->code_is(500)
-}
-
 # Named placeholders
 $app->add_route("/named/:a", sub {
     my $self = shift;

@@ -1,26 +1,8 @@
 package Kelp::Routes::Controller;
 
 use Kelp::Base 'Kelp::Routes';
-use Carp;
 
-sub dispatch {
-    my $self = shift;
-    my $app = shift or croak "no app supplied";
-    my $match = shift or croak "no route pattern instance supplied";
-
-    my $to = $match->to or croak 'No destination defined';
-
-    return $self->SUPER::dispatch($app, $match) if ref $to;
-
-    my ($controller_class, $action) = ($to =~ /^(.+)::(\w+)$/)
-        or croak "Invalid controller '$to'";
-
-    my $controller = $app->_clone($controller_class);
-
-    $controller->before_dispatch($action);
-    return $controller->$action(@{ $match->param });
-}
-
+# the new Kelp::Routes does the Controller logic by itself, so this package is now a no-op
 
 1;
 

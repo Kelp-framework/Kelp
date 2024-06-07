@@ -29,10 +29,5 @@ $t->request( GET '/bye/jack' )
   ->code_is(200)
   ->content_is("BYE jack");
 
-# Add a route that will not find the package and watch it die
-dies_ok {
-    $app->routes->add('/die', 'missing#hello');
-} 'dies when missing class';
-
 done_testing;
 

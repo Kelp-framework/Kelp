@@ -1,24 +1,28 @@
 package Kelp::Routes;
 
-use Carp;
-
 use Kelp::Base;
+
+use Carp;
 use Plack::Util;
+use Kelp::Util;
+use Try::Tiny;
 use Class::Inspector;
 
-attr base        => '';
-attr pattern_obj => 'Kelp::Routes::Pattern';
-attr routes      => sub { [] };
-attr names       => sub { {} };
+attr base          => ''; # the default is set by config module
+attr pattern_obj   => 'Kelp::Routes::Pattern';
+attr fatal         => 0;
+attr routes        => sub { [] };
+attr names         => sub { {} };
 
 # Cache
-attr _CACHE => sub { {} };
 attr cache => sub {
     my $self = shift;
+    my %cache;
+
     Plack::Util::inline_object(
-        get   => sub { $self->_CACHE->{ $_[0] } },
-        set   => sub { $self->_CACHE->{ $_[0] } = $_[1] },
-        clear => sub { $self->_CACHE( {} ) }
+        get   => sub { $cache{ $_[0] } },
+        set   => sub { $cache{ $_[0] } = $_[1] },
+        clear => sub { %cache = () }
     );
 };
 
@@ -28,111 +32,185 @@ sub add {
 }
 
 sub clear {
-    $_[0]->routes( [] );
-    $_[0]->cache->clear;
-    $_[0]->names( {} );
+    my ( $self ) = @_;
+
+    $self->routes( [] );
+    $self->cache->clear;
+    $self->names( {} );
 }
 
-sub _camelize {
-    my ( $string, $base ) = @_;
-    return $string unless $string;
-    my @parts = split( /\#/, $string );
-    my $sub = pop @parts;
-    @parts = map {
-        join '', map { ucfirst lc } split /\_/
-    } @parts;
-    unshift @parts, $base if $base;
-    return join( '::', @parts, $sub );
+sub url {
+    my $self = shift;
+    my $name = shift // croak "Route name is missing";
+    my %args = @_ == 1 ? %{ $_[0] } : @_;
+
+    return $name unless exists $self->names->{$name};
+    my $route = $self->routes->[ $self->names->{$name} ];
+    return $route->build(%args);
+}
+
+sub _message {
+    my ( $self, $type_str, @parts ) = @_;
+    my $message = "[ROUTES] $type_str: ";
+
+    for my $part (@parts) {
+        $part //= '';
+        $part =~ s/ at .+? line \d+.\n//g; # way prettier errors
+    }
+
+    return $message . join ' - ', @parts;;
+}
+
+sub _error {
+    my ( $self, @parts ) = @_;
+
+    croak $self->_message( 'ERROR', @parts ) if $self->fatal;
+    carp $self->_message( 'WARNING, route is skipped', @parts );
+    return;
+}
+
+sub _warning {
+    my ( $self, @parts ) = @_;
+
+    carp $self->_message( 'WARNING', @parts );
 }
 
 sub _parse_route {
     my ( $self, $parent, $key, $val ) = @_;
 
-    # Scalar, e.g. path => 'bar#foo'
-    # CODE, e.g. path => sub { ... }
-    if ( !ref($val) || ref($val) eq 'CODE' ) {
+    # Scalar, e.g. 'bar#foo'
+    # CODE, e.g. sub { ... }
+    if ( !ref $val || ref $val eq 'CODE' ) {
         $val = { to => $val };
     }
 
     # Sanity check
-    if ( ref($val) ne 'HASH' ) {
-        carp "Route description must be a SCALAR, CODE or HASH. Skipping.";
-        return;
+    if ( ref $val ne 'HASH' ) {
+        return $self->_error('Route description must be a string, CODE or HASH');
     }
 
-    # 'to' is required
-    if ( !exists $val->{to} ) {
-        carp "Route is missing destination. Skipping.";
-        return;
-    }
-
-    # Format destination
-    if ( !ref $val->{to} ) {
-        my $sigil = defined $val->{to} && $val->{to} =~ s/^(\+)// ? $1 : undef;
-        $val->{to} = _camelize( $val->{to}, $sigil ? undef : $self->base );
-
-        # Load the class, if there is one and it is not 'main'
-        if (   defined $val->{to}
-            && $val->{to} =~ /^(.+)::(\w+)$/
-            && $1 ne 'main'
-            && !Class::Inspector->loaded($1) ) {
-            Plack::Util::load_class($1);
+    # Handle key in form of [METHOD => 'pattern']
+    if ( ref $key eq 'ARRAY' ) {
+        if ( ( grep { defined } @$key ) != 2 ) {
+            return $self->_error( "Path as an ARRAY is expected to have two parameters" );
         }
-    }
 
-    # Handle the value part
-    if ( ref($key) eq 'ARRAY' ) {
         my ( $method, $pattern ) = @$key;
         if ( !grep { $method eq $_ } qw/GET POST PUT DELETE/ ) {
-            carp "Using an odd method: $method";
+            $self->_warning( "Using an odd method '$method'" );
         }
+
         $val->{method} = $method;
         $key = $pattern;
     }
 
     # Only SCALAR and Regexp allowed
-    if ( ref($key) && ref($key) ne 'Regexp' ) {
-        carp "Pattern $key can not be computed.";
-        return;
+    if ( ref $key && ref $key ne 'Regexp' ) {
+        return $self->_error( "Pattern '$key' can not be computed" );
     }
 
     $val->{pattern} = $key;
 
-    my $tree;
-    if ( $tree = delete $val->{tree} ) {
-        if ( ref($tree) ne 'ARRAY' ) {
-            carp "Tree must be an ARRAY. Skipping.";
-            $tree = undef;
-        }
-        else {
-            $val->{bridge} = 1;
-        }
+    # Format and load the target of 'to'
+    my $error;
+    try {
+        $val->{to} = $self->format_to( $val->{to} );
+        $val->{dest} = $self->load_destination( $val->{to} );
     }
-    $tree //= [];
+    catch {
+        $error = $_;
+    };
 
-    # Parrent defined?
-    if (%$parent) {
+    if ( !defined $val->{dest} || $error ) {
+        return $self->_error( "Invalid destination for route '$key'", $error );
+    }
+
+    # store tree for later and set up bridge based on it
+    my $tree = delete $val->{tree};
+    if ($tree && (ref $tree ne 'ARRAY' || @$tree % 2 != 0)) {
+        return $self->_error( "Tree must be an even-sized ARRAY" );
+    }
+    $val->{bridge} ||= defined $tree;
+
+    # Credit stuff from tree parent, if possible
+    if ( defined $parent->{pattern} ) {
         if ( $val->{name} && $parent->{name} ) {
             $val->{name} = $parent->{name} . '_' . $val->{name};
         }
         $val->{pattern} = $parent->{pattern} . $val->{pattern};
     }
 
-    # Create pattern object
+    # Can now add the object to routes
     push @{ $self->routes }, $self->build_pattern( $val );
 
     # Add route index to names
     if ( my $name = $val->{name} ) {
         if ( exists $self->names->{$name} ) {
-            carp "Redefining route name $name";
+            $self->_warning( "Multiple routes named '$name'" );
         }
-        $self->names->{$name} = scalar( @{ $self->routes } ) - 1;
+        $self->names->{$name} = $#{ $self->routes };
     }
 
+    # handle further tree levels, if any
+    $tree //= [];
     while (@$tree) {
         my ( $k, $v ) = splice( @$tree, 0, 2 );
         $self->_parse_route( $val, $k, $v );
     }
+}
+
+# Override to change what 'to' values are valid
+sub format_to {
+    my ( $self, $to ) = @_;
+    my $ref = ref $to;
+
+    if ( !defined $to ) {
+        croak 'missing';
+    }
+    elsif ( !$to || ( $ref && $ref ne 'CODE' ) ) {
+        croak 'neither a string nor a coderef';
+    }
+
+    $to = Kelp::Util::camelize( $to, $self->base )
+        unless $ref;
+
+    return $to;
+}
+
+# Override to change the way the application loads the destination from 'to'
+sub load_destination {
+    my ( $self, $to ) = @_;
+    my $ref = ref $to;
+
+    if ( !$ref && $to ) {
+        # Load the class, if there is one
+        if ( my $class = Kelp::Util::extract_class( $to ) ) {
+            my $method = Kelp::Util::extract_function( $to );
+
+            Plack::Util::load_class( $class )
+                unless Class::Inspector->loaded( $class );
+
+            croak "method '$method' does not exist in class '$class'"
+                unless $method = $class->can( $method );
+
+            return [$class->isa( $self->base ) ? $class : undef, $method];
+        }
+        elsif ( exists &$to ) {
+            # Move to reference
+            return [undef, \&{$to}];
+        }
+        else {
+            croak "function '$to' does not exist";
+        }
+    }
+    elsif ( $ref ) {
+        croak "don't know how to load from reftype '$ref'"
+            unless $ref eq 'CODE';
+
+        return [undef, $to];
+    }
+
+    return undef;
 }
 
 # Override to use a custom pattern object
@@ -143,64 +221,50 @@ sub build_pattern {
     return $package->new( %$args );
 }
 
-sub url {
-    my $self = shift;
-    my $name = shift // die "Route name is missing";
-    my %args = @_ == 1 ? %{ $_[0] } : @_;
-
-    return $name unless exists $self->names->{$name};
-    my $route = $self->routes->[ $self->names->{$name} ];
-    return $route->build(%args);
-}
-
 sub match {
     my ( $self, $path, $method ) = @_;
+    $method //= '';
 
     # Look for this path and method in the cache. If found,
     # return the array of routes that matched the previous time.
     # If not found, then return all routes.
-    my $key = $path . ':' . ( $method // '' );
-    my $routes = $self->cache->get($key) // $self->routes;
+    my $key = "$path:$method";
+    my $routes = $self->cache->get( $key );
+    if ( !defined $routes ) {
+        # Look through all routes, grep the ones that match
+        # and sort them by 'bridge' and 'pattern'
+        @$routes =
+            sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
+            grep { $_->match( $path, $method ) } @{ $self->routes };
 
-    # Look through all routes, grep the ones that match
-    # and sort them by 'bridge' and 'pattern'
-    my @processed =
-      sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
-      grep { $_->match( $path, $method ) } @$routes;
+        $self->cache->set( $key, $routes );
+    }
+    else {
+        # matching fills the route parameters
+        $_->match( $path, $method ) for @$routes;
+    }
 
-    my $value = \@processed;
-    $self->cache->set( $key, $value );
-    return $value;
+    # shallow copy to make sure nothing pollutes the cache
+    return [ @$routes ];
 }
 
+# dispatch does not do many sanity checks on the destination, since those are
+# done in format_to and load_destination. A single check is present, which
+# lazy-computes dest if it is not set (since some code might have overrode add).
 sub dispatch {
     my ( $self, $app, $route ) = @_;
     $app   || die "Application instance required";
     $route || die "No route pattern instance supplied";
 
-    # Shortcuts
-    my $to  = $route->to;
+    my $dest = $route->dest;
+    $route->dest( $self->load_destination( $route->to ) )
+        unless $dest;
 
-    # Destination must be either a scalar, or a code reference
-    if ( !$to || ( ref $to && ref $to ne 'CODE' ) ) {
-        die 'Invalid destination for ' . $app->req->path;
-    }
+    my ( $to, $controller, $action ) = ( $route->to, @{ $dest } );
+    $app = $app->_clone( $controller );
 
-    # If the destination is not a code reference, then we assume it's
-    # a fully qualified function name, so we find its reference
-    unless ( ref $to ) {
-
-        # Check if the destination function exists
-        unless ( exists &$to ) {
-            die sprintf( 'Route not found %s for %s', $to, $app->req->path );
-        }
-
-        # Move to reference
-        $to = \&{$to};
-    }
-
-    $app->before_dispatch( $route->to );
-    return $to->( $app, @{ $route->param } );
+    $app->before_dispatch( $to );
+    return $action->( $app, @{ $route->param } );
 }
 
 1;
@@ -486,6 +550,16 @@ it with a plus sign:
     $r->add( '/outside' => '+Outside::Module::route' );
     # /outside -> Outside::Module::route
 
+=head2 pattern_obj
+
+A full class name of an object used for each pattern, L<Kelp::Routes::Pattern>
+by default. Works the same as its counterpart L<Kelp/request_obj>.
+
+=head2 fatal
+
+A boolean. If set to true, errors in route definitions will crash the
+application instead of just raising a warning. False by default.
+
 =head2 cache
 
 Routes will be cached in memory, so repeating requests will be dispatched much
@@ -679,16 +753,32 @@ named captures in which case the C<named> hash will also be initialized.
 
     my $result = $r->dispatch($kelp, $route_pattern);
 
-Dispatches an instance of L<Kelp::Routes::Pattern> by running the route destination specified in L<Kelp::Routes::Pattern/to>
+Dispatches an instance of L<Kelp::Routes::Pattern> by running the route
+destination specified in L<Kelp::Routes::Pattern/dest>. If dest is not set, it
+will be computed using L</load_destination> with unformatted
+L<Kelp::Routes::Pattern/to>.
+
+The C<$kelp> instance is always shallow-cloned before running the route with
+it, and may be reblessed into another class if it is a subclass of L</base>.
+Setting top-level attributes of C<$kelp> object will not be persistent.
+
+=head2 build_pattern
+
+Override this method to do change the creation of the pattern. Same role as L<Kelp/build_request>.
+
+=head2 format_to
+
+Override this method to change the formatting process of L<Kelp::Routes::Pattern/to>. See code for details.
+
+=head2 load_destination
+
+Override this method to change the loading process of L<Kelp::Routes::Pattern/dest>. See code for details.
 
 =head1 EXTENDING
 
 This is the default router class for each new Kelp application, but it doesn't
 have to be. You can create your own subclass that better suits your needs. It's
-generally enough to override the L</dispatch> method.
-
-Kelp comes with L<Kelp::Routes::Controller>, a router extension which reblesses
-the application instance into a controller class.
+generally enough to override the L</dispatch> or L</format_to> method.
 
 =head1 ACKNOWLEDGEMENTS
 
