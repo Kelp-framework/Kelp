@@ -10,11 +10,7 @@ sub build {
 
     my $router = delete($args{router}) // ('+' . $DEFAULT_ROUTER);
 
-    # A module name with a leading + indicates it's already fully
-    # qualified (i.e., it does not need the Kelp::Routes:: prefix).
-    my $prefix = $router =~ s/^\+// ? undef : $DEFAULT_ROUTER;
-
-    my $router_class = Plack::Util::load_class( $router, $prefix );
+    my $router_class = Plack::Util::load_class( $router, $DEFAULT_ROUTER );
     my $r = $router_class->new( %args );
 
     # Register two methods:
@@ -114,3 +110,4 @@ C<MyApp::myroute>.
 
 
 =cut
+
