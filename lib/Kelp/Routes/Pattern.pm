@@ -20,7 +20,6 @@ attr to       => undef;
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
-    $self->{_tokens} = [];
     $self->regex;    # Compile the regex
     return $self;
 }
@@ -48,6 +47,8 @@ sub _rep_regex {
 
 sub _build_regex {
     my $self = shift;
+    $self->{_tokens} = [];
+
     return $self->pattern if ref $self->pattern eq 'Regexp';
 
     my $PAT = '(.?)([:*?])(\w+)';
