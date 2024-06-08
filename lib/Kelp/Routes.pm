@@ -190,10 +190,11 @@ sub load_destination {
             Plack::Util::load_class( $class )
                 unless Class::Inspector->loaded( $class );
 
+            my $method_code = $class->can( $method );
             croak "method '$method' does not exist in class '$class'"
-                unless $method = $class->can( $method );
+                unless $method_code;
 
-            return [$class->isa( $self->base ) ? $class : undef, $method];
+            return [$class->isa( $self->base ) ? $class : undef, $method_code];
         }
         elsif ( exists &$to ) {
             # Move to reference
