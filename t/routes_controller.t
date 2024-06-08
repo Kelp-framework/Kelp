@@ -11,7 +11,6 @@ my $app = MyApp2->new(
         modules_init => {
             Routes => {
                 base   => 'MyApp2::Controller',
-                router => 'Controller',
             }
         }
     }
