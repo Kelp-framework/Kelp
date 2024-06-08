@@ -265,6 +265,62 @@ my $r = Kelp::Routes->new;
       ];
 }
 
+# Returned locations
+{
+    # same tree as above
+    $r->clear;
+
+    my $user = $r->add( '/user' => { name => 'user', to   => 'bar#user', } );
+    $user->add( '/id' => { to => 'bar#id',   name => 'id' } );
+    $user->add( '/edit' => { to => 'bar#edit', name => 'edit' } );
+    $user->add( [ DELETE => '/id' ] => { to => 'bar#del' => name => 'delete' } );
+
+    my $change = $user->add( '/change' => { to   => 'bar#change', name => 'change' } );
+    $change->add( '/name' => { to => 'bar#change_name', name => 'name' } );
+    $change->add( [ PUT  => '/email' ] => { to => 'bar#change_email', name => 'email' } );
+
+    is_deeply _d( $r, qw/pattern name to method bridge/ ), [
+        {
+            pattern => '/user',
+            name    => 'user',
+            to      => 'Bar::user',
+            bridge  => !!1,
+        }, {
+            pattern => '/user/id',
+            name    => 'user_id',
+            to      => 'Bar::id',
+            bridge  => !!0,
+        }, {
+            pattern => '/user/edit',
+            name    => 'user_edit',
+            to      => 'Bar::edit',
+            bridge  => !!0,
+        }, {
+            pattern => '/user/id',
+            name    => 'user_delete',
+            to      => 'Bar::del',
+            method  => 'DELETE',
+            bridge  => !!0,
+        }, {
+            pattern => '/user/change',
+            name    => 'user_change',
+            to      => 'Bar::change',
+            bridge  => !!1,
+        }, {
+            pattern => '/user/change/name',
+            name    => 'user_change_name',
+            to      => 'Bar::change_name',
+            bridge  => !!0,
+        }, {
+            pattern => '/user/change/email',
+            name    => 'user_change_email',
+            to      => 'Bar::change_email',
+            method  => 'PUT',
+            bridge  => !!0,
+        }
+      ];
+}
+
 sub _d {
     my ( $r, @fields ) = @_;
     my @o = ();

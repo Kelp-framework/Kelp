@@ -5,6 +5,7 @@ use Kelp::Base;
 use Carp;
 use Plack::Util;
 use Kelp::Util;
+use Kelp::Routes::Location;
 use Try::Tiny;
 use Class::Inspector;
 
@@ -28,8 +29,11 @@ attr cache => sub {
 };
 
 sub add {
-    my ( $self, $pattern, $descr ) = @_;
-    $self->_parse_route( {}, $pattern, $descr );
+    my ( $self, $pattern, $descr, $parent ) = @_;
+    $parent = {} if !$parent || ref $parent ne 'HASH';
+
+    my $route = $self->_parse_route( $parent, $pattern, $descr );
+    return $self->_build_location($route);
 }
 
 sub clear {
@@ -48,6 +52,16 @@ sub url {
     return $name unless exists $self->names->{$name};
     my $route = $self->routes->[ $self->names->{$name} ];
     return $route->build(%args);
+}
+
+sub _build_location {
+    # build a specific location object on which ->add can be called again
+    my ( $self, $route ) = @_;
+
+    return Kelp::Routes::Location->new(
+        router => $self,
+        parent => $route,
+    );
 }
 
 sub _message {
@@ -142,7 +156,8 @@ sub _parse_route {
     }
 
     # Can now add the object to routes
-    push @{ $self->routes }, $self->build_pattern( $val );
+    my $route = $self->build_pattern( $val );
+    push @{ $self->routes }, $route;
 
     # Add route index to names
     if ( my $name = $val->{name} ) {
@@ -158,6 +173,8 @@ sub _parse_route {
         my ( $k, $v ) = splice( @$tree, 0, 2 );
         $self->_parse_route( $val, $k, $v );
     }
+
+    return $route;
 }
 
 # Override to change what 'to' values are valid
@@ -523,6 +540,34 @@ bridges, because they contain a tree.
 
 =back
 
+=head1 LOCATIONS
+
+Instead of using trees, you can alternatively use locations returned by the
+L</add> method, which will work exactly the same. The object returned from
+C<add> will be a facade implementing a localized version of C<add>:
+
+    # /users
+    my $users = $r->add( '/users' => {
+        to   => 'users#auth',
+        name => 'users',
+    } );
+
+    # /users/profile, /users becomes a bridge
+    my $profile = $users->add( '/profile' => {
+        name => 'profile',
+        to   => 'users#profile'
+    } );
+
+    # /users/settings, has its own tree so it's a bridge
+    my $settings = $users->add( '/settings' => {
+        name => 'settings',
+        to   => 'users#settings',
+        tree => [
+            '/email' => { name => 'email', to => 'users#email' },
+            '/login' => { name => 'login', to => 'users#login' }
+        ],
+    } );
+
 =head1 ATTRIBUTES
 
 =head2 base
@@ -610,6 +655,10 @@ Adds a new route definition to the routes array.
 
 C<$path> can be a path string, e.g. C<'/user/view'> or an ARRAY containing a
 method and a path, e.g. C<[ PUT =E<gt> '/item' ]>.
+
+Returns an object on which you can call C<add> again. If you do, the original
+route will become a bridge. It will work as if you included the extra routes in
+the route's C<tree>.
 
 The route destination is very flexible. It can be one of these three things:
 
