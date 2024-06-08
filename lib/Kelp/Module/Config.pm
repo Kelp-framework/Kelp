@@ -44,7 +44,7 @@ attr data => sub {
 
             # Routes
             Routes => {
-                base => ref( $self->app )
+                base => ($self->app->can('_real_class') ? $self->app->_real_class : ref $self->app),
             },
 
             # Template
@@ -571,3 +571,4 @@ true value to make this module warn about missing files.
     $ KELP_CONFIG_WARN=1 plackup app.psgi
 
 =cut
+

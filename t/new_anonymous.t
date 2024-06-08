@@ -24,6 +24,7 @@ isa_ok $app1, 'Kelp';
 isa_ok $app2, 'Kelp';
 
 isnt refaddr $app1->routes, refaddr $app2->routes, 'not the same app routes ok';
+unlike $app1->routes->base, qr/^Kelp::Anonymous::/, 'base ok';
 
 $app1->routes->add('/', sub { 'hello' });
 
@@ -48,3 +49,4 @@ throws_ok sub {
 }, qr/redefining of .+ not allowed/i, 'limitations ok';
 
 done_testing;
+
