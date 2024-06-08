@@ -22,8 +22,21 @@ sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
     $self->has_name(defined $self->{name} && length $self->{name}); # remember if pattern was named
+
+    $self->_fix_pattern;
     $self->regex; # Compile the regex
     return $self;
+}
+
+sub _fix_pattern {
+    my ( $self ) = @_;
+    my $pattern = $self->pattern;
+    return if ref $pattern; # only fix non-regex patterns
+
+    # operations performed
+    $pattern =~ s{/+}{/}g;
+
+    $self->pattern($pattern);
 }
 
 sub _rep_regex {
