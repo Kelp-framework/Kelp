@@ -9,6 +9,7 @@ use Try::Tiny;
 use Class::Inspector;
 
 attr base          => ''; # the default is set by config module
+attr rebless       => 0;  # do not rebless app by default
 attr pattern_obj   => 'Kelp::Routes::Pattern';
 attr fatal         => 0;
 attr routes        => sub { [] };
@@ -194,7 +195,7 @@ sub load_destination {
             croak "method '$method' does not exist in class '$class'"
                 unless $method_code;
 
-            return [$class->isa( $self->base ) ? $class : undef, $method_code];
+            return [$self->rebless && $class->isa( $self->base ) ? $class : undef, $method_code];
         }
         elsif ( exists &$to ) {
             # Move to reference
@@ -262,7 +263,7 @@ sub dispatch {
         unless $dest;
 
     my ( $to, $controller, $action ) = ( $route->to, @{ $dest } );
-    $app = $app->_clone( $controller );
+    $app = $app->_clone( $controller ) if $controller;
 
     $app->before_dispatch( $to );
     return $action->( $app, @{ $route->param } );
@@ -551,6 +552,11 @@ it with a plus sign:
     $r->add( '/outside' => '+Outside::Module::route' );
     # /outside -> Outside::Module::route
 
+=head2 rebless
+
+Switch used to set whether the router should rebless the app into the
+controller classes (subclasses of L</base>). Boolean value, false by default.
+
 =head2 pattern_obj
 
 A full class name of an object used for each pattern, L<Kelp::Routes::Pattern>
@@ -759,9 +765,10 @@ destination specified in L<Kelp::Routes::Pattern/dest>. If dest is not set, it
 will be computed using L</load_destination> with unformatted
 L<Kelp::Routes::Pattern/to>.
 
-The C<$kelp> instance is always shallow-cloned before running the route with
-it, and may be reblessed into another class if it is a subclass of L</base>.
-Setting top-level attributes of C<$kelp> object will not be persistent.
+The C<$kelp> instance may be shallow-cloned and reblessed into another class if
+it is a subclass of L</base> and L</rebless> is configured. Modifications made
+to top-level attributes of C<$kelp> object will be gone after the action is
+complete.
 
 =head2 build_pattern
 

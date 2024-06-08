@@ -2,7 +2,8 @@ package Kelp::Routes::Controller;
 
 use Kelp::Base 'Kelp::Routes';
 
-# the new Kelp::Routes does the Controller logic by itself, so this package is now a no-op
+# the new Kelp::Routes does the Controller logic by itself, we just need to configure it correctly
+attr rebless => 1;
 
 1;
 
@@ -21,6 +22,7 @@ Kelp::Routes::Controller - Legacy routes and controller for Kelp
     {
         modules_init => {
             Routes => {
+                router => 'Controller',
                 base   => 'MyApp::Controller',
             }
         }
@@ -51,8 +53,8 @@ Kelp::Routes::Controller - Legacy routes and controller for Kelp
 =head1 DESCRIPTION
 
 B<< This module is no longer needed, since L<Kelp::Routes> handles reblessing
-by itself. It's only here for backward compatibility and documentation
-purposes. >>
+by itself when configured with C<rebless>. It's only here for backward
+compatibility and documentation purposes. >>
 
 This router module reblesses a Kelp application into its own controller class.
 This allows you to structure your web application in a classic object oriented
