@@ -12,7 +12,7 @@ use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
 
-our $VERSION = '1.07';
+our $VERSION = '2.00';
 
 # Basic attributes
 attr -host => hostname;
