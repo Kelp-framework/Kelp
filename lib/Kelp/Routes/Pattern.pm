@@ -42,6 +42,12 @@ sub _fix_pattern {
 sub _rep_regex {
     my ( $self, $char, $switch, $token ) = @_;
 
+    # no token - only valid for the wildcard *
+    if (!$token) {
+        return $char . '(.+)' if $switch eq '*';
+        return $char . $switch;
+    }
+
     push @{$self->{_tokens}}, $token;
 
     my ( $a, $b, $r ) = ( "(?<$token>", ')', undef );
@@ -66,7 +72,7 @@ sub _build_regex {
 
     return $self->pattern if ref $self->pattern eq 'Regexp';
 
-    my $PAT = '(.?)([:*?])(\w+)';
+    my $PAT = '(.?)([:*?])(\w+)?';
     my $pattern =  $self->pattern;
 
     # Curly braces and brackets are only used for separation.

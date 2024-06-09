@@ -131,6 +131,59 @@ _match(
     }]
 );
 
+# wildcard without label
+
+_match(
+    '/r/*',
+    yes => {
+        '/r/a'     => {},
+        '/r/a/b/'  => {},
+    },
+    par => {
+        '/r/a'   => [qw(a)],
+        '/r/a/b' => [qw(a b)],
+    },
+    no => [qw{
+        /
+        /r
+        /r/
+        /r1
+        /ar1
+    }]
+);
+
+_match(
+    '/r*',
+    yes => {
+        '/r/'      => {},
+        '/r/a'     => {},
+        '/r/a/b/'  => {},
+        '/r1'      => {},
+    },
+    par => {
+        '/r/'   => [qw(/)],
+        '/r1'   => [qw(1)],
+    },
+    no => [qw{
+        /
+        /r
+        /ar1
+    }]
+);
+
+_match(
+    '/r/*/:a',
+    yes => {
+        '/r/aa/b' => { a => 'b' },
+    },
+    par => {
+        '/r/aa/bb/c' => [qw(aa/bb c)],
+    },
+    no => [qw{
+        /r/tt/
+    }]
+);
+
 # Defaults
 #
 _match(
@@ -320,3 +373,4 @@ sub _match {
         ok !$p->match($_), "no match: $_" for (@$no);
     }
 }
+
