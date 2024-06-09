@@ -144,7 +144,7 @@ sub match {
         @matched = map { $named{$_} } @{ $self->{_tokens} };
     }
     elsif ( $has_matches ) {
-        @matched = map { defined && length ? $_ : undef } @matched;
+        @matched = map { length($_ // '') ? $_ : undef } @matched;
     }
     else {
         @matched = ();
