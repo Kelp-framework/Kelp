@@ -50,20 +50,21 @@ sub _rep_regex {
 
     push @{$self->{_tokens}}, $token;
 
-    my ( $a, $b, $r ) = ( "(?<$token>", ')', undef );
-    for ($switch) {
-        if ( $_ eq ':' || $_ eq '?' ) {
-            $r = $a . ( $self->check->{$token} // '[^\/]+' ) . $b
-        }
-        if ( $_ eq '*' ) {
-            $r = $a . '.+' . $b
+    my ( $prefix, $suffix ) = ( "(?<$token>", ')' );
+    my $re;
+
+    if ( $switch eq ':' || $switch eq '?' ) {
+        $re = $char . $prefix . ( $self->check->{$token} // '[^\/]+' ) . $suffix;
+        if ( $switch eq '?' ) {
+            $re = "(?:$re)" if $char eq '/';
+            $re .= '?';
         }
     }
+    elsif ( $switch eq '*' ) {
+        $re = $char . $prefix . '.+' . $suffix;
+    }
 
-    $char = $char . '?' if $char eq '/' && $switch eq '?';
-    $r .= '?' if $switch eq '?';
-
-    return $char . $r;
+    return $re;
 }
 
 sub _build_regex {

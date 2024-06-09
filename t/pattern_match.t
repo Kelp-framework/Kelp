@@ -131,6 +131,18 @@ _match(
     }]
 );
 
+_match(
+    '/aa/?b',
+    yes => {
+        '/aa'   => {},
+        '/aa/'  => {},
+        '/aa/b' => { b => 'b' },
+    },
+    no => [
+        '/aaa'
+    ],
+);
+
 # wildcard without label
 
 _match(
