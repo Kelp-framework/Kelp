@@ -90,14 +90,22 @@ sub _build_regex {
 
 sub _rep_build {
     my ( $self, $switch, $token, %args ) = @_;
+
+    if (!$token) {
+        return $switch unless $switch eq '*';
+        $token = '*';
+    }
+
     my $rep = $args{$token} // $self->defaults->{$token} // '';
     if ($switch ne '?' && !$rep) {
         return '{?' . $token . '}';
     }
+
     my $check = $self->check->{$token};
     if ( $check && $args{$token} !~ $check ) {
         return '{!' . $token . '}';
     }
+
     return $rep;
 }
 
@@ -110,9 +118,9 @@ sub build {
         return;
     }
 
-    my $PAT = '([:*?])(\w+)';
+    my $PAT = '([:*?])(\w+)?';
     $pattern =~ s/{?$PAT}?/$self->_rep_build($1, $2, %args)/eg;
-    if ($pattern =~ /{([!?])(\w+)}/) {
+    if ($pattern =~ /{([!?])(\w+|[*])}/) {
         carp $1 eq '!'
             ? "Field $2 doesn't match checks"
             : "Default value for field $2 is missing";
@@ -308,12 +316,21 @@ was successful, this sub will return a true value and the L</named> and L</param
 attributes will be initialized with the names and values of the matched placeholders.
 
 =head2 build
+
 C<build( %args )>
 
 Builds a URL from a pattern.
 
     my $p = Kelp::Routes::Patters->new( pattern  => '/:id/:line/:row' );
     $p->build( id => 100, line => 5, row => 8 ); # Returns '/100/5/8'
+
+If the pattern contains an unnamed wildcard C<*>, then it should be built like this:
+
+    my $p = Kelp::Routes::Patters->new( pattern  => '/hello/*' );
+    $p->build( '*' => 'kelp' ); # Returns '/hello/kelp'
+
+If the pattern contains more than one unnamed wildcards, then you should
+probably give them some names.
 
 =head1 ACKNOWLEDGEMENTS
 

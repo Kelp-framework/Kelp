@@ -92,4 +92,14 @@ use Kelp::Routes::Pattern;
     is $p->build( a => 'foo' ), undef;
 }
 
+# Wildcards
+{
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/a/*/*b' );
+    is $p->build( '*' => 'hello', b => 5 ), '/a/hello/5';
+    is $p->build( '*' =>  'b/c', b => 'd' ), '/a/b/c/d';
+    is $p->build( b => '??' ), undef;
+    is $p->build( '*' => 'foo' ), undef;
+}
+
 done_testing;
+
