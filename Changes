@@ -2,6 +2,7 @@
             [New Features]
             - Added a return value to 'add' method from Kelp::Routes,
               * it can be used to call add again, adding a child and making the parent a bridge
+            - Added new placeholder to routes: >slurpy (a mix of optional + wildcard)
             - Added before_dispatch hook in Kelp
             - Added Kelp::Util, which contains some general utilities (previously as private code in Kelp::Routes)
             - Added has_name and dest methods to Kelp::Routes::Pattern
@@ -27,8 +28,9 @@
             [Bug fixes]
             - Instances created with new_anon now have correct default 'base' for routes
             - Fixed bridge behavior in some cases by removing duplicated slashes from non-regex pattern
-            - Fixed unnamed wildcard being honored in non-regex patterns as documented
+            - Fixed unnamed wildcard not being honored in non-regex patterns as documented
             - Fixed ?placeholder possibly matching other routes, for example '/not/?here' matching '/nothing'
+            - Fixed *placeholder not honoring rules from checks while matching a pattern
             - Optional capture groups in custom-regex routes no longer produce a warning when not matched
             - Kelp::Generator now ignores empty lines in index files
 

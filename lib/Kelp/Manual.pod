@@ -348,6 +348,45 @@ This will handle C</person>, C</person/> and C</person/jack>.
 This will handle C</bar/foo/baz/500> and send it to C<MyApp::Articles::view>
 with parameters C<$article> equal to C<bar/foo/baz> and C<$id> equal to 500.
 
+Wildcards can also be used without a label:
+
+    # FIXME: will match both /actions/create and /actions_and_stuff
+    $r->add( '/actions*' => sub { ... } );
+
+=head4 Slurpy
+
+    $r->add( '/other-app/>rest' => sub {
+        my ( $self, $rest ) = @_;
+        return "other-app called with path: " . ($rest // '<none>');
+    } );
+
+This is a mix of L</Wildcards> and L</Optional>. It works like optional
+placeholders but will by default also match slashes.
+
+The use case of this is to have something that hijacks all possibilities under
+that path, but also matches for that base path, for example the above will
+match all of these:
+
+    /other-app/>rest matches:
+        /other-app
+        /other-app/
+        /other-app/home
+        /other-app/article/1
+
+    /other-app/*rest matches:
+        /other-app/home
+        /other-app/article/1
+
+    /other-app/?rest matches:
+        /other-app
+        /other-app/
+        /other-app/home
+
+Just like wildcards, slurpy placeholders can be used without a label:
+
+    # all user actions and their index in one route
+    $r->add( '/user/actions/>' => sub { ... } );
+
 =head3 Placeholder restrictions
 
 Paths' named placeholders can be restricted by providing regular expressions.

@@ -18,6 +18,11 @@ attr param    => sub { [] };
 attr to       => undef;
 attr dest     => undef;
 
+# helpers for matching different types of wildcards
+sub __noslash  { 1 == grep { $_[0] eq $_ } ':', '?' }
+sub __matchall { 1 == grep { $_[0] eq $_ } '*', '>' }
+sub __optional { 1 == grep { $_[0] eq $_ } '?', '>' }
+
 sub new {
     my $class = shift;
     my $self = $class->SUPER::new(@_);
@@ -41,29 +46,36 @@ sub _fix_pattern {
 
 sub _rep_regex {
     my ( $self, $char, $switch, $token ) = @_;
-
-    # no token - only valid for the wildcard *
-    if (!$token) {
-        return $char . '(.+)' if $switch eq '*';
-        return $char . $switch;
-    }
-
-    push @{$self->{_tokens}}, $token;
-
-    my ( $prefix, $suffix ) = ( "(?<$token>", ')' );
     my $re;
 
-    if ( $switch eq ':' || $switch eq '?' ) {
-        $re = $char . $prefix . ( $self->check->{$token} // '[^\/]+' ) . $suffix;
-        if ( $switch eq '?' ) {
-            $re = "(?:$re)" if $char eq '/';
-            $re .= '?';
+    my $optional = sub {
+        return unless __optional($switch);
+        $re = "(?:$re)" if $char eq '/';
+        $re .= '?';
+    };
+
+    # no token - only valid for the wildcard * and slurpy >
+    if ( !defined $token ) {
+
+        # do nothing
+        return $char . $switch
+            unless __matchall($switch);
+
+        $re = $char . '(.+)';
+    }
+    else {
+        push @{$self->{_tokens}}, $token;
+
+        my ( $prefix, $suffix ) = ( "(?<$token>", ')' );
+        if ( __noslash($switch) ) {
+            $re = $char . $prefix . ( $self->check->{$token} // '[^\/]+' ) . $suffix;
+        }
+        elsif ( __matchall($switch) ) {
+            $re = $char . $prefix .  ( $self->check->{$token} // '.+' ) . $suffix;
         }
     }
-    elsif ( $switch eq '*' ) {
-        $re = $char . $prefix . '.+' . $suffix;
-    }
 
+    $optional->();
     return $re;
 }
 
@@ -73,7 +85,7 @@ sub _build_regex {
 
     return $self->pattern if ref $self->pattern eq 'Regexp';
 
-    my $PAT = '(.?)([:*?])(\w+)?';
+    my $PAT = '(.?)([:*?>])(\w+)?';
     my $pattern =  $self->pattern;
 
     # Curly braces and brackets are only used for separation.
@@ -92,13 +104,13 @@ sub _build_regex {
 sub _rep_build {
     my ( $self, $switch, $token, %args ) = @_;
 
-    if (!$token) {
-        return $switch unless $switch eq '*';
-        $token = '*';
+    if (!defined $token) {
+        return $switch unless __matchall($switch);
+        $token = $switch;
     }
 
     my $rep = $args{$token} // $self->defaults->{$token} // '';
-    if ($switch ne '?' && !$rep) {
+    if ( !__optional($switch) && !$rep) {
         return '{?' . $token . '}';
     }
 
@@ -119,9 +131,9 @@ sub build {
         return;
     }
 
-    my $PAT = '([:*?])(\w+)?';
+    my $PAT = '([:*?>])(\w+)?';
     $pattern =~ s/{?$PAT}?/$self->_rep_build($1, $2, %args)/eg;
-    if ($pattern =~ /{([!?])(\w+|[*])}/) {
+    if ($pattern =~ /{([!?])(\w+|[*>])}/) {
         carp $1 eq '!'
             ? "Field $2 doesn't match checks"
             : "Default value for field $2 is missing";
@@ -325,12 +337,13 @@ Builds a URL from a pattern.
     my $p = Kelp::Routes::Patters->new( pattern  => '/:id/:line/:row' );
     $p->build( id => 100, line => 5, row => 8 ); # Returns '/100/5/8'
 
-If the pattern contains an unnamed wildcard C<*>, then it should be built like this:
+If the pattern contains an unnamed wildcard C<*> or slurpy C<< > >>, then it
+should be built like this:
 
-    my $p = Kelp::Routes::Patters->new( pattern  => '/hello/*' );
-    $p->build( '*' => 'kelp' ); # Returns '/hello/kelp'
+    my $p = Kelp::Routes::Patters->new( pattern  => '/hello/*/>' );
+    $p->build( '*' => 'kelp', '>' => 'world' ); # Returns '/hello/kelp/world'
 
-If the pattern contains more than one unnamed wildcards, then you should
+If the pattern contains more than one unnamed items, then you should
 probably give them some names.
 
 =head1 ACKNOWLEDGEMENTS

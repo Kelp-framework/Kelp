@@ -60,6 +60,16 @@ use Kelp::Routes::Pattern;
     is $p->build( a => 'foo' ), undef;
 }
 
+{
+    my $p = Kelp::Routes::Pattern->new(
+        pattern  => '/:a/>b',
+        defaults => { b => 'bar/baz' }
+    );
+    is $p->build( a => 'bar', b => 'baz' ), '/bar/baz';
+    is $p->build( a => 'foo' ), '/foo/bar/baz';
+    is $p->build( b => 'bar' ), undef;
+}
+
 # Captures
 {
     my $p = Kelp::Routes::Pattern->new( pattern => '/{:a}ing/{:b}ing' );
@@ -92,13 +102,34 @@ use Kelp::Routes::Pattern;
     is $p->build( a => 'foo' ), undef;
 }
 
-# Wildcards
 {
     my $p = Kelp::Routes::Pattern->new( pattern  => '/a/*/*b' );
     is $p->build( '*' => 'hello', b => 5 ), '/a/hello/5';
     is $p->build( '*' =>  'b/c', b => 'd' ), '/a/b/c/d';
     is $p->build( b => '??' ), undef;
     is $p->build( '*' => 'foo' ), undef;
+}
+
+# Slurpy
+{
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/:a/>b' );
+    is $p->build( a => 'bar', b => 'foo' ), '/bar/foo';
+    is $p->build( a => 'bar', b => 'bat/foo' ), '/bar/bat/foo';
+    is $p->build( b => 'foo' ), undef;
+    is $p->build( a => 'foo' ), '/foo/';
+}
+
+{
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/a/>' );
+    is $p->build( '>' => 'hello' ), '/a/hello';
+    is $p->build( '>' =>  'b/c' ), '/a/b/c';
+    is $p->build(), '/a/';
+}
+
+# Two unnamed items
+{
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/hello/*/>' );
+    is $p->build( '*' => 'kelp', '>' => 'world' ), '/hello/kelp/world';
 }
 
 done_testing;

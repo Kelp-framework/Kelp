@@ -196,6 +196,45 @@ _match(
     }]
 );
 
+# Slurpy
+
+_match(
+    '/test/>a',
+    yes => {
+        '/test'      => {},
+        '/test/'     => {},
+        '/test/a'    => { a => 'a' },
+        '/test/a/b'  => { a => 'a/b' },
+        '/test/a/b/' => { a => 'a/b/' },
+    },
+    par => {
+        '/test/a'    => [ 'a' ],
+        '/test/a/b'  => [ 'a/b' ],
+        '/test/a/b/' => [ 'a/b/' ],
+    },
+    no => [qw(
+        /tes
+        /testa
+        /tes/t
+    )],
+);
+
+_match(
+    '/test/a>b',
+    yes => {
+        '/test/a'      => {},
+        '/test/a/'     => { b => '/' },
+        '/test/ab'     => { b => 'b' },
+        '/test/a/b'    => { b => '/b' },
+        '/test/a/b/'   => { b => '/b/' },
+    },
+    no => [qw(
+        /test/b
+        /test/
+        /a/test/a
+    )],
+);
+
 # Defaults
 #
 _match(
@@ -299,6 +338,7 @@ _match(
         '/abc/69' => [qw/abc 69/]
     },
     no => [
+        '/high/five5',
         '/123/123',
         '/0/0',
         '/12/a2'
