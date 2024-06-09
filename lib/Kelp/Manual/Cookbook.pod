@@ -96,7 +96,7 @@ A slightly shorter version with state variables and no ping:
         ]);
     }
 
-Same methods can be used for accessing the schema of <DBIx::Class>.
+Same methods can be used for accessing the schema of L<DBIx::Class>.
 
 =head2 Custom 404 and 500 error pages
 
@@ -226,6 +226,14 @@ use L<Plack::Middleware::ReverseProxy>.
 
 (REMOTE_ADDR is not set at all when using the proxy via filesocket).
 
+=head2 Changing the default access logging
+
+Access logs reported by Kelp through C<logger> can be modified or disabled by
+writing your own customized L<Kelp/before_dispatch> method (not calling the
+parent version).
+
+    sub before_dispatch {} # enough to disable the access logs
+
 =head1 SEE ALSO
 
 L<Kelp::Manual>
@@ -243,3 +251,4 @@ L<Plack>
 =item * Mailing list: L<https://groups.google.com/forum/?fromgroups#!forum/perl-kelp>
 
 =back
+
