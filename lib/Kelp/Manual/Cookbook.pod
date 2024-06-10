@@ -234,6 +234,23 @@ parent version).
 
     sub before_dispatch {} # enough to disable the access logs
 
+=head2 Using sessions
+
+In order to have access to L<Kelp::Request/session> a
+L<Plack::Middleware::Session> middleware must be initialized. In your config
+file:
+
+    middleware => ['Session'],
+    middleware_init => {
+        Session => {
+            store => 'File'
+        }
+    }
+
+Note that you pretty much need to choose a C<store> right away, as otherwise it
+will store data in memory, which is both volatile and does not work with
+multi-process servers.
+
 =head1 SEE ALSO
 
 L<Kelp::Manual>

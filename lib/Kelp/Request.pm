@@ -245,30 +245,9 @@ Clear the session:
         $self->req->session( {} );
     }
 
-=head3 Common tasks with sessions
-
-=over
-
-=item Initialize file sessions
-
-In your config file:
-
-    middleware => ['Session'],
-    middleware_init => {
-        Session => {
-            store => 'File'
-        }
-    }
-
-=item Delete session value
+Delete session value:
 
     delete $self->req->session->{'useless'};
-
-=item Remove all session values
-
-    $self->req->session( {} );
-
-=back
 
 =head2 is_ajax
 
