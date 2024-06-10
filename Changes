@@ -1,4 +1,4 @@
-2024-06-09: Version 2.00
+2024-06-10: Version 2.00
             [New Features]
             - Added a return value to 'add' method from Kelp::Routes,
               * it can be used to call add again, adding a child and making the parent a bridge
