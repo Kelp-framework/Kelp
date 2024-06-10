@@ -448,6 +448,18 @@ the forward slash.
     # /bar/foo/baz/bat  -> match ( a = 'bar', b = 'foo/baz', c = 'bat' )
     # /bar/bat          -> no match
 
+=head2 Slurpy
+
+Slurpy placeholders will take as much as they can or nothing. It's a mix of a
+wildcard and optional placeholder.
+
+    $r->add( '/path/>rest'  => 'Module::sub' );
+    # /path            -> match ( rest = undef )
+    # /path/foo        -> match ( rest = '/foo' )
+    # /path/foo/bar    -> match ( rest = '/foo/bar' )
+
+Just like optional parameters, they may have C<defaults>.
+
 =head2 Using curly braces
 
 Curly braces may be used to separate the placeholders from the rest of the
