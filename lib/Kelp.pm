@@ -12,7 +12,7 @@ use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
 
-our $VERSION = '1.07';
+our $VERSION = '2.00';
 
 # Basic attributes
 attr -host => hostname;
@@ -62,8 +62,8 @@ sub new {
     return $self;
 }
 
-my $last_anon = 0;
 sub new_anon {
+    state $last_anon = 0;
     my $class = shift;
 
     # make sure we don't eval something dodgy
@@ -81,6 +81,8 @@ sub new_anon {
             {
                 package $anon_class;
                 use parent -norequire, '$class';
+
+                sub _real_class { '$class' }
             }
             1;
         ];

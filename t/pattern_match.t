@@ -131,6 +131,110 @@ _match(
     }]
 );
 
+_match(
+    '/aa/?b',
+    yes => {
+        '/aa'   => {},
+        '/aa/'  => {},
+        '/aa/b' => { b => 'b' },
+    },
+    no => [
+        '/aaa'
+    ],
+);
+
+# wildcard without label
+
+_match(
+    '/r/*',
+    yes => {
+        '/r/a'     => {},
+        '/r/a/b/'  => {},
+    },
+    par => {
+        '/r/a'   => [qw(a)],
+        '/r/a/b' => [qw(a b)],
+    },
+    no => [qw{
+        /
+        /r
+        /r/
+        /r1
+        /ar1
+    }]
+);
+
+_match(
+    '/r*',
+    yes => {
+        '/r/'      => {},
+        '/r/a'     => {},
+        '/r/a/b/'  => {},
+        '/r1'      => {},
+    },
+    par => {
+        '/r/'   => [qw(/)],
+        '/r1'   => [qw(1)],
+    },
+    no => [qw{
+        /
+        /r
+        /ar1
+    }]
+);
+
+_match(
+    '/r/*/:a',
+    yes => {
+        '/r/aa/b' => { a => 'b' },
+    },
+    par => {
+        '/r/aa/bb/c' => [qw(aa/bb c)],
+    },
+    no => [qw{
+        /r/tt/
+    }]
+);
+
+# Slurpy
+
+_match(
+    '/test/>a',
+    yes => {
+        '/test'      => {},
+        '/test/'     => {},
+        '/test/a'    => { a => 'a' },
+        '/test/a/b'  => { a => 'a/b' },
+        '/test/a/b/' => { a => 'a/b/' },
+    },
+    par => {
+        '/test/a'    => [ 'a' ],
+        '/test/a/b'  => [ 'a/b' ],
+        '/test/a/b/' => [ 'a/b/' ],
+    },
+    no => [qw(
+        /tes
+        /testa
+        /tes/t
+    )],
+);
+
+_match(
+    '/test/a>b',
+    yes => {
+        '/test/a'      => {},
+        '/test/a/'     => { b => '/' },
+        '/test/ab'     => { b => 'b' },
+        '/test/a/b'    => { b => '/b' },
+        '/test/a/b/'   => { b => '/b/' },
+    },
+    no => [qw(
+        /test/b
+        /test/
+        /a/test/a
+    )],
+);
+
 # Defaults
 #
 _match(
@@ -234,6 +338,7 @@ _match(
         '/abc/69' => [qw/abc 69/]
     },
     no => [
+        '/high/five5',
         '/123/123',
         '/0/0',
         '/12/a2'
@@ -320,3 +425,4 @@ sub _match {
         ok !$p->match($_), "no match: $_" for (@$no);
     }
 }
+

@@ -10,6 +10,7 @@ my $app = MyApp2->new(
     __config => {
         modules_init => {
             Routes => {
+                rebless => 1,
                 base   => 'MyApp2::Controller',
             }
         }

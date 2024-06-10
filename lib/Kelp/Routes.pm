@@ -5,10 +5,12 @@ use Kelp::Base;
 use Carp;
 use Plack::Util;
 use Kelp::Util;
+use Kelp::Routes::Location;
 use Try::Tiny;
 use Class::Inspector;
 
 attr base          => ''; # the default is set by config module
+attr rebless       => 0;  # do not rebless app by default
 attr pattern_obj   => 'Kelp::Routes::Pattern';
 attr fatal         => 0;
 attr routes        => sub { [] };
@@ -27,8 +29,11 @@ attr cache => sub {
 };
 
 sub add {
-    my ( $self, $pattern, $descr ) = @_;
-    $self->_parse_route( {}, $pattern, $descr );
+    my ( $self, $pattern, $descr, $parent ) = @_;
+    $parent = {} if !$parent || ref $parent ne 'HASH';
+
+    my $route = $self->_parse_route( $parent, $pattern, $descr );
+    return $self->_build_location($route);
 }
 
 sub clear {
@@ -47,6 +52,16 @@ sub url {
     return $name unless exists $self->names->{$name};
     my $route = $self->routes->[ $self->names->{$name} ];
     return $route->build(%args);
+}
+
+sub _build_location {
+    # build a specific location object on which ->add can be called again
+    my ( $self, $route ) = @_;
+
+    return Kelp::Routes::Location->new(
+        router => $self,
+        parent => $route,
+    );
 }
 
 sub _message {
@@ -141,7 +156,8 @@ sub _parse_route {
     }
 
     # Can now add the object to routes
-    push @{ $self->routes }, $self->build_pattern( $val );
+    my $route = $self->build_pattern( $val );
+    push @{ $self->routes }, $route;
 
     # Add route index to names
     if ( my $name = $val->{name} ) {
@@ -157,6 +173,8 @@ sub _parse_route {
         my ( $k, $v ) = splice( @$tree, 0, 2 );
         $self->_parse_route( $val, $k, $v );
     }
+
+    return $route;
 }
 
 # Override to change what 'to' values are valid
@@ -190,10 +208,11 @@ sub load_destination {
             Plack::Util::load_class( $class )
                 unless Class::Inspector->loaded( $class );
 
+            my $method_code = $class->can( $method );
             croak "method '$method' does not exist in class '$class'"
-                unless $method = $class->can( $method );
+                unless $method_code;
 
-            return [$class->isa( $self->base ) ? $class : undef, $method];
+            return [$self->rebless && $class->isa( $self->base ) ? $class : undef, $method_code];
         }
         elsif ( exists &$to ) {
             # Move to reference
@@ -261,7 +280,7 @@ sub dispatch {
         unless $dest;
 
     my ( $to, $controller, $action ) = ( $route->to, @{ $dest } );
-    $app = $app->_clone( $controller );
+    $app = $app->_clone( $controller ) if $controller;
 
     $app->before_dispatch( $to );
     return $action->( $app, @{ $route->param } );
@@ -429,6 +448,18 @@ the forward slash.
     # /bar/foo/baz/bat  -> match ( a = 'bar', b = 'foo/baz', c = 'bat' )
     # /bar/bat          -> no match
 
+=head2 Slurpy
+
+Slurpy placeholders will take as much as they can or nothing. It's a mix of a
+wildcard and optional placeholder.
+
+    $r->add( '/path/>rest'  => 'Module::sub' );
+    # /path            -> match ( rest = undef )
+    # /path/foo        -> match ( rest = '/foo' )
+    # /path/foo/bar    -> match ( rest = '/foo/bar' )
+
+Just like optional parameters, they may have C<defaults>.
+
 =head2 Using curly braces
 
 Curly braces may be used to separate the placeholders from the rest of the
@@ -521,6 +552,34 @@ bridges, because they contain a tree.
 
 =back
 
+=head1 LOCATIONS
+
+Instead of using trees, you can alternatively use locations returned by the
+L</add> method, which will work exactly the same. The object returned from
+C<add> will be a facade implementing a localized version of C<add>:
+
+    # /users
+    my $users = $r->add( '/users' => {
+        to   => 'users#auth',
+        name => 'users',
+    } );
+
+    # /users/profile, /users becomes a bridge
+    my $profile = $users->add( '/profile' => {
+        name => 'profile',
+        to   => 'users#profile'
+    } );
+
+    # /users/settings, has its own tree so it's a bridge
+    my $settings = $users->add( '/settings' => {
+        name => 'settings',
+        to   => 'users#settings',
+        tree => [
+            '/email' => { name => 'email', to => 'users#email' },
+            '/login' => { name => 'login', to => 'users#login' }
+        ],
+    } );
+
 =head1 ATTRIBUTES
 
 =head2 base
@@ -549,6 +608,11 @@ it with a plus sign:
 
     $r->add( '/outside' => '+Outside::Module::route' );
     # /outside -> Outside::Module::route
+
+=head2 rebless
+
+Switch used to set whether the router should rebless the app into the
+controller classes (subclasses of L</base>). Boolean value, false by default.
 
 =head2 pattern_obj
 
@@ -603,6 +667,10 @@ Adds a new route definition to the routes array.
 
 C<$path> can be a path string, e.g. C<'/user/view'> or an ARRAY containing a
 method and a path, e.g. C<[ PUT =E<gt> '/item' ]>.
+
+Returns an object on which you can call C<add> again. If you do, the original
+route will become a bridge. It will work as if you included the extra routes in
+the route's C<tree>.
 
 The route destination is very flexible. It can be one of these three things:
 
@@ -758,9 +826,10 @@ destination specified in L<Kelp::Routes::Pattern/dest>. If dest is not set, it
 will be computed using L</load_destination> with unformatted
 L<Kelp::Routes::Pattern/to>.
 
-The C<$kelp> instance is always shallow-cloned before running the route with
-it, and may be reblessed into another class if it is a subclass of L</base>.
-Setting top-level attributes of C<$kelp> object will not be persistent.
+The C<$kelp> instance may be shallow-cloned and reblessed into another class if
+it is a subclass of L</base> and L</rebless> is configured. Modifications made
+to top-level attributes of C<$kelp> object will be gone after the action is
+complete.
 
 =head2 build_pattern
 

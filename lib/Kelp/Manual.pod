@@ -348,6 +348,45 @@ This will handle C</person>, C</person/> and C</person/jack>.
 This will handle C</bar/foo/baz/500> and send it to C<MyApp::Articles::view>
 with parameters C<$article> equal to C<bar/foo/baz> and C<$id> equal to 500.
 
+Wildcards can also be used without a label:
+
+    # FIXME: will match both /actions/create and /actions_and_stuff
+    $r->add( '/actions*' => sub { ... } );
+
+=head4 Slurpy
+
+    $r->add( '/other-app/>rest' => sub {
+        my ( $self, $rest ) = @_;
+        return "other-app called with path: " . ($rest // '<none>');
+    } );
+
+This is a mix of L</Wildcards> and L</Optional>. It works like optional
+placeholders but will by default also match slashes.
+
+The use case of this is to have something that hijacks all possibilities under
+that path, but also matches for that base path, for example the above will
+match all of these:
+
+    /other-app/>rest matches:
+        /other-app
+        /other-app/
+        /other-app/home
+        /other-app/article/1
+
+    /other-app/*rest matches:
+        /other-app/home
+        /other-app/article/1
+
+    /other-app/?rest matches:
+        /other-app
+        /other-app/
+        /other-app/home
+
+Just like wildcards, slurpy placeholders can be used without a label:
+
+    # all user actions and their index in one route
+    $r->add( '/user/actions/>' => sub { ... } );
+
 =head3 Placeholder restrictions
 
 Paths' named placeholders can be restricted by providing regular expressions.
@@ -394,11 +433,11 @@ the necessary arguments.
 
     my $url = $self->route->url('update', id => 1000); # /update/1000
 
-=head2 Controllers
+=head2 Reblessing into controller classes
 
-All of the examples here show routes which take a shallow-cloned instance of
-the web application as a first parameter. This is true even if those routes
-live in another class.
+All of the examples here show routes which take a instance of the web
+application as a first parameter. This is true even if those routes live in
+another class.
 
 To rebless the app instance into the controller class instance, the controller
 class must extend the class specified in C<base> configuration field. The
@@ -406,23 +445,24 @@ default value of that field is the application class, so your application class
 is by default your main controller class. All other controllers must (directly
 or indirectly) inherit from your application class.
 
-=head3 Step 0: (Optional) Change the base controllr
+=head3 Step 1: Configure the controller
 
-It is a good practice to set up a different base, so that you separate general
+It is a good practice to set up a different C<base>, so that you separate general
 app code from request-handling code.
 
     # config.pl
     {
         modules_init => {
             Routes => {
+                rebless => 1, # the app instance will be reblessed
                 base => 'MyApp::Controller',
             }
         }
     }
 
-=head3 Step 1: Create a main controller class
+=head3 Step 2: Create a main controller class
 
-This step is done already if you haven't changed the C<base>.
+This step is only required if you've changed the C<base>.
 
     # lib/MyApp/Controller.pm
     package MyApp::Controller;
@@ -436,7 +476,7 @@ This step is done already if you haven't changed the C<base>.
 
     1;
 
-=head3 Step 2: Create any number of controller classes
+=head3 Step 3: Create any number of controller classes
 
 They all must inherit from your main controller class.
 
@@ -452,7 +492,7 @@ They all must inherit from your main controller class.
 
     1;
 
-=head3 Step 3: Add routes with shorter class names
+=head3 Step 4: Add routes with shorter class names
 
 You no longer have to prefix destinations with the base controller class name.
 
