@@ -1,4 +1,7 @@
-# Kelp
+<p align="center" width="100%">
+    <img width="80%" src="art/logo_wide.png" alt="logo">
+</p>
+
 A web framework light, yet rich in nutrients.
 
 ## Code and documentation
