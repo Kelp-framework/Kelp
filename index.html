@@ -1,1085 +1,212 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <title>Kelp by naturalist</title>
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
-    <script src="javascripts/respond.js"></script>
-    <!--[if lt IE 9]>
-      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    <!--[if lt IE 8]>
-    <link rel="stylesheet" href="stylesheets/ie.css">
-    <![endif]-->
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
 
-  </head>
-  <body>
-      <div id="header">
-        <nav>
-          <li class="fork"><a href="https://github.com/naturalist/kelp">View On GitHub</a></li>
-          <li class="downloads"><a href="https://github.com/naturalist/kelp/zipball/master">ZIP</a></li>
-          <li class="downloads"><a href="https://github.com/naturalist/kelp/tarball/master">TAR</a></li>
-          <li class="title">DOWNLOADS</li>
-        </nav>
-      </div><!-- end header -->
+<head>
+<title>Perl Kelp</title>
+<style>
+    * { box-sizing: border-box; }
 
-    <div class="wrapper">
-
-      <section>
-        <div id="title">
-          <h1>Kelp</h1>
-          <p>A web framework light, yet rich in nutrients.</p>
-          <hr>
-          <span class="credits left">Project maintained by <a href="https://github.com/naturalist">naturalist</a></span>
-          <span class="credits right">Hosted on GitHub Pages &mdash; Theme by <a href="https://twitter.com/michigangraham">mattgraham</a></span>
-        </div>
-
-        <p>First ...</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># lib/MyApp.pm</span>
-<span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-<span class="pl-k">use</span> parent <span class="pl-s1"><span class="pl-pds">'</span>Kelp<span class="pl-pds">'</span></span>;
-
-<span class="pl-st">sub</span> <span class="pl-en">build</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$r</span> = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>routes;
-    <span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/hello<span class="pl-pds">"</span></span>, sub { <span class="pl-s1"><span class="pl-pds">"</span>Hello, world!<span class="pl-pds">"</span></span> } );
-    <span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/hello/:name<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>greet<span class="pl-pds">'</span></span> );
-}
-
-<span class="pl-st">sub</span> <span class="pl-en">greet</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$name</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-s1"><span class="pl-pds">"</span>Hello, <span class="pl-vo">$name</span>!<span class="pl-pds">"</span></span>;
-}
-
-1;</pre></div>
-
-<p>Then ...</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># app.psgi</span>
-<span class="pl-k">use</span> MyApp;
-<span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new;
-<span class="pl-vo">$app</span><span class="pl-k">-&gt;</span>run;</pre></div>
-
-<p>Finally ...</p>
-
-<pre lang="none"><code>&gt; plackup app.psgi
-</code></pre>
-
-<p>Or, for quick prototyping use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># app.psgi</span>
-<span class="pl-k">use</span> Kelp::Less;
-
-get <span class="pl-s1"><span class="pl-pds">'</span>/hello/?name<span class="pl-pds">'</span></span><span class="pl-k"> =&gt;</span> sub {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$name</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-s1"><span class="pl-pds">"</span>Hello <span class="pl-pds">"</span></span> . <span class="pl-vo">$name</span> <span class="pl-sr"><span class="pl-pds">//</span></span> <span class="pl-s1"><span class="pl-pds">'</span>world<span class="pl-pds">'</span></span>;
-};
-
-run;</pre></div>
-
-<h1>
-<a id="description" class="anchor" href="#description" aria-hidden="true"><span class="octicon octicon-link"></span></a>DESCRIPTION</h1>
-
-<p>If you're going to be deploying a Perl based web application, chances are that
-you will be using Plack. Plack has almost all necessary tools to create and
-maintain a healthy web app. Tons of middleware is written for it, and there are
-several very well tested high performance preforking servers, such as Starman.</p>
-
-<p>Plack, however, is not a web framework, hence its creators have intentionally
-omitted adding certain components. This is where Kelp gets to shine. It provides
-a layer on top of Plack and puts everything together into a complete web
-framework.</p>
-
-<p>Kelp provides:</p>
-
-<ul>
-<li>
-<strong>Advanced Routing</strong>. Create intricate, yet simple ways to capture HTTP requests
-and route them to their designated code. Use explicit and optional named
-placeholders, wildcards, or just regular expressions.</li>
-<li>
-<strong>Flexible Configuration</strong>. Use different configuration file for each
-environment, e.g. development, deployment, etc. Merge a temporary configuration
-into your current one for testing and debugging purposes.</li>
-<li>
-<strong>Enhanced Logging</strong>. Log messages at different levels of emergency. Log to a
-file, screen, or anything supported by Log::Dispatcher.</li>
-<li>
-<strong>Powerful Rendering</strong>. Use the built-in auto-rendering logic, or the template
-module of your choice to return rich text, html and JSON responses.</li>
-<li>
-<strong>JSON encoder/decoder</strong>. Kelp comes with JSON, but you can easily plug in JSON::XS
-or any decoder of your choice.</li>
-<li>
-<strong>Extendable Core</strong>. Kelp uses pluggable modules for everything. This allows
-anyone to add a module for a custom interface. Writing Kelp modules is a
-pleasant and fulfilling activity.</li>
-<li>
-<strong>Sleek Testing</strong>. Kelp takes Plack::Test and wraps it in an object oriented
-class of convenience methods. Testing is done via sending requests to your
-routes, then analyzing the response.</li>
-</ul>
-
-<h1>
-<a id="why-kelp" class="anchor" href="#why-kelp" aria-hidden="true"><span class="octicon octicon-link"></span></a>WHY KELP?</h1>
-
-<p>What makes Kelp different from the other Perl micro web frameworks? There are a
-number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. Most of them, however, bring their deployment code,
-and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
-<em>Plack</em>-centric. It uses Plack as its foundation layer, and it builds the web
-framework on top of it. <code>Kelp::Request</code> is an extension of <code>Plack::Request</code>,
-<code>Kelp::Response</code> is an extension of <code>Plack::Response</code>.</p>
-
-<p>This approach of extending current CPAN code puts familiar and well tested
-tools in the hands of the application developer, while keeping familiar syntax
-and work flow.</p>
-
-<p>Kelp is a team player and it uses several popular, trusted CPAN modules for its
-internals. At the same time it doesn't include modules that it doesn't need,
-just because they are considered trendy. It does its best to keep a lean profile
-and a small footprint, and it's completely object manager agnostic.</p>
-
-<h1>
-<a id="creating-a-new-web-app" class="anchor" href="#creating-a-new-web-app" aria-hidden="true"><span class="octicon octicon-link"></span></a>CREATING A NEW WEB APP</h1>
-
-<h2>
-<a id="using-the-kelp-script" class="anchor" href="#using-the-kelp-script" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using the <code>Kelp</code> script</h2>
-
-<p>The easiest way to create the directory structure and a general application
-skeleton is by using the <code>Kelp</code> script, which comes with this package.</p>
-
-<pre lang="none"><code>&gt; Kelp MyApp
-</code></pre>
-
-<p>This will create <code>lib/MyApp.pm</code>, <code>app.psgi</code> and some other files (explained
-below).</p>
-
-<p>To create a <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a> app, use:</p>
-
-<pre lang="none"><code>&gt; Kelp --less MyApp
-</code></pre>
-
-<p>Get help by typing:</p>
-
-<pre lang="none"><code>&gt; Kelp --help
-</code></pre>
-
-<h2>
-<a id="directory-structure" class="anchor" href="#directory-structure" aria-hidden="true"><span class="octicon octicon-link"></span></a>Directory structure</h2>
-
-<p>Before you begin writing the internals of your app, you need to create the
-directory structure either by hand, or by using the above described <code>Kelp</code>
-utility script.</p>
-
-<pre lang="none"><code> .
- |--/lib
- |   |--MyApp.pm
- |   |--/MyApp
- |
- |--/conf
- |   |--config.pl
- |   |--test.pl
- |   |--development.pl
- |   |--deployment.pl
- |
- |--/view
- |--/log
- |--/t
- |--app.psgi
-</code></pre>
-
-<ul>
-<li>
-<p><strong>/lib</strong></p>
-
-<p>The <code>lib</code> folder contains your application modules and any local modules
-that you want your app to use.</p>
-</li>
-<li>
-<p><strong>/conf</strong></p>
-
-<p>The <code>conf</code> folder is where Kelp will look for configuration files. You need one
-main file, named <code>config.pl</code>. You can also add other files that define different
-running environments, if you name them <em>environment</em><code>.pl</code>. Replace
-<em>environment</em> with the actual name of the environment.
-To change the running environment, you can specify the app <code>mode</code>, or you can
-set the <code>PLACK_ENV</code> environment variable.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new( <span class="pl-c1">mode</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>development<span class="pl-pds">'</span></span> );</pre></div>
-
-<p>or</p>
-
-<pre lang="none"><code>&gt; PLACK_ENV=development plackup app.psgi
-</code></pre>
-</li>
-<li>
-<p><strong>/view</strong></p>
-
-<p>This is where the <code>Template</code> module will look for template files.</p>
-</li>
-<li>
-<p><strong>/log</strong></p>
-
-<p>This is where the <code>Logger</code> module will create <code>error.log</code>, <code>debug.log</code> and
-any other log files that were defined in the configuration.</p>
-</li>
-<li>
-<p><strong>/t</strong></p>
-
-<p>The <code>t</code> folder is traditionally used to hold test files. It is up to you to use
-it or not, although we strongly recommend that you write some automated test
-units for your web app.</p>
-</li>
-<li>
-<p><strong>app.psgi</strong></p>
-
-<p>This is the <a href="http://search.cpan.org/perldoc?PSGI">PSGI</a> file, of the app, which you will deploy. In it's most basic
-form it should look like this:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">use</span> lib <span class="pl-s1"><span class="pl-pds">'</span>../lib<span class="pl-pds">'</span></span>;
-<span class="pl-k">use</span> MyApp;
-
-<span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new;
-<span class="pl-vo">$app</span><span class="pl-k">-&gt;</span>run;</pre></div>
-</li>
-</ul>
-
-<h2>
-<a id="the-application-classes" class="anchor" href="#the-application-classes" aria-hidden="true"><span class="octicon octicon-link"></span></a>The application classes</h2>
-
-<p>Your application's classes should be put in the <code>lib/</code> folder. The main class,
-in our example <code>MyApp.pm</code>, initializes any modules and variables that your
-app will use. Here is an example that uses <code>Moose</code> to create lazy attributes
-and initialize a database connection:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-
-<span class="pl-k">use</span> parent Kelp;
-<span class="pl-k">use</span> Moose;
-
-has <span class="pl-c1">dbh</span> =&gt; (
-    <span class="pl-c1">is</span>      =&gt; <span class="pl-s1"><span class="pl-pds">'</span>ro<span class="pl-pds">'</span></span>,
-    <span class="pl-c1">isa</span>     =&gt; <span class="pl-s1"><span class="pl-pds">'</span>DBI<span class="pl-pds">'</span></span>,
-    <span class="pl-c1">lazy</span>    =&gt; 1,
-    <span class="pl-c1">default</span> =&gt; sub {
-        <span class="pl-s">my</span> <span class="pl-vo">$self</span>   = <span class="pl-s3">shift</span>;
-        <span class="pl-s">my</span> <span class="pl-vo">@config</span> = @{ <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>config(<span class="pl-s1"><span class="pl-pds">'</span>dbi<span class="pl-pds">'</span></span>) };
-        <span class="pl-k">return</span> DBI<span class="pl-k">-&gt;</span><span class="pl-s3">connect</span>(<span class="pl-vo">@config</span>);
+    .color, a {
+        color: #0298c3;
+        font-weight: bold;
     }
-);
 
-<span class="pl-st">sub</span> <span class="pl-en">build</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>routes<span class="pl-k">-&gt;</span>add(<span class="pl-s1"><span class="pl-pds">"</span>/read/:id<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>read<span class="pl-pds">"</span></span>);
-}
-
-<span class="pl-st">sub</span> <span class="pl-en">read</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$id</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>dbh<span class="pl-k">-&gt;</span>selectrow_array(<span class="pl-s1"><span class="pl-pds">q[</span></span>
-<span class="pl-s1">        SELECT * FROM problems</span>
-<span class="pl-s1">        WHERE id = ?</span>
-<span class="pl-s1">    <span class="pl-pds">]</span></span>, <span class="pl-vo">$id</span>);
-}
-
-1;</pre></div>
-
-<p>What is happening here?</p>
-
-<ul>
-<li>First, we create a lazy attribute and instruct it to connect to DBI. Notice that
-we have access to the current app and all of its internals via the <code>$self</code>
-variable. Notice also that the reason we define <code>dbh</code> as a <em>lazy</em> attribute
-is that <code>config</code> will not yet be initialized. All modules are initialized upon
-the creation of the object instance, e.g. when we call <code>MyApp-&gt;new</code>;</li>
-<li>Then, we override Kelp's <a href="#build">"build"</a> subroutine to create a single route
-<code>/read/:id</code>, which is assigned to the subroutine <code>read</code> in the current class.</li>
-<li>The <code>read</code> subroutine, takes <code>$self</code> and <code>$id</code> (the named placeholder from the
-path), and uses <code>$self-&gt;dbh</code> to retrieve data.</li>
-</ul>
-
-<p><em>A note about object managers:</em> The above example uses <a href="http://search.cpan.org/perldoc?Moose">Moose</a>. It is entirely
-up to you to use Moose, another object manager, or no object manager at all.
-The above example will be just as successful if you used our own little
-<a href="http://search.cpan.org/perldoc?Kelp::Base">Kelp::Base</a>:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-<span class="pl-k">use</span> Kelp::Base <span class="pl-s1"><span class="pl-pds">'</span>Kelp<span class="pl-pds">'</span></span>;
-
-attr <span class="pl-c1">dbi</span> =&gt; sub {
-    ...
-};
-
-1;</pre></div>
-
-<h2>
-<a id="routing" class="anchor" href="#routing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Routing</h2>
-
-<p>Kelp uses a powerful and very flexible router. Traditionally, it is also light
-and consists of less than 300 lines of code (comments included). You are
-encouraged to read <a href="http://search.cpan.org/perldoc?Kelp::Routes">Kelp::Routes</a>, but here are some key points. All examples
-are assumed to be inside the <a href="#build">"build"</a> method and <code>$r</code> is equal to
-<code>$self-&gt;routes</code>:</p>
-
-<h3>
-<a id="destinations" class="anchor" href="#destinations" aria-hidden="true"><span class="octicon octicon-link"></span></a>Destinations</h3>
-
-<p>You can direct HTTP paths to subroutines in your classes or, you can use inline
-code.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/home<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>home<span class="pl-pds">"</span></span> );  <span class="pl-c"># goes to sub home</span>
-<span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/legal<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>Legal::view<span class="pl-pds">"</span></span> ); <span class="pl-c"># goes to MyApp::Legal::view</span>
-<span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/about<span class="pl-pds">"</span></span>, sub { <span class="pl-s1"><span class="pl-pds">"</span>Content for about<span class="pl-pds">"</span></span> }); <span class="pl-c"># inline</span></pre></div>
-
-<h3>
-<a id="restrict-http-methods" class="anchor" href="#restrict-http-methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>Restrict HTTP methods</h3>
-
-<p>Make a route only catch a specific HTTP method:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( [ <span class="pl-c1">POST</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>/update<span class="pl-pds">'</span></span> ], <span class="pl-s1"><span class="pl-pds">"</span>update_user<span class="pl-pds">"</span></span> );</pre></div>
-
-<h3>
-<a id="named-captures" class="anchor" href="#named-captures" aria-hidden="true"><span class="octicon octicon-link"></span></a>Named captures</h3>
-
-<p>Using regular expressions is so Perl. Sometimes, however, it gets a little
-overwhelming. Use named paths if you anticipate that you or someone else will
-ever want to maintain your code.</p>
-
-<h4>
-<a id="explicit" class="anchor" href="#explicit" aria-hidden="true"><span class="octicon octicon-link"></span></a>Explicit</h4>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/update/:id<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>update<span class="pl-pds">"</span></span> );
-
-<span class="pl-c"># Later</span>
-<span class="pl-st">sub</span> <span class="pl-en">update</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$id</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-c"># Do something with $id</span>
-}</pre></div>
-
-<h4>
-<a id="optional" class="anchor" href="#optional" aria-hidden="true"><span class="octicon octicon-link"></span></a>Optional</h4>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/person/?name<span class="pl-pds">"</span></span>, sub {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$name</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-k">return</span> <span class="pl-s1"><span class="pl-pds">"</span>I am <span class="pl-pds">"</span></span> . <span class="pl-vo">$name</span> <span class="pl-sr"><span class="pl-pds">//</span></span> <span class="pl-s1"><span class="pl-pds">"</span>nobody<span class="pl-pds">"</span></span>;
-});</pre></div>
-
-<p>This will handle <code>/person</code>, <code>/person/</code> and <code>/person/jack</code>.</p>
-
-<h4>
-<a id="wildcards" class="anchor" href="#wildcards" aria-hidden="true"><span class="octicon octicon-link"></span></a>Wildcards</h4>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/*article/:id<span class="pl-pds">'</span></span>, <span class="pl-s1"><span class="pl-pds">'</span>Articles::view<span class="pl-pds">'</span></span> );</pre></div>
-
-<p>This will handle <code>/bar/foo/baz/500</code> and send it to <code>MyApp::Articles::view</code>
-with parameters <code>$article</code> equal to <code>bar/foo/baz</code> and <code>$id</code> equal to 500.</p>
-
-<h3>
-<a id="placeholder-restrictions" class="anchor" href="#placeholder-restrictions" aria-hidden="true"><span class="octicon octicon-link"></span></a>Placeholder restrictions</h3>
-
-<p>Paths' named placeholders can be restricted by providing regular expressions.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/user/:id<span class="pl-pds">'</span></span>, {
-    <span class="pl-c1">check</span> =&gt; { <span class="pl-c1">id</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>\d+<span class="pl-pds">'</span></span> },
-    <span class="pl-c1">to</span>    =&gt; <span class="pl-s1"><span class="pl-pds">"</span>Users::get<span class="pl-pds">"</span></span>
-});
-
-<span class="pl-c"># Matches /user/1000, but not /user/abc</span></pre></div>
-
-<h3>
-<a id="placeholder-defaults" class="anchor" href="#placeholder-defaults" aria-hidden="true"><span class="octicon octicon-link"></span></a>Placeholder defaults</h3>
-
-<p>This only applies to optional placeholders, or those prefixed with a question mark.
-If a default value is provided for any of them, it will be used in case the
-placeholder value is missing.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/:id/?other<span class="pl-pds">'</span></span>, <span class="pl-c1">defaults</span> =&gt; { <span class="pl-c1">other</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>info<span class="pl-pds">'</span></span> } );
-
-<span class="pl-c"># GET /100;</span>
-<span class="pl-c"># { id =&gt; 100, other =&gt; 'info' }</span>
-
-<span class="pl-c"># GET /100/delete;</span>
-<span class="pl-c"># { id =&gt; 100, other =&gt; 'delete' }</span></pre></div>
-
-<h3>
-<a id="bridges" class="anchor" href="#bridges" aria-hidden="true"><span class="octicon octicon-link"></span></a>Bridges</h3>
-
-<p>A <em>bridge</em> is a route that has to return a true value in order for the next
-route in line to be processed.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/users<span class="pl-pds">'</span></span>, { <span class="pl-c1">to</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>Users::auth<span class="pl-pds">'</span></span>, <span class="pl-c1">bridge</span> =&gt; 1 } );
-<span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">'</span>/users/:action<span class="pl-pds">'</span></span><span class="pl-k"> =&gt;</span> <span class="pl-s1"><span class="pl-pds">'</span>Users::dispatch<span class="pl-pds">'</span></span> );</pre></div>
-
-<p>See <a href="http://search.cpan.org/perldoc?Kelp::Routes#BRIDGES">"BRIDGES" in Kelp::Routes</a> for more information.</p>
-
-<h3>
-<a id="url-building" class="anchor" href="#url-building" aria-hidden="true"><span class="octicon octicon-link"></span></a>URL building</h3>
-
-<p>Each path can be given a name and later a URL can be built using that name and
-the necessary arguments.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add( <span class="pl-s1"><span class="pl-pds">"</span>/update/:id<span class="pl-pds">"</span></span>, { <span class="pl-c1">name</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>update<span class="pl-pds">'</span></span>, <span class="pl-c1">to</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>User::update<span class="pl-pds">'</span></span> } );
-
-<span class="pl-c"># Later</span>
-
-<span class="pl-s">my</span> <span class="pl-vo">$url</span> = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>route<span class="pl-k">-&gt;</span>url(<span class="pl-s1"><span class="pl-pds">'</span>update<span class="pl-pds">'</span></span>, <span class="pl-c1">id</span> =&gt; 1000); <span class="pl-c"># /update/1000</span></pre></div>
-
-<h3>
-<a id="reblessing-the-app-into-the-controller-class" class="anchor" href="#reblessing-the-app-into-the-controller-class" aria-hidden="true"><span class="octicon octicon-link"></span></a>Reblessing the app into the controller class</h3>
-
-<p>With version 0.9001, Kelp introduces an optional re-blessing of the application
-instance into the controller class. By default, this feature is turned off,
-so each controller method will, by default, receive an instance of the main app.</p>
-
-<p>Default behavior:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># lib/MyApp/Bar.pm</span>
-<span class="pl-k">package</span> <span class="pl-en">MyApp::Bar;</span>
-
-<span class="pl-st">sub</span> <span class="pl-en">action</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;    <span class="pl-c"># Default: $self will be an instance of MyApp</span>
-    ...
-}</pre></div>
-
-<p>Turning on re-blessing is best done in the config of <a href="http://search.cpan.org/perldoc?Kelp::Routes">Kelp::Routes</a>. Once
-turned on, the route dispatcher will re-bless the application instance into the
-controller class, allowing for more traditional OO development. Note, that
-reblessing *may* entail a performance penalty. Our benchmarks show that they
-are quite insignificant.</p>
-
-<p>With re-blessing turned on:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># lib/MyApp/Bar.pm</span>
-<span class="pl-k">package</span> <span class="pl-en">MyApp::Bar;</span>
-<span class="pl-k">use</span> parent <span class="pl-s1"><span class="pl-pds">'</span>MyApp<span class="pl-pds">'</span></span>;
-
-<span class="pl-st">sub</span> <span class="pl-en">action</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;  <span class="pl-c"># Reblessed: $self will be an instance of MyApp::Bar</span>
-    ...
-}</pre></div>
-
-<p>To find out how to turn on re-blessing, see <a href="http://search.cpan.org/perldoc?Kelp::Routes#rebless">"rebless" in Kelp::Routes</a>.</p>
-
-<h2>
-<a id="quick-development-using-kelpless" class="anchor" href="#quick-development-using-kelpless" aria-hidden="true"><span class="octicon octicon-link"></span></a>Quick development using Kelp::Less</h2>
-
-<p>For writing quick experimental web apps and to reduce the boiler plate, one
-could use <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>. In this case all of the code can be put in <code>app.psgi</code>:
-Look up the POD for <code>Kelp::Less</code> for many examples, but to get you started off,
-here is a quick one:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># app.psgi</span>
-<span class="pl-k">use</span> Kelp::Less;
-
-get <span class="pl-s1"><span class="pl-pds">'</span>/api/:user/?action<span class="pl-pds">'</span></span><span class="pl-k"> =&gt;</span> sub {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$user</span>, <span class="pl-vo">$action</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$json</span> = {
-        <span class="pl-c1">success</span> =&gt; \1,
-        <span class="pl-c1">user</span>    =&gt; <span class="pl-vo">$user</span>,
-        <span class="pl-c1">action</span>  =&gt; <span class="pl-vo">$action</span> <span class="pl-sr"><span class="pl-pds">//</span></span> <span class="pl-s1"><span class="pl-pds">'</span>ask<span class="pl-pds">'</span></span>
-    };
-    <span class="pl-k">return</span> <span class="pl-vo">$json</span>;
-};
-
-run;</pre></div>
-
-<h2>
-<a id="adding-middleware" class="anchor" href="#adding-middleware" aria-hidden="true"><span class="octicon octicon-link"></span></a>Adding middleware</h2>
-
-<p>Kelp, being Plack-centric, will let you easily add middleware. There are three
-possible ways to add middleware to your application, and all three ways can be
-used separately or together.</p>
-
-<h3>
-<a id="using-the-configuration" class="anchor" href="#using-the-configuration" aria-hidden="true"><span class="octicon octicon-link"></span></a>Using the configuration</h3>
-
-<p>Adding middleware in your configuration is probably the easiest and best way for
-you. This way you can load different middleware for each running mode, e.g.
-<code>Debug</code> in development only.</p>
-
-<p>Add middleware names to the <code>middleware</code> array in your configuration file and
-the corresponding initializing arguments in the <code>middleware_init</code> hash:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># conf/development.pl</span>
-{
-    <span class="pl-c1">middleware</span>      =&gt; [<span class="pl-s1"><span class="pl-pds">qw/</span>Session Debug<span class="pl-pds">/</span></span>],
-    <span class="pl-c1">middleware_init</span> =&gt; {
-        <span class="pl-c1">Session</span> =&gt; { <span class="pl-c1">store</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>File<span class="pl-pds">'</span></span> }
+    body {
+        width: 100%;
+        margin: 0 auto;
+        min-height: 100%;
+        font-family: Helvetica, sans-serif;
+        font-size: 1.2rem ;
     }
-}</pre></div>
 
-<p>The middleware will be added in the order you specify in the <code>middleware</code>
-array.</p>
-
-<h3>
-<a id="in-apppsgi" class="anchor" href="#in-apppsgi" aria-hidden="true"><span class="octicon octicon-link"></span></a>In <code>app.psgi</code>:</h3>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># app.psgi</span>
-<span class="pl-k">use</span> MyApp;
-<span class="pl-k">use</span> Plack::Builder;
-
-<span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new();
-
-builder {
-    enable <span class="pl-s1"><span class="pl-pds">"</span>Plack::Middleware::ContentLength<span class="pl-pds">"</span></span>;
-    <span class="pl-vo">$app</span><span class="pl-k">-&gt;</span>run;
-};</pre></div>
-
-<h3>
-<a id="by-overriding-the-run-subroutine-in-libmyapppm" class="anchor" href="#by-overriding-the-run-subroutine-in-libmyapppm" aria-hidden="true"><span class="octicon octicon-link"></span></a>By overriding the <a href="#run">"run"</a> subroutine in <code>lib/MyApp.pm</code>:</h3>
-
-<p>Make sure you call <code>SUPER</code> first, and then wrap new middleware around the
-returned app.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># lib/MyApp.pm</span>
-<span class="pl-st">sub</span> <span class="pl-en">run</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$app</span> = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>SUPER::run(<span class="pl-vo">@_</span>);
-    Plack::Middleware::ContentLength<span class="pl-k">-&gt;</span>wrap(<span class="pl-vo">$app</span>);
-}</pre></div>
-
-<p>Note that any middleware defined in your config file will be added first.</p>
-
-<h2>
-<a id="deploying" class="anchor" href="#deploying" aria-hidden="true"><span class="octicon octicon-link"></span></a>Deploying</h2>
-
-<p>Deploying a Kelp application is done the same way any other Plack application is
-deployed:</p>
-
-<pre lang="none"><code>&gt; plackup -E deployment -s Starman app.psgi
-</code></pre>
-
-<h2>
-<a id="testing" class="anchor" href="#testing" aria-hidden="true"><span class="octicon octicon-link"></span></a>Testing</h2>
-
-<p>Kelp provides a test class called <code>Kelp::Test</code>. It is object oriented, and all
-methods return the <code>Kelp::Test</code> object, so they can be chained together.
-Testing is done by sending HTTP requests to an already built application and
-analyzing the response. Therefore, each test usually begins with the
-<a href="http://search.cpan.org/perldoc?Kelp::Test#request">"request" in Kelp::Test</a> method, which takes a single <a href="http://search.cpan.org/perldoc?HTTP::Request">HTTP::Request</a> parameter.
-It sends the request to the web app and saves the response as an
-<a href="http://search.cpan.org/perldoc?HTTP::Response">HTTP::Response</a> object.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># file t/test.t</span>
-<span class="pl-k">use</span> MyApp;
-<span class="pl-k">use</span> Kelp::Test;
-<span class="pl-k">use</span> Test::More;
-<span class="pl-k">use</span> HTTP::Request::Common;
-
-<span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new( <span class="pl-c1">mode</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>test<span class="pl-pds">'</span></span> );
-<span class="pl-s">my</span> <span class="pl-vo">$t</span> = Kelp::Test<span class="pl-k">-&gt;</span>new( <span class="pl-c1">app</span> =&gt; <span class="pl-vo">$app</span> );
-
-<span class="pl-vo">$t</span><span class="pl-k">-&gt;</span>request( GET <span class="pl-s1"><span class="pl-pds">'</span>/path<span class="pl-pds">'</span></span> )
-  <span class="pl-k">-&gt;</span>code_is(200)
-  <span class="pl-k">-&gt;</span>content_is(<span class="pl-s1"><span class="pl-pds">"</span>It works<span class="pl-pds">"</span></span>);
-
-<span class="pl-vo">$t</span><span class="pl-k">-&gt;</span>request( POST <span class="pl-s1"><span class="pl-pds">'</span>/api<span class="pl-pds">'</span></span> )
-  <span class="pl-k">-&gt;</span>json_cmp({<span class="pl-c1">auth</span> =&gt; 1});
-
-done_testing;</pre></div>
-
-<p>What is happening here?</p>
-
-<ul>
-<li>First, we create an instance of the web application class, which we have
-previously built and placed in the <code>lib/</code> folder. We set the mode of the app to
-<code>test</code>, so that file <code>conf/test.pl</code> overrides the main configuration.
-The test configuration can contain anything you see fit. Perhaps you want to
-disable certain modules, or maybe you want to make DBI connect to a different
-database.</li>
-<li>Second, we create an instance of the <code>Kelp::Test</code> class and tell it that it
-will perform all tests using our <code>$app</code> instance.</li>
-<li>At this point we are ready to send requests to the app via the
-<a href="http://search.cpan.org/perldoc?Kelp::Test#request">request</a> method. It takes only one argument, an
-HTTP::Request object. It is very convenient to use the <a href="http://search.cpan.org/perldoc?HTTP::Request::Common">HTTP::Request::Common</a>
-module here, because you can create common requests using abridged syntax,
-i.e. <code>GET</code>, <code>POST</code>, etc.  The line <code>$t-&gt;request( GET '/path' )</code> fist
-creates a HTTP::Request GET object, and then passes it to the <code>request</code> method.</li>
-<li>After we send the request, we can test the response using any of the <code>Test::</code>
-modules, or via the methods provided by <a href="http://search.cpan.org/perldoc?Kelp::Test">Kelp::Test</a>.
-In the above example, we test if we got a code 200 back from <code>/path</code> and if the
-returned content was <code>It works</code>.</li>
-</ul>
-
-<p>Run the rest as usual, using <code>prove</code>:</p>
-
-<pre lang="none"><code>&gt; prove -l t/test.t
-</code></pre>
-
-<p>Take a look at the <a href="http://search.cpan.org/perldoc?Kelp::Test">Kelp::Test</a> for details and more examples.</p>
-
-<h2>
-<a id="building-an-http-response" class="anchor" href="#building-an-http-response" aria-hidden="true"><span class="octicon octicon-link"></span></a>Building an HTTP response</h2>
-
-<p>Kelp contains an elegant module, called <a href="http://search.cpan.org/perldoc?Kelp::Response">Kelp::Response</a>, which extends
-<code>Plack::Response</code> with several useful methods. Most methods return <code>$self</code>
-after they do the required job.
-For the sake of the examples below, let's assume that all of the code is located
-inside a route definition.</p>
-
-<h3>
-<a id="automatic-content-type" class="anchor" href="#automatic-content-type" aria-hidden="true"><span class="octicon octicon-link"></span></a>Automatic content type</h3>
-
-<p>Your routes don't always have to set the <code>response</code> object. You could just
-return a simple scalar value or a reference to a hash, array or anything that
-can be converted to JSON.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># Content-type automatically set to "text/html"</span>
-<span class="pl-st">sub</span> <span class="pl-en">text_route</span> {
-    <span class="pl-k">return</span> <span class="pl-s1"><span class="pl-pds">"</span>There, there ...<span class="pl-pds">"</span></span>;
-}
-
-<span class="pl-c"># Content-type automatically set to "application/json"</span>
-<span class="pl-st">sub</span> <span class="pl-en">json_route</span> {
-    <span class="pl-k">return</span> { <span class="pl-c1">error</span> =&gt; 1,  <span class="pl-c1">message</span> =&gt; <span class="pl-s1"><span class="pl-pds">"</span>Fail<span class="pl-pds">"</span></span> };
-}</pre></div>
-
-<h3>
-<a id="rendering-text" class="anchor" href="#rendering-text" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rendering text</h3>
-
-<div class="highlight highlight-perl"><pre><span class="pl-c"># Render simple text</span>
-<span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>text<span class="pl-k">-&gt;</span>render(<span class="pl-s1"><span class="pl-pds">"</span>It works!<span class="pl-pds">"</span></span>);</pre></div>
-
-<h3>
-<a id="rendering-html" class="anchor" href="#rendering-html" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rendering HTML</h3>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>html<span class="pl-k">-&gt;</span>render(<span class="pl-s1"><span class="pl-pds">"</span>&lt;h1&gt;It works!&lt;/h1&gt;<span class="pl-pds">"</span></span>);</pre></div>
-
-<h3>
-<a id="custom-content-type" class="anchor" href="#custom-content-type" aria-hidden="true"><span class="octicon octicon-link"></span></a>Custom content type</h3>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>set_content_type(<span class="pl-s1"><span class="pl-pds">'</span>image/png<span class="pl-pds">'</span></span>);</pre></div>
-
-<h3>
-<a id="return-404-or-500-errors" class="anchor" href="#return-404-or-500-errors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Return 404 or 500 errors</h3>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">some_route</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-k">if</span> (<span class="pl-vo">$missing</span>) {
-        <span class="pl-k">return</span> <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>render_404;
+    b {
+        color: #86df51;
     }
-    <span class="pl-k">if</span> (<span class="pl-vo">$broken</span>) {
-        <span class="pl-k">return</span> <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>render_500;
+
+    code {
+        font-family: Courier New, monospace;
+        font-size: 1.1rem;
+        color: #999;
     }
-}</pre></div>
 
-<h3>
-<a id="templates" class="anchor" href="#templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Templates</h3>
+    #download img {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        z-index: 50;
+        width: 15%;
+    }
 
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">hello</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$name</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>template( <span class="pl-s1"><span class="pl-pds">'</span>hello.tt<span class="pl-pds">'</span></span>, { <span class="pl-c1">name</span> =&gt; <span class="pl-vo">$name</span> } );
-}</pre></div>
+    aside {
+        position: relative;
+        height: 100vh;
+        width: 100%;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 60%;
+        z-index: 25;
+    }
 
-<p>The above example will render the contents of <code>hello.tt</code>, and it will set the
-content-type to <code>text/html</code>. To set a different content-type, use
-<code>set_content_type</code> or any of its aliases:</p>
+    aside img {
+        display: block;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: min(100%, 100vh);
+    }
 
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">hello_txt</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$name</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>text<span class="pl-k">-&gt;</span>template( <span class="pl-s1"><span class="pl-pds">'</span>hello_txt.tt<span class="pl-pds">'</span></span>, { <span class="pl-c1">name</span> =&gt; <span class="pl-vo">$name</span> } );
-}</pre></div>
+    article {
+        position: relative;
+        color: white;
+        background: #082c26;
+        background: linear-gradient(90deg, #082c26 0%, #156457 100%);
+        padding: 0 20%;
+        line-height: 1.4;
+        padding-top: 50px;
+        z-index: 100;
+    }
 
-<h3>
-<a id="headers" class="anchor" href="#headers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Headers</h3>
+    p {
+        text-align: justify;
+        padding: 50px;
+        padding-top: 0;
+        margin: 0;
+    }
 
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>set_header( <span class="pl-s1"><span class="pl-pds">"</span>X-Framework<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>Kelp<span class="pl-pds">"</span></span> )<span class="pl-k">-&gt;</span>render( { <span class="pl-c1">success</span> =&gt; \1 } );</pre></div>
+    @media only screen and (max-width: 768px) {
+        aside {
+            background-size: 80%;
+        }
 
-<h3>
-<a id="serving-static-files" class="anchor" href="#serving-static-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Serving static files</h3>
+        aside img {
+            width: 80%
+        }
 
-<p>If you want to serve static pages, you can use the <a href="http://search.cpan.org/perldoc?Plack::Middleware::Static">Plack::Middleware::Static</a>
-middleware that comes with Plack. Here is an example configuration that serves
-files in your <code>public</code> folder (under the Kelp root folder) from URLs that
-begin with <code>/public</code>:</p>
+        article {
+            padding: 0 5%;
+            padding-top: 20px;
+        }
 
-<div class="highlight highlight-perl"><pre><span class="pl-c"># conf/config.pl</span>
-{
-    <span class="pl-c1">middleware</span>      =&gt; [<span class="pl-s1"><span class="pl-pds">qw/</span>Static<span class="pl-pds">/</span></span>],
-    <span class="pl-c1">middleware_init</span> =&gt; {
-        <span class="pl-c1">Static</span> =&gt; {
-            <span class="pl-c1">path</span> =&gt; <span class="pl-sr"><span class="pl-pds"><span class="pl-s3">qr</span>{</span>^/public/<span class="pl-pds">}</span></span>,
-            <span class="pl-c1">root</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>.<span class="pl-pds">'</span></span>,
+        p {
+            padding: 20px;
+            padding-top: 0;
+        }
+
+        #download img {
+            width: 30%;
         }
     }
-};</pre></div>
 
-<h3>
-<a id="uploading-files" class="anchor" href="#uploading-files" aria-hidden="true"><span class="octicon octicon-link"></span></a>Uploading files</h3>
+    @media only screen and (max-width: 1200px) {
+        article {
+            padding: 0 10%;
+            padding-top: 25px;
+        }
 
-<p>File uploads are handled by <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, which inherits Plack::Request
-and has its <code>uploads|Plack::Request/uploads</code> property. The uploads property returns a
-reference to a hash containing all uploads.</p>
+        p {
+            padding: 25px;
+            padding-top: 0;
+        }
 
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">upload</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$uploads</span>  = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>req<span class="pl-k">-&gt;</span>uploads;
-
-    <span class="pl-c"># Now $uploads is a hashref to all uploads</span>
-    ...
-}</pre></div>
-
-<p>For <a href="http://search.cpan.org/perldoc?Kelp::Less">Kelp::Less</a>, then you can use the <code>req</code> reserved word:</p>
-
-<div class="highlight highlight-perl"><pre>get <span class="pl-s1"><span class="pl-pds">'</span>/upload<span class="pl-pds">'</span></span><span class="pl-k"> =&gt;</span> sub {
-    <span class="pl-s">my</span> <span class="pl-vo">$uploads</span> = req<span class="pl-k">-&gt;</span>uploads;
-};</pre></div>
-
-<h3>
-<a id="delayed-responses" class="anchor" href="#delayed-responses" aria-hidden="true"><span class="octicon octicon-link"></span></a>Delayed responses</h3>
-
-<p>To send a delayed response, have your route return a subroutine.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">delayed</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-k">return</span> sub {
-        <span class="pl-s">my</span> <span class="pl-vo">$responder</span> = <span class="pl-s3">shift</span>;
-        <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>code(200);
-        <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>text<span class="pl-k">-&gt;</span>body(<span class="pl-s1"><span class="pl-pds">"</span>Better late than never.<span class="pl-pds">"</span></span>);
-        <span class="pl-vo">$responder</span><span class="pl-k">-&gt;</span>(<span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>finalize);
-    };
-}</pre></div>
-
-<p>See the <a href="http://search.cpan.org/perldoc?PSGI#Delayed-Response-and-Streaming-Body">PSGI</a> pod for more
-information and examples.</p>
-
-<h2>
-<a id="pluggable-modules" class="anchor" href="#pluggable-modules" aria-hidden="true"><span class="octicon octicon-link"></span></a>Pluggable modules</h2>
-
-<p>Kelp can be extended using custom <em>modules</em>. Each new module must be a subclass
-of the <code>Kelp::Module</code> namespace. Modules' job is to initialize and register new
-methods into the web application class. The following is the full code of the
-<a href="http://search.cpan.org/perldoc?Kelp::Module::JSON">Kelp::Module::JSON</a> for example:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">Kelp::Module::JSON;</span>
-
-<span class="pl-k">use</span> Kelp::Base <span class="pl-s1"><span class="pl-pds">'</span>Kelp::Module<span class="pl-pds">'</span></span>;
-<span class="pl-k">use</span> JSON;
-
-<span class="pl-st">sub</span> <span class="pl-en">build</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">%args</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$json</span> = JSON<span class="pl-k">-&gt;</span>new;
-    <span class="pl-vo">$json</span><span class="pl-k">-&gt;</span>property( <span class="pl-vo">$_</span><span class="pl-k"> =&gt;</span> <span class="pl-vo">$args</span>{<span class="pl-vo">$_</span>} ) <span class="pl-k">for</span> <span class="pl-s3">keys</span> <span class="pl-vo">%args</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>register( <span class="pl-c1">json</span> =&gt; <span class="pl-vo">$json</span> );
-}
-
-1;</pre></div>
-
-<p>What is happening here?</p>
-
-<ul>
-<li>First we create a class <code>Kelp::Module::JSON</code> which inherits <code>Kelp::Module</code>.</li>
-<li>Then, we override the <code>build</code> method (of <code>Kelp::Module</code>), create a new JSON
-object and register it into the web application via the <code>register</code> method.</li>
-</ul>
-
-<p>If we instruct our web application to load the <code>JSON</code> module, it will have a
-new method <code>json</code> which will be a link to the <code>JSON</code> object initialized in the
-module.</p>
-
-<p>See more exampled and POD at <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a>.</p>
-
-<h3>
-<a id="how-to-load-modules-using-the-config" class="anchor" href="#how-to-load-modules-using-the-config" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to load modules using the config</h3>
-
-<p>There are two modules that are <strong>always</strong> loaded by each application instance.
-Those are <code>Config</code> and <code>Routes</code>. The reason behind this is that each and every
-application always needs a router and configuration.
-All other modules must be loaded either using the <a href="#load_module">"load_module"</a> method, or
-using the <code>modules</code> key in the configuration. The default configuration already
-loads these modules: <code>Template</code>, <code>Logger</code> and <code>JSON</code>. Your configuration can
-remove some and/or add others. The configuration key <code>modules_init</code> may contain
-hashes with initialization arguments. See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for configuration
-examples.</p>
-
-<h1>
-<a id="attributes" class="anchor" href="#attributes" aria-hidden="true"><span class="octicon octicon-link"></span></a>ATTRIBUTES</h1>
-
-<h2>
-<a id="hostname" class="anchor" href="#hostname" aria-hidden="true"><span class="octicon octicon-link"></span></a>hostname</h2>
-
-<p>Gets the current hostname.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">some_route</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-k">if</span> ( <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>hostname <span class="pl-s3">eq</span> <span class="pl-s1"><span class="pl-pds">'</span>prod-host<span class="pl-pds">'</span></span> ) {
-        ...
+        #download img {
+            width: 20%;
+        }
     }
-}</pre></div>
 
-<h2>
-<a id="mode" class="anchor" href="#mode" aria-hidden="true"><span class="octicon octicon-link"></span></a>mode</h2>
+</style>
+<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/sgnix/kelp/master/art/logo.png">
+</head>
+
+<body>
+    <a id="download" href="https://metacpan.org/dist/Kelp">
+        <img src="images/metacpan.png" alt="Get from metacpan">
+    </a>
+    <aside style='background-image: url("https://raw.githubusercontent.com/sgnix/kelp/master/art/logo_wide.png")'>
+    </aside>
+
+    <article>
+    <p>
+    Welcome to <a href="https://metacpan.org/dist/Kelp">Kelp</a>, a lean Perl
+    web framework designed to make web development simple, efficient, and
+    powerful. Whether you're building a small personal project or a complex
+    application, Kelp <b>delivers the tools</b> required to turn your idea into
+    a fully functional website. At the same time, its minimalist design and
+    modular architecture results in <b>faster performance</b> and
+    <b>outstanding extensibility</b>. With Kelp, you can focus on writing
+    clean, maintainable code without the bloat of unnecessary features. Our
+    intuitive routing system, flexible configuration options, and seamless
+    integration with the Plack ecosystem <b>make developing with Perl a
+    pleasurable experience</b>.
+    </p>
+
+    <p>
+    Much like Perl itself, Kelp tries to move forward <b>without breaking
+    backward compatibility</b>. Recently released major version 2 of the
+    framework brought an astonishing number of <a
+    href="https://metacpan.org/dist/Kelp/changes">new features, bug fixes and
+    performance improvements</a> without causing any major disturbances to
+    existing applications. It values your time as a developer and lets you sit
+    back and enjoy a functional and stable website for <b>years</b>.
+    </p>
+
+    </article>
+
+    <aside style='background-image: url("")'>
+        <a href="example.psgi" title="Get the code for this example">
+            <img alt="API example" src="images/carbon.png">
+        </a>
+    </aside>
+
+    <article>
+    <p>
+    What makes Kelp different from the other web frameworks? From all the fine
+    <a href="https://metacpan.org/search?size=20&q=web+framework">web
+    frameworks in the Perl ecosystem</a>, the majority bring <b>their own
+    deployment code</b> and aim to write <b>their own processing
+    mechanisms</b>. Kelp, on the other hand, is <b>heavily Plack-centric</b>.
+    It uses Plack as its foundation layer, and it <b>builds the web framework
+    on top of it</b>. <code>Kelp::Request</code> is an extension of
+    <code>Plack::Request</code>, <code>Kelp::Response</code> is an extension of
+    <code>Plack::Response</code> and the application can be run natively
+    through <code>plackup</code>.
+    </p>
+
+    <p>
+    This approach of extending current CPAN code puts <b>well tested tools</b> in
+    the hands of the application developer, while keeping familiar syntax and
+    work flow. It also creates less friction when running in a pure Plack
+    environment, making Kelp <b>one of the fastest Perl web frameworks</b>.
+    </p>
+
+    <p>
+    Besides Plack itself, Kelp uses <a
+    href="https://cpandeps.grinnz.com/?dist=Kelp&phase=runtime&style=topdown">only
+    a few</a> popular, trusted CPAN modules for its internals. At the same
+    time, its core does not deliver features you might not need. Solutions to
+    many common problems <b>already exist</b> either as Plack application or
+    middleware, or as a Kelp third party module. The framework does its best to
+    keep a lean profile and a small footprint, and it's completely <b>object
+    manager agnostic</b>.
+    </p>
+
+    <p>
+    The Kelp project is distributed <b>through CPAN</b>. To install it, you can
+    use your local CPAN client - <code>cpanm Kelp</code> - or download and
+    build a tarball from metacpan. To get started, read <a
+    href="https://metacpan.org/pod/Kelp::Manual" title="Kelp::Manual on
+    metacpan">our extensive manual</a>. If you have any questions, we're
+    <b>happy to help</b> - you can either <a
+    href="https://github.com/sgnix/kelp">create a github issue</a> or <a
+    href="https://groups.google.com/g/perl-kelp">ask on our google group</a>.
+    </p>
+    </article>
+
+    <aside style='background-image: url("images/fin.png")'></aside>
+
+
+</body>
 
-<p>Sets or gets the current mode. The mode is important for the app to know what
-configuration file to merge into the main configuration. See
-<a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new( <span class="pl-c1">mode</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>development<span class="pl-pds">'</span></span> );
-<span class="pl-c"># conf/config.pl and conf/development.pl are merged with priority</span>
-<span class="pl-c"># given to the second one.</span></pre></div>
-
-<h2>
-<a id="config_module" class="anchor" href="#config_module" aria-hidden="true"><span class="octicon octicon-link"></span></a>config_module</h2>
-
-<p>Sets of gets the class of the configuration module to be loaded on startup. The
-default value is <code>Config</code>, which will cause the <code>Kelp::Module::Config</code> to get
-loaded. See the documentation for <a href="http://search.cpan.org/perldoc?Kelp::Module::Config">Kelp::Module::Config</a> for more information
-and for an example of how to create and use other config modules.</p>
-
-<h2>
-<a id="loaded_modules" class="anchor" href="#loaded_modules" aria-hidden="true"><span class="octicon octicon-link"></span></a>loaded_modules</h2>
-
-<p>A hashref containing the names and instances of all loaded modules. For example,
-if you have these two modules loaded: Template and JSON, then a dump of
-the <code>loaded_modules</code> hash will look like this:</p>
-
-<div class="highlight highlight-perl"><pre>{
-    <span class="pl-c1">Template</span> =&gt; Kelp::Module::Template=HASH(0x208f6e8),
-    <span class="pl-c1">JSON</span>     =&gt; Kelp::Module::JSON=HASH(0x209d454)
-}</pre></div>
-
-<p>This can come handy if your module does more than just registering a new method
-into the application. Then, you can use its object instance to do access that
-additional functionality.</p>
-
-<pre><code></code></pre>
-<h2>
-<a id="path" class="anchor" href="#path" aria-hidden="true"><span class="octicon octicon-link"></span></a>path</h2>
-
-<p>Gets the current path of the application. That would be the path to <code>app.psgi</code></p>
-
-<h2>
-<a id="name" class="anchor" href="#name" aria-hidden="true"><span class="octicon octicon-link"></span></a>name</h2>
-
-<p>Gets or sets the name of the application. If not set, the name of the main
-class will be used.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-s">my</span> <span class="pl-vo">$app</span> = MyApp<span class="pl-k">-&gt;</span>new( <span class="pl-c1">name</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>Twittar<span class="pl-pds">'</span></span> );</pre></div>
-
-<h2>
-<a id="charset" class="anchor" href="#charset" aria-hidden="true"><span class="octicon octicon-link"></span></a>charset</h2>
-
-<p>Sets of gets the encoding charset of the app. It will be <code>UTF-8</code>, if not set to
-anything else. The charset could also be changed in the config files.</p>
-
-<h2>
-<a id="long_error" class="anchor" href="#long_error" aria-hidden="true"><span class="octicon octicon-link"></span></a>long_error</h2>
-
-<p>When a route dies, Kelp will by default display a short error message. Set this
-attribute to a true value, if you need to see a full stack trace of the error.
-The <code>KELP_LONG_ERROR</code> environment variable can also set this attribute.</p>
-
-<h2>
-<a id="req" class="anchor" href="#req" aria-hidden="true"><span class="octicon octicon-link"></span></a>req</h2>
-
-<p>This attribute only makes sense if called within a route definition. It will
-contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a> instance.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">some_route</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-k">if</span> ( <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>req<span class="pl-k">-&gt;</span>is_json ) {
-        ...
-    }
-}</pre></div>
-
-<h2>
-<a id="res" class="anchor" href="#res" aria-hidden="true"><span class="octicon octicon-link"></span></a>res</h2>
-
-<p>This attribute only makes sense if called within a route definition. It will
-contain a reference to the current <a href="http://search.cpan.org/perldoc?Kelp::Response">Kelp::Response</a> instance.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">some_route</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>json<span class="pl-k">-&gt;</span>render( { <span class="pl-c1">success</span> =&gt; 1 } );
-}</pre></div>
-
-<h1>
-<a id="methods" class="anchor" href="#methods" aria-hidden="true"><span class="octicon octicon-link"></span></a>METHODS</h1>
-
-<h2>
-<a id="build" class="anchor" href="#build" aria-hidden="true"><span class="octicon octicon-link"></span></a>build</h2>
-
-<p>On it's own the <code>build</code> method doesn't do anything. It is called by the
-constructor, so it can be overridden to add route destinations and
-initializations.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-
-<span class="pl-st">sub</span> <span class="pl-en">build</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$r</span> = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>routes;
-
-    <span class="pl-c"># Load some modules</span>
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>load_module(<span class="pl-s1"><span class="pl-pds">"</span>MongoDB<span class="pl-pds">"</span></span>);
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>load_module(<span class="pl-s1"><span class="pl-pds">"</span>Validate<span class="pl-pds">"</span></span>);
-
-    <span class="pl-c"># Add all route destinations</span>
-    <span class="pl-vo">$r</span><span class="pl-k">-&gt;</span>add(<span class="pl-s1"><span class="pl-pds">"</span>/one<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>one<span class="pl-pds">"</span></span>);
-    ...
-
-}</pre></div>
-
-<h2>
-<a id="load_module" class="anchor" href="#load_module" aria-hidden="true"><span class="octicon octicon-link"></span></a>load_module</h2>
-
-<p><code>load_module($name, %options)</code></p>
-
-<p>Used to load a module. All modules must be under the <code>Kelp::Module::</code>
-namespace.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>load_module(<span class="pl-s1"><span class="pl-pds">"</span>Redis<span class="pl-pds">"</span></span>, <span class="pl-c1">server</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>127.0.0.1<span class="pl-pds">'</span></span>);
-<span class="pl-c"># Will look for and load Kelp::Module::Redis</span></pre></div>
-
-<p>Options for the module may be specified after its name, or in the
-<code>modules_init</code> hash in the config. The precedence is given to the
-inline options.
-See <a href="http://search.cpan.org/perldoc?Kelp::Module">Kelp::Module</a> for more information on making and using modules.</p>
-
-<h2>
-<a id="request" class="anchor" href="#request" aria-hidden="true"><span class="octicon octicon-link"></span></a>request</h2>
-
-<p>This method is used to create the request object for each HTTP request. It
-returns an instance of <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a>, initialized with the current request's
-environment. You can override this method to use a custom request module.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-<span class="pl-k">use</span> MyApp::Request;
-
-<span class="pl-st">sub</span> <span class="pl-en">request</span> {
-    <span class="pl-s">my</span> ( <span class="pl-vo">$self</span>, <span class="pl-vo">$env</span> ) = <span class="pl-vo">@_</span>;
-    <span class="pl-k">return</span> MyApp::Requst<span class="pl-k">-&gt;</span>new( <span class="pl-c1">app</span> =&gt; <span class="pl-vo">$app</span>, <span class="pl-c1">env</span> =&gt; <span class="pl-vo">$env</span> );
-}
-
-<span class="pl-c"># Now each request will be handled by MyApp::Request</span></pre></div>
-
-<h2>
-<a id="before_finalize" class="anchor" href="#before_finalize" aria-hidden="true"><span class="octicon octicon-link"></span></a>before_finalize</h2>
-
-<p>Override this method, to modify the response object just before it gets
-finalized.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-k">package</span> <span class="pl-en">MyApp;</span>
-
-<span class="pl-st">sub</span> <span class="pl-en">before_finalize</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>set_header(<span class="pl-s1"><span class="pl-pds">"</span>X-App-Name<span class="pl-pds">"</span></span>, <span class="pl-s1"><span class="pl-pds">"</span>MyApp<span class="pl-pds">"</span></span>);
-}
-
-...</pre></div>
-
-<p>The above is an example of how to insert a custom header into the response of
-every route.</p>
-
-<h2>
-<a id="response" class="anchor" href="#response" aria-hidden="true"><span class="octicon octicon-link"></span></a>response</h2>
-
-<p>This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is <a href="http://search.cpan.org/perldoc?Kelp::Response">Kelp::Response</a>. Much like <a href="#request">"request"</a>, the
-response can also be overridden to use a custom response object.</p>
-
-<h2>
-<a id="run" class="anchor" href="#run" aria-hidden="true"><span class="octicon octicon-link"></span></a>run</h2>
-
-<p>This method builds and returns the PSGI app. You can override it in order to
-include middleware. See <a href="#Adding%20middleware">"Adding middleware"</a> for an example.</p>
-
-<h2>
-<a id="param" class="anchor" href="#param" aria-hidden="true"><span class="octicon octicon-link"></span></a>param</h2>
-
-<p>A shortcut to <code>$self-&gt;req-&gt;param</code>:</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">some_route</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-k">if</span> ( <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>param(<span class="pl-s1"><span class="pl-pds">'</span>age<span class="pl-pds">'</span></span>) &gt; 18 ) {
-        <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>can_watch_south_path(1);
-    }
-}</pre></div>
-
-<p>See <a href="http://search.cpan.org/perldoc?Kelp::Request">Kelp::Request</a> for more information and examples.</p>
-
-<h2>
-<a id="session" class="anchor" href="#session" aria-hidden="true"><span class="octicon octicon-link"></span></a>session</h2>
-
-<p>A shortcut to <code>$self-&gt;req-&gt;session</code>. Take a look at <a href="http://search.cpan.org/perldoc?Kelp::Request#session">"session" in Kelp::Request</a>
-for more information and examples.</p>
-
-<h2>
-<a id="stash" class="anchor" href="#stash" aria-hidden="true"><span class="octicon octicon-link"></span></a>stash</h2>
-
-<p>Provides safe access to <code>$self-&gt;req-&gt;stash</code>. When called without
-arguments, it will return the stash hash. If called with a single argument, it
-will return the value of the corresponding key in the stash.
-See <a href="http://search.cpan.org/perldoc?Kelp::Request#stash">"stash" in Kelp::Request</a> for more information and examples.</p>
-
-<h2>
-<a id="named" class="anchor" href="#named" aria-hidden="true"><span class="octicon octicon-link"></span></a>named</h2>
-
-<p>Provides safe access to <code>$self-&gt;req-&gt;named</code>. When called without
-arguments, it will return the named hash. If called with a single argument, it
-will return the value of the corresponding key in the named hash.
-See <a href="http://search.cpan.org/perldoc?Kelp::Request#named">"named" in Kelp::Request</a> for more information and examples.</p>
-
-<h2>
-<a id="url_for" class="anchor" href="#url_for" aria-hidden="true"><span class="octicon octicon-link"></span></a>url_for</h2>
-
-<p>A safe shortcut to <code>$self-&gt;routes-&gt;url</code>. Builds a URL from path and
-arguments.</p>
-
-<div class="highlight highlight-perl"><pre><span class="pl-st">sub</span> <span class="pl-en">build</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>routes<span class="pl-k">-&gt;</span>add(<span class="pl-s1"><span class="pl-pds">"</span>/:name/:id<span class="pl-pds">"</span></span>, { <span class="pl-c1">name</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>, <span class="pl-c1">to</span> =&gt; sub {
-        ...
-    }});
-}
-
-<span class="pl-st">sub</span> <span class="pl-en">check</span> {
-    <span class="pl-s">my</span> <span class="pl-vo">$self</span> = <span class="pl-s3">shift</span>;
-    <span class="pl-s">my</span> <span class="pl-vo">$url_for_name</span> = <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>url_for(<span class="pl-s1"><span class="pl-pds">'</span>name<span class="pl-pds">'</span></span>, <span class="pl-c1">name</span> =&gt; <span class="pl-s1"><span class="pl-pds">'</span>jake<span class="pl-pds">'</span></span>, <span class="pl-c1">id</span> =&gt; 1003);
-    <span class="pl-vo">$self</span><span class="pl-k">-&gt;</span>res<span class="pl-k">-&gt;</span>redirect_to( <span class="pl-vo">$url_for_name</span> );
-}</pre></div>
-
-<h1>
-<a id="support" class="anchor" href="#support" aria-hidden="true"><span class="octicon octicon-link"></span></a>SUPPORT</h1>
-
-<ul>
-<li>GitHub: <a href="https://github.com/naturalist/kelp">https://github.com/naturalist/kelp</a>
-</li>
-<li>Mailing list: <a href="https://groups.google.com/forum/?fromgroups%5C#!forum/perl-kelp">https://groups.google.com/forum/?fromgroups\#!forum/perl-kelp</a>
-</li>
-</ul>
-
-<h1>
-<a id="author" class="anchor" href="#author" aria-hidden="true"><span class="octicon octicon-link"></span></a>AUTHOR</h1>
-
-<p>Stefan Geneshky - minimal  cpan.org</p>
-
-<h1>
-<a id="contributors" class="anchor" href="#contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONTRIBUTORS</h1>
-
-<p>Ruslan Zakirov</p>
-
-<p>Julio Fraire</p>
-
-<p>Maurice Aubrey</p>
-
-<p>David Steinbrunner</p>
-
-<p>Gurunandan Bhat</p>
-
-<h1>
-<a id="license" class="anchor" href="#license" aria-hidden="true"><span class="octicon octicon-link"></span></a>LICENSE</h1>
-
-<p>This module and all the modules in this package are governed by the same license
-as Perl itself.</p>
-      </section>
-
-    </div>
-    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
-    
-  </body>
 </html>
+
