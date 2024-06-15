@@ -12,7 +12,7 @@ use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
 
-our $VERSION = '2.00';
+our $VERSION = '2.01';
 
 # Basic attributes
 attr -host => hostname;
@@ -383,11 +383,65 @@ Kelp is a light, modular web framework built on top of Plack.
 
 This document lists all the methods and attributes available in the main
 instance of a Kelp application, passed as a first argument to route handling
-routines.
+routines. If you're just getting started, you may be more interested in the
+following documentation pages:
 
 See L<Kelp::Manual> for a complete reference.
 
 See L<Kelp::Manual::Cookbook> for solutions to common problems.
+
+=head1 REASONS TO USE KELP
+
+=over
+
+=item
+
+B<Plack ecosystem>. Kelp isn't just compatible with L<Plack>, it's built on top
+of it. Your application can be supported by a collection of already available Plack
+components.
+
+=item
+
+B<Advanced Routing>. Create intricate, yet simple ways to capture HTTP requests
+and route them to their designated code. Use explicit and optional named
+placeholders, wildcards, or just regular expressions.
+
+=item
+
+B<Flexible Configuration>. Use different configuration file for each
+environment, e.g. development, deployment, etc. Merge a temporary configuration
+into your current one for testing and debugging purposes.
+
+=item
+
+B<Enhanced Logging>. Log messages at different levels of emergency. Log to a
+file, screen, or anything supported by L<Log::Dispatch>.
+
+=item
+
+B<Powerful Rendering>. Use the built-in auto-rendering logic, or the template
+module of your choice to return rich text, html and JSON responses.
+
+=item
+
+B<JSON encoder/decoder>. Kelp can handle JSON-formatted requests and responses
+automatically, making working with JSON much more enjoyable. On top of that, it
+uses L<JSON::MaybeXS> to choose the best (fastest, most secure) backend
+available.
+
+=item
+
+B<Extendable Core>. Kelp has straightforward code and uses pluggable modules
+for everything. This allows anyone to extend it or add a module for a custom
+interface. Writing Kelp modules is easy.
+
+=item
+
+B<Sleek Testing>. Kelp takes Plack::Test and wraps it in an object oriented
+class of convenience methods. Testing is done via sending requests to your
+routes, then analyzing the response.
+
+=back
 
 =head1 ATTRIBUTES
 

@@ -1,8 +1,25 @@
-# Kelp
-A web framework light, yet rich in nutrients.
+<div align="center" width="100%">
+    <p><img width="80%" src="art/logo_wide.png" alt="logo"></p>
+    <p><b>A web framework light, yet rich in nutrients</b></p>
+</div>
 
-## Code and documentation
-[Kelp on CPAN](https://metacpan.org/release/Kelp)
+Kelp is a Perl web framework focused on Plack application toolkit. It's lean,
+fast and extensible.
+
+
+## Installation
+Kelp is [distributed through CPAN](https://metacpan.org/release/Kelp). It can
+be installed through a local CPAN client, for example:
+
+```sh
+cpanm Kelp
+```
+
+## Documentation
+The Kelp manual can be viewed either online on
+[metacpan](https://metacpan.org/pod/Kelp::Manual) or offline by
+running a `perldoc Kelp::Manual` command. For detailed information, consult
+documentation pages for specific parts of Kelp.
 
 ## Bugs and feature requests
 Please use the Github's issue tracker to file both bugs and feature requests.
@@ -44,4 +61,9 @@ Benjamin Hengst (notbenh)
 Nikolay Mishin (@mishin)
 
 Bartosz Jarzyna (bbrtj)
+
+## License
+
+This module and all the modules in this package are governed by the same license
+as Perl itself.
 

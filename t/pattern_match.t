@@ -149,11 +149,12 @@ _match(
     '/r/*',
     yes => {
         '/r/a'     => {},
+        '/r/a/b'  => {},
         '/r/a/b/'  => {},
     },
     par => {
         '/r/a'   => [qw(a)],
-        '/r/a/b' => [qw(a b)],
+        '/r/a/b' => [qw(a/b)],
     },
     no => [qw{
         /
@@ -186,10 +187,11 @@ _match(
 _match(
     '/r/*/:a',
     yes => {
-        '/r/aa/b' => { a => 'b' },
+        '/r/aa/b'    => { a => 'b' },
+        '/r/aa/bb/c' => { a => 'c' },
     },
     par => {
-        '/r/aa/bb/c' => [qw(aa/bb c)],
+        '/r/aa/bb/c' => [qw(c)],
     },
     no => [qw{
         /r/tt/
@@ -417,7 +419,12 @@ sub _match {
             if ( $par && $par->{$path} ) {
                 is_deeply $p->param, $par->{$path}, "$path param ok"
                   or diag caller;
+                delete $par->{$path};
             }
+        }
+
+        if ($par && keys %$par) {
+            fail 'test configuration error, unchecked path parameters for: ' . join ', ', keys %$par;
         }
     }
 
