@@ -147,6 +147,15 @@ sub _parse_route {
     }
     $val->{bridge} ||= defined $tree;
 
+    # psgi + bridge is incompatible, as psgi route will only render (not return true values)
+    if ( $val->{psgi} && $val->{bridge} ) {
+        return $self->_error( "Route '$key' cannot have both 'psgi' and 'bridge'" );
+    }
+
+    # Adjust the destination for psgi
+    $val->{dest} = $self->wrap_psgi( $val->{to}, $val->{dest} )
+        if $val->{psgi};
+
     # Credit stuff from tree parent, if possible
     if ( defined $parent->{pattern} ) {
         if ( $val->{name} && $parent->{name} ) {
@@ -230,6 +239,18 @@ sub load_destination {
     }
 
     return undef;
+}
+
+# Override to change the way a psgi application is adapted to kelp
+sub wrap_psgi {
+    my ( $self, $to, $destination ) = @_;
+
+    # adjust the subroutine to load
+    # don't adjust the controller (index 0) to still call the proper hooks if
+    # it was configured to be a controller action
+
+    $destination->[1] = Kelp::Util::adapt_psgi($destination->[1]);
+    return $destination;
 }
 
 # Override to use a custom pattern object
@@ -580,6 +601,28 @@ C<add> will be a facade implementing a localized version of C<add>:
         ],
     } );
 
+=head1 PLACK APPS
+
+Kelp makes it easy to nest Plack/PSGI applications inside your Kelp app. All
+you have to do is provide a Plack application runner in C<to> and set C<psgi>
+to a true value.
+
+    use Plack::App::File;
+
+    $r->add( '/static/>path' => {
+        to => Plack::App::File->new(root => "/path/to/static")->to_app,
+        psgi => 1,
+    });
+
+You must provide a proper placeholder at the end if you want your app to occpy
+all the subpaths under the base path. A slurpy placeholder like C<< >path >>
+works best and mimics L<Plack::App::URLMap>'s behavior. B<It is an error to
+only provide a placeholder in the middle of the pattern>. Kelp will take B<the
+last placeholder> and assume it comes B<after> the base route. If it doesn't,
+the paths set for the nested app will be wrong.
+
+Note that a route cannot have C<psgi> and C<bridge> (or C<tree>) simultaneously.
+
 =head1 ATTRIBUTES
 
 =head2 base
@@ -842,6 +885,10 @@ Override this method to change the formatting process of L<Kelp::Routes::Pattern
 =head2 load_destination
 
 Override this method to change the loading process of L<Kelp::Routes::Pattern/dest>. See code for details.
+
+=head2 wrap_psgi
+
+Override this method to change the way a Plack/PSGI application is extracted from a destination. See code for details.
 
 =head1 EXTENDING
 
