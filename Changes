@@ -1,3 +1,13 @@
+2024-06-15: Version 2.01
+            [New Features]
+            - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
+            - Added Kelp::Util::adapt_psgi (used by the new 'psgi' route flag)
+
+            [Changes]
+            - 'kelp' template has been adjusted to match framework looks
+            - Documentation improvements
+            - Added a homepage on github
+
 2024-06-10: Version 2.00
             [New Features]
             - Added a return value to 'add' method from Kelp::Routes,
