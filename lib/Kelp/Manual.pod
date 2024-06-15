@@ -62,69 +62,6 @@ omitted adding certain components. This is where Kelp gets to shine. It provides
 a layer on top of Plack and puts everything together into a complete web
 framework.
 
-Kelp provides:
-
-=over
-
-=item
-
-B<Advanced Routing>. Create intricate, yet simple ways to capture HTTP requests
-and route them to their designated code. Use explicit and optional named
-placeholders, wildcards, or just regular expressions.
-
-=item
-
-B<Flexible Configuration>. Use different configuration file for each
-environment, e.g. development, deployment, etc. Merge a temporary configuration
-into your current one for testing and debugging purposes.
-
-=item
-
-B<Enhanced Logging>. Log messages at different levels of emergency. Log to a
-file, screen, or anything supported by Log::Dispatch.
-
-=item
-
-B<Powerful Rendering>. Use the built-in auto-rendering logic, or the template
-module of your choice to return rich text, html and JSON responses.
-
-=item
-
-B<JSON encoder/decoder>. Kelp comes with JSON, which will automatically choose
-the best (fastest, most secure) backend available (using L<JSON::MaybeXS>).
-
-=item
-
-B<Extendable Core>. Kelp uses pluggable modules for everything. This allows
-anyone to add a module for a custom interface. Writing Kelp modules is easy.
-
-=item
-
-B<Sleek Testing>. Kelp takes Plack::Test and wraps it in an object oriented
-class of convenience methods. Testing is done via sending requests to your
-routes, then analyzing the response.
-
-=back
-
-=head1 WHY KELP?
-
-What makes Kelp different from the other Perl micro web frameworks? There are a
-number of fine web frameworks on CPAN, and most of them provide a complete
-platform for web app building. Most of them, however, bring their deployment code,
-and aim to write their own processing mechanisms. Kelp, on the other hand, is heavily
-I<Plack>-centric. It uses Plack as its foundation layer, and it builds the web
-framework on top of it. C<Kelp::Request> is an extension of C<Plack::Request>,
-C<Kelp::Response> is an extension of C<Plack::Response>.
-
-This approach of extending current CPAN code puts familiar and well tested
-tools in the hands of the application developer, while keeping familiar syntax
-and work flow.
-
-Kelp is a team player and it uses several popular, trusted CPAN modules for its
-internals. At the same time it doesn't include modules that it doesn't need,
-just because they are considered trendy. It does its best to keep a lean profile
-and a small footprint, and it's completely object manager agnostic.
-
 =head1 CREATING A NEW WEB APP
 
 =head2 Using the C<Kelp> script
@@ -162,7 +99,7 @@ utility script.
      |   |--development.pl
      |   |--deployment.pl
      |
-     |--/view
+     |--/views
      |--/log
      |--/t
      |--app.psgi
@@ -189,7 +126,7 @@ or
 
     > PLACK_ENV=development plackup app.psgi
 
-=item B</view>
+=item B</views>
 
 This is where the C<Template> module will look for template files.
 
@@ -316,6 +253,17 @@ Make a route only catch a specific HTTP method:
 
     $r->add( [ POST => '/update' ], "update_user" );
 
+=head3 Nesting Plack apps
+
+It's easy to have a Plack app nested in Kelp:
+
+    $r->add( '/app', {
+        to => $plack_app->to_app,
+        psgi => 1,
+    });
+
+See L<Kelp::Routes/PLACK APPS> for details.
+
 =head3 Named captures
 
 Using regular expressions is so Perl. Sometimes, however, it gets a little
@@ -353,6 +301,9 @@ Wildcards can also be used without a label:
     # FIXME: will match both /actions/create and /actions_and_stuff
     $r->add( '/actions*' => sub { ... } );
 
+NOTE: matched contents from an unlabelled wildcard will be B<discarded> if your
+route also contains named placeholders. Name it to prevent that from happening.
+
 =head4 Slurpy
 
     $r->add( '/other-app/>rest' => sub {
@@ -386,6 +337,9 @@ Just like wildcards, slurpy placeholders can be used without a label:
 
     # all user actions and their index in one route
     $r->add( '/user/actions/>' => sub { ... } );
+
+NOTE: matched contents from an unlabelled slurpy will be B<discarded> if your
+route also contains named placeholders. Name it to prevent that from happening.
 
 =head3 Placeholder restrictions
 
