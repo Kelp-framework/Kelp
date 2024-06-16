@@ -100,10 +100,17 @@ $t->request( GET '/view' )
   ->content_is("We are all living in America");
 
 # Delayed
+
+$app->add_route("/delayed", "not_really_delayed");
 $app->add_route("/delayed", "delayed");
-$t->request( GET '/delayed' )
+
+$t->request( GET '/delayed?yes' )
   ->code_is(200)
   ->content_is("Better late than never.");
+
+$t->request( GET '/delayed' )
+  ->code_is(200)
+  ->content_is("Why wait?");
 
 # Stash
 $app->add_route("/auth" => {
@@ -145,6 +152,18 @@ sub view {
             where => 'America'
         }
     );
+}
+
+sub not_really_delayed {
+    my $self = shift;
+
+    # render something unless the route wants delayed
+    if (!defined $self->param('yes')) {
+        return 'Why wait?';
+    }
+
+    # next route
+    return undef;
 }
 
 sub delayed {

@@ -8,6 +8,13 @@
             - Documentation improvements
             - Added a homepage on github
 
+            [Bug fixes]
+            - Route destination will no longer be executed if a response was already rendered by a previous one
+              * Rendering a response in a bridge will work the same as if the bridge returned a false value
+              * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
+              * Delayed responses will no longer override a previously rendered normal response
+              * The destination will still be run if the render happened inside 'before_dispatch' hook
+
 2024-06-10: Version 2.00
             [New Features]
             - Added a return value to 'add' method from Kelp::Routes,

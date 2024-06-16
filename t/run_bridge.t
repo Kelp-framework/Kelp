@@ -13,7 +13,10 @@ my $t = Kelp::Test->new( app => $app );
 $app->add_route(
     "/bridge" => {
         to   => "bridge",
-        tree => [ "/route" => "bridge_route" ]
+        tree => [
+            "/route" => "bridge_route",
+            "/render_route" => "bridge_route_render",
+        ]
     }
 );
 $t->request( GET '/bridge' )->code_is(403);
@@ -24,6 +27,12 @@ $t->request( GET '/bridge/not_existing_route?ok=1' )->code_is(404);
 $t->request( GET '/bridge/route?ok=1' )
   ->code_is(200)
   ->content_is("We like milk.");
+
+# if a bridge renders a response, no other handlers should be executed even
+# if the return value is true
+$t->request( GET '/bridge/render_route?code=403&ok=1' )
+  ->code_is(403)
+  ->content_is("ok");
 
 # render inside bridge
 $app->add_route(
@@ -69,3 +78,9 @@ sub bridge_route {
     my $self = shift;
     return $self->req->stash->{info};
 }
+
+sub bridge_route_render {
+    my $self = shift;
+    $self->res->render($self->req->stash->{info});
+}
+

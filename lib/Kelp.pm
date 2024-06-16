@@ -225,7 +225,7 @@ sub psgi {
         return $self->finalize;
     }
 
-    try {
+    return try {
 
         # Go over the entire route chain
         for my $route (@$match) {
@@ -235,23 +235,26 @@ sub psgi {
             $req->route_name( $route->name );
             my $data = $self->routes->dispatch( $self, $route );
 
-            # Is it a bridge? Bridges must return a true value
-            # to allow the rest of the routes to run.
             if ( $route->bridge ) {
+                # Is it a bridge? Bridges must return a true value to allow the
+                # rest of the routes to run. They may also have rendered
+                # something, in which case trust that and don't render 403 (but
+                # still end the execution chain)
+
                 if ( !$data ) {
                     $res->render_403 unless $res->rendered;
-                    last;
                 }
-                next;
             }
-
-            # If the route returned something, then analyze it and render it
-            if ( defined $data ) {
+            elsif ( defined $data ) {
+                # If the non-bridge route returned something, then analyze it and render it
 
                 # Handle delayed response if CODE
-                return $data if ref($data) eq 'CODE';
-                $res->render($data) unless $res->rendered;
+                return $data if ref $data eq 'CODE';
+                $res->render( $data ) unless $res->rendered;
             }
+
+            # Do not go any further if we got a render
+            last if $res->rendered;
         }
 
         # If nothing got rendered
@@ -268,7 +271,7 @@ sub psgi {
             }
         }
 
-        $self->finalize;
+        return $self->finalize;
     }
     catch {
         my $exception = $_;
@@ -287,9 +290,10 @@ sub psgi {
             $self->logger( 'critical', $message ) if $self->can('logger');
 
             # Render 500
-            $res->render_500($_);
+            $res->render_500($exception);
         }
-        $self->finalize;
+
+        return $self->finalize;
     };
 }
 
