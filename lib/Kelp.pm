@@ -4,9 +4,7 @@ use Kelp::Base;
 
 use Carp qw/ longmess croak /;
 use FindBin;
-use Encode;
 use Try::Tiny;
-use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
@@ -28,7 +26,7 @@ attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
-    $_[0]->config("charset") // 'UTF-8';
+    $_[0]->config('charset') // 'UTF-8';
 };
 
 # Name the config module

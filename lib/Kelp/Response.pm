@@ -5,7 +5,7 @@ use Kelp::Base 'Plack::Response';
 use Encode;
 use Carp;
 use Try::Tiny;
-use Scalar::Util;
+use Scalar::Util qw(blessed);
 
 attr -app => sub { croak "app is required" };
 attr rendered => 0;
@@ -19,24 +19,29 @@ sub new {
 }
 
 sub set_content_type {
-    $_[0]->content_type( $_[1] );
-    return $_[0];
+    my ( $self, $type ) = @_;
+    $self->content_type( $type );
+    return $self;
 }
 
 sub text {
-    $_[0]->set_content_type( 'text/plain; charset=' . $_[0]->app->charset );
+    my $self = shift;
+    return $self->set_content_type( 'text/plain; charset=' . $self->app->charset );
 }
 
 sub html {
-    $_[0]->set_content_type( 'text/html; charset=' . $_[0]->app->charset );
+    my $self = shift;
+    return $self->set_content_type( 'text/html; charset=' . $self->app->charset );
 }
 
 sub json {
-    $_[0]->set_content_type('application/json');
+    my $self = shift;
+    return $self->set_content_type('application/json');
 }
 
 sub xml {
-    $_[0]->set_content_type('application/xml');
+    my $self = shift;
+    return $self->set_content_type('application/xml');
 }
 
 sub finalize {
@@ -173,7 +178,7 @@ sub render_500 {
     }
 
     # if render_500 gets blessed object as error stringify it
-    $error = ref $error if Scalar::Util::blessed $error;
+    $error = ref $error if blessed $error;
 
     return $self->set_code(500)->render($error);
 }
@@ -453,3 +458,4 @@ module.
     }
 
 =cut
+
