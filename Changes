@@ -2,8 +2,12 @@
             [New Features]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
             - Added Kelp::Util::adapt_psgi (used by the new 'psgi' route flag)
+            - Added Kelp::Request::json_content
 
             [Changes]
+            - Scalar context behavior of the param method called without arguments on json request is now deprecated
+              * this is done in effort to make param method easier to use and harder to misuse
+            - Repeatedly fetching parameters from json request with the param method is now much faster
             - 'kelp' template has been adjusted to match framework looks
             - Documentation improvements
             - Added a homepage on github
@@ -14,6 +18,7 @@
               * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
               * Delayed responses will no longer override a previously rendered normal response
               * The destination will still be run if the render happened inside 'before_dispatch' hook
+
 
 2024-06-10: Version 2.00
             [New Features]

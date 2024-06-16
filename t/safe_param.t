@@ -19,7 +19,7 @@ $app->add_route(
 $t->request(GET '/safe/tval?test=sth')
     ->content_is('tval 1 sth');
 $t->request(GET '/safe/tval?test=sth&test=sth_else')
-    ->content_is('tval 1 ' . 'sth_else');
+    ->content_is('tval 1 sth_else');
 
 done_testing;
 

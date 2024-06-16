@@ -2,7 +2,6 @@ package Kelp::Request;
 
 use Kelp::Base 'Plack::Request';
 
-use Encode;
 use Carp;
 use Try::Tiny;
 
@@ -16,6 +15,12 @@ attr named => sub { {} };
 
 # The name of the matched route for this request
 attr route_name => sub { undef };
+
+# copy of json_content, used repeatedly by param
+attr _param_json_content => sub {
+    my $hash = $_[0]->json_content // {};
+    ref $hash eq 'HASH' ? $hash : { ref $hash, $hash };
+};
 
 # If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
 sub address     { $_[0]->env->{REMOTE_ADDR} }
@@ -31,37 +36,45 @@ sub new {
 
 sub is_ajax {
     my $self = shift;
-    return unless my $with = $self->headers->header('X-Requested-With');
-    return $with =~ /XMLHttpRequest/i;
+    return 0 unless my $with = $self->headers->header('X-Requested-With');
+    return $with =~ m{XMLHttpRequest}i;
 }
 
 sub is_json {
     my $self = shift;
-    return unless $self->content_type;
-    return lc($self->content_type) =~ qr[^application/json]i;
+    return 0 unless $self->content_type;
+    return $self->content_type =~ m{^application/json}i;
 }
 
+sub json_content {
+    my $self = shift;
+    return undef unless $self->is_json;
+
+    return try {
+        $self->app->json->decode( $self->content );
+    }
+    catch {
+        undef;
+    };
+}
 
 sub param {
     my $self = shift;
 
-    if ( $self->is_json && $self->app->can( 'json' ) ) {
-        my $hash = try {
-            $self->app->json->decode( $self->content );
-        }
-        catch {
-            {};
-        };
-        $hash = { ref($hash), $hash } unless ref($hash) eq 'HASH';
+    if ( $self->is_json && $self->app->can('json') ) {
+        my $hash = $self->_param_json_content;
 
         return $hash->{ $_[0] } if @_;
-        return $hash if !wantarray;
+        if (!wantarray) {
+            carp "param() called in scalar context on json request is deprecated and will return the number of keys in the future. Use json_content instead";
+            return $hash;
+        }
         return keys %$hash;
     }
 
-    # safe method without calling Plack::Request::param
-    return $self->parameters->get($_[0]) if @_;
-    return keys %{ $self->parameters };
+    # safe method of calling Plack::Request::param
+    return scalar $self->cgi_param($_[0]) if @_;
+    return $self->cgi_param;
 }
 
 sub cgi_param {
@@ -71,7 +84,7 @@ sub cgi_param {
 sub session {
     my $self    = shift;
     my $session = $self->env->{'psgix.session'}
-      // die "No Session middleware wrapped";
+      // croak "No Session middleware wrapped";
 
     return $session if !@_;
 
@@ -142,44 +155,36 @@ if the route was not named.
 =head2 param
 
 Returns the HTTP parameters of the request. It has two modes of operation.
-Normally, it behaves like L<Plack::Request/param>, but has no context sensivity
-vulnerability - will always return a list when called without parameters and a
-scalar when called with a parameter.
-
-The behavior is changed when the content type of the request is
-C<application/json> and a JSON module is loaded. In that case, it will decode
-the JSON body and return as follows:
 
 =over
 
 =item
 
-If no arguments are passed, then it will return the names of the HTTP parameters
-when called in array contest, and a reference to the entire JSON hash when
-called in scalar context.
-
-    # JSON body = { bar => 1, foo => 2 }
-    my @names = $self->param;   # @names = ('bar', 'foo')
-    my $json = $self->param;    # $json = { bar => 1, foo => 2 }
-
+If passed with a parameter, returns the value value of a parameter with that
+name from either request body or query. This always returns a scalar value.
 
 =item
 
-If a single argument is passed, then the corresponding value in the JSON
-document is returned.
+If passed without parameters, returns the list containing the names of
+available parameters. This always returns a list.
 
-    my $bar = $self->param('bar');  # $bar = 1
+=back
 
-=item
-
-If the root contents of the JSON document is not an C<HASH> (after decoding), then it will be wrapped into a hash with its reftype as a key, for example:
+The behavior is changed when the content type of the request is
+C<application/json> and a JSON module is loaded. In that case, it will decode
+the JSON body and return values from it instead. If the root contents of the
+JSON document is not an C<HASH> (after decoding), then it will be wrapped into
+a hash with its reftype as a key, for example:
 
     { ARRAY => [...] } # when JSON contains an array as root element
     { '' => [...] }    # when JSON contains something that's not a reference
 
-    my $array = $kelp->param('ARRAY');
+    my $array_ref = $kelp->param('ARRAY');
 
-=back
+There also exists a special, deprecated behavior of C<param> returning the
+entire contents of json when called without arguments in scalar context. This
+will be later removed, so that C<param> will work exactly the same regardless
+of whether the request was json. Use L</json_content> for that instead.
 
 Since this method has so many ways to use it, you're encouraged to use
 other, more specific methods from L<Plack::Request>.
@@ -190,6 +195,11 @@ Calls C<param> in L<Plack::Request>, which is CGI.pm compatible. It is B<not
 recommended> to use this method, unless for some reason you have to maintain
 CGI.pm compatibility. Misusing this method can lead to bugs and security
 vulnerabilities.
+
+=head2 json_content
+
+Returns the json-decoded body of the request or undef if the request is not
+json, there is no json decoder or an error occured.
 
 =head2 address, remote_host, user
 
@@ -205,7 +215,7 @@ fields when using a proxy.
 
 =head2 session
 
-Returns the Plack session hash or dies if no C<Session> middleware was included.
+Returns the Plack session hash or croaks if no C<Session> middleware was included.
 
     sub get_session_value {
         my $self = shift;
