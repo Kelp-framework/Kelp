@@ -9,6 +9,7 @@ use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
+use Encode qw(encode decode);
 
 our $VERSION = '2.01';
 
@@ -19,7 +20,6 @@ attr -path => $FindBin::Bin;
 attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
 attr  request_obj  => 'Kelp::Request';
 attr  response_obj => 'Kelp::Response';
-
 
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
@@ -342,6 +342,18 @@ sub abs_url {
     return URI->new_abs( $url, $self->config('app_url') )->as_string;
 }
 
+sub charset_encode {
+    my ( $self, $string ) = @_;
+    return $string unless $self->charset;
+    return encode $self->charset, $string;
+}
+
+sub charset_decode {
+    my ( $self, $string ) = @_;
+    return $string unless $self->charset;
+    return decode $self->charset, $string;
+}
+
 1;
 
 __END__
@@ -514,8 +526,8 @@ class will be used.
 
 =head2 charset
 
-Sets of gets the encoding charset of the app. It will be C<UTF-8>, if not set to
-anything else. The charset could also be changed in the config files.
+Gets the encoding charset of the app. It will be C<UTF-8>, if not set to
+anything else. The charset can changed in the config files.
 
 =head2 long_error
 
@@ -726,6 +738,12 @@ arguments.
 
 Same as L</url_for>, but returns the full absolute URI for the current
 application (based on configuration).
+
+=head2 charset_encode
+
+=head2 charset_decode
+
+Shortcut methods, which encode or decode a string using the application's current L</charset>.
 
 =head1 AUTHOR
 

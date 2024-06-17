@@ -92,7 +92,7 @@ sub content_is {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is '$value'";
-    is Encode::decode( $self->app->charset, $self->res->content ), $value,
+    is $self->app->charset_decode( $self->res->content ), $value,
       $test_name;
     return $self;
 }
@@ -102,7 +102,7 @@ sub content_isnt {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is not '$value'";
-    isnt Encode::decode( $self->app->charset, $self->res->content ), $value,
+    isnt $self->app->charset_decode( $self->res->content ), $value,
       $test_name;
     return $self;
 }
@@ -112,7 +112,7 @@ sub content_like {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content matches $regexp";
-    like Encode::decode( $self->app->charset, $self->res->content ), $regexp,
+    like $self->app->charset_decode( $self->res->content ), $regexp,
       $test_name;
     return $self;
 }
@@ -122,7 +122,7 @@ sub content_unlike {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content does not match $regexp";
-    unlike Encode::decode( $self->app->charset, $self->res->content ), $regexp,
+    unlike $self->app->charset_decode( $self->res->content ), $regexp,
       $test_name;
     return $self;
 }

@@ -2,7 +2,6 @@ package Kelp::Response;
 
 use Kelp::Base 'Plack::Response';
 
-use Encode;
 use Carp;
 use Try::Tiny;
 use Scalar::Util qw(blessed);
@@ -88,12 +87,12 @@ sub render {
         die "Data must be a reference" unless ref($body);
         my $json = $self->app->json;
         $body = $json->encode($body);
-        $body = encode($self->app->charset, $body) unless $json->get_utf8;
+        $body = $self->app->charset_encode( $body ) unless $json->get_utf8;
         $self->json if $guess_json;
         $self->body( $body );
     } else {
         $self->html if $guess_html;
-        $self->body( encode( $self->app->charset, $body ) );
+        $self->body( $self->app->charset_encode( $body ) );
     }
 
     $self->rendered(1);
