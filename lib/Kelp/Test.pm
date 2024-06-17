@@ -14,6 +14,17 @@ BEGIN {
     $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
 }
 
+sub import {
+    my ($me, @args) = @_;
+
+    if ($args[0] && $args[0] eq -utf8) {
+        my $builder = Test::More->builder;
+        binmode $builder->output,         ":encoding(utf8)";
+        binmode $builder->failure_output, ":encoding(utf8)";
+        binmode $builder->todo_output,    ":encoding(utf8)";
+    }
+}
+
 attr -psgi => undef;
 
 attr -app => sub {
@@ -253,6 +264,9 @@ Kelp::Test - Automated tests for a Kelp web app
 
     $t->request( POST '/api' )
       ->json_cmp({auth => 1});
+
+    # automatically sets wide output for Test::More (disables Wide character warnings)
+    use Kelp::Test -utf8;
 
 =head1 DESCRIPTION
 
