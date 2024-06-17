@@ -5,9 +5,8 @@ use Plack::Test;
 use Plack::Util;
 use Test::More import => ['!note'];
 use Test::Deep;
+use Kelp::Test::CookieJar;
 use Carp;
-use Encode ();
-use HTTP::Cookies;
 use Try::Tiny;
 
 BEGIN {
@@ -36,7 +35,7 @@ attr -app => sub {
 
 attr res  => sub { die "res is not initialized" };
 
-attr cookies => sub { HTTP::Cookies->new };
+attr cookies => sub { Kelp::Test::CookieJar->new };
 
 sub request {
     my ( $self, $req ) = @_;
@@ -309,7 +308,19 @@ C<res>.
 
 =head2 cookies
 
-An L<HTTP::Cookies> object containing the cookie jar for all tests.
+An object of C<Kelp::Test::CookieJar> implementing the partial interface of
+L<HTTP::Cookies> module, containing the cookie jar for all tests. Compared to
+the module it's mocking, it does not handle cookie parameters other than name
+and value, but properly escapes the cookie name and value for the request.
+Its usage should usually be as trivial as this:
+
+    # NOTE: extra undef parameters are required to match HTTP::Cookies interface
+
+    $t->set_cookie(undef, $name, $value);
+    $t->request(...);
+
+    my $cookies_hash = $t->get_cookies;
+    my @cookie_values = $t->get_cookies(undef, 'cookie1', 'cookie2');
 
 =head1 METHODS
 
@@ -451,3 +462,4 @@ Prints the entire content for debugging purposes.
       ->diag_content();
 
 =cut
+
