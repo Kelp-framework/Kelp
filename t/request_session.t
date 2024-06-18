@@ -3,7 +3,14 @@ use Kelp::Test;
 use Kelp;
 use Test::More;
 use HTTP::Request::Common;
-use Plack::Middleware::Session;
+
+my $has_session = eval {
+    require Plack::Middleware::Session;
+    1;
+};
+
+plan skip_all => 'These tests require Plack::Middleware::Session'
+    unless $has_session;
 
 my $app = Kelp->new(
     mode     => 'test',
@@ -49,3 +56,4 @@ $t->request( GET '/session' )
     ->content_is('All OK');
 
 done_testing;
+
