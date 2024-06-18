@@ -6,7 +6,7 @@ use Carp;
 
 attr -code => sub { croak 'code is required' };
 
-attr 'body';
+attr body => undef;
 
 sub new {
     my ($class, $code, %params) = @_;
@@ -36,16 +36,14 @@ Kelp::Exception - Tiny HTTP exceptions
 
 =head1 SYNOPSIS
 
-    Exception->throw(400, body => 'The request was malformed');
+    # will log the body to 'error' level logger
+    Kelp::Exception->throw(400, body => 'The request was malformed and got aborted');
+
+    # will only show an error page with the code
+    Kelp::Exception->throw(410);
 
     # code is optional - 500 by default
     Kelp::Exception->throw;
-
-    # can control what user sees - even in deployment (unlike string exceptions)
-    Kelp::Exception->throw(501, body => {
-        status => \0,
-        error => 'This method is not yet implemented'
-    });
 
 =head1 DESCRIPTION
 
@@ -66,18 +64,15 @@ without its complexity.
 
 HTTP status code. Only possible are 5XX and 4XX.
 
-Readonly.
+Readonly. Required.
 
 =head2 body
 
-Required. Body of the request - can be a string for HTML and a hashref /
-arrayref for JSON responses.
+Body of the exception - can be anything that can be serialized and if passed
+will cause the application to log it on error level.
 
-A string will be passed to C<< $response->render_error >> to be rendered inside
-an error template, if available. A reference will be JSON encoded if JSON is
-available, otherwise will produce an exception.
-
-Content type for the response will be set accordingly.
+Content type and status string for the response will be set accordingly. Will
+render HTML in template and plaintext if there is no template (as usual errors do).
 
 =head1 METHODS
 
@@ -89,24 +84,5 @@ Content type for the response will be set accordingly.
 
 Same as simply constructing and calling die on an object.
 
-=head1 CAVEATS
-
-=over
-
-=item
-
-Code 500 exceptions will not be logged, as it is considered something that a
-web developer know about. They are not thrown anywhere in Kelp internal code,
-so only user code can fall victim to this.
-
-=item
-
-If there is no content type set, and the exception body is not a reference,
-then a C<text/html> content type will be guessed and the body text will be
-passed to an error template, if available.
-
-=back
-
 =cut
-
 

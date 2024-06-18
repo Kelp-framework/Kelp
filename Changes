@@ -28,12 +28,16 @@
             - A template named '0' will now be properly rendered
             - An 'app' object available in Kelp::Response template is now a properly reblessed controller
 
+
             [Backward-Incompatible Changes]
             - Request data will now be properly decoded using either charset from Content-Type or application charset
               * Request paths, query parameters and body are automatically decoded
               * Headers, cookies and sessions are unaffected (session encoding must be configured on the middleware level)
               * Please use methods with prefix 'raw_' from Kelp::Request to access encoded request data if needed
               * Not decoding input was a bug which needed to be fixed, but the application was already encoding the response correctly
+            - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
+              * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
+              * Log will happen at 'error' level, while regular errors are going to 'critical'
 
             [Tweaks]
             - 'kelp' template has been adjusted to match framework looks

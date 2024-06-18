@@ -275,9 +275,9 @@ sub psgi {
         my $exception = $_;
 
         if (blessed $exception && $exception->isa('Kelp::Exception')) {
-            # No logging here, since it is a message for the user with a code
-            # rather than a real exceptional case
-            # (Nothing really broke, user code invoked this)
+            # only log it as an error if the body is present
+            $self->logger( 'error', $exception->body )
+                if $self->can('logger') && defined $exception->body;
 
             $res->render_exception($exception);
         }

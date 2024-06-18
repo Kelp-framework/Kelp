@@ -6,6 +6,9 @@ use HTTP::Request::Common;
 use Kelp::Exception;
 use Test::More;
 
+use lib 't/lib';
+use StringifyingException;
+
 my $app = Kelp->new( mode => 'test' );
 my $t = Kelp::Test->new( app => $app );
 
@@ -18,50 +21,79 @@ $t->request( GET "/0" )
 $app->add_route( "/1", sub { Kelp::Exception->throw(400) });
 $app->add_route( "/2", sub { Kelp::Exception->throw(403, body => 'body text') });
 $app->add_route( "/2alt", sub { Kelp::Exception->throw(404, body => 'body text') });
-$app->add_route( "/3", sub { Kelp::Exception->throw(501, body => {json => 'object'}) });
-$app->add_route( "/4", sub { Kelp::Exception->throw(503, body => [qw(json array)]) });
-$app->add_route( "/5", sub { shift->res->json; Kelp::Exception->throw(500) });
+$app->add_route( "/5", sub { shift->res->json; Kelp::Exception->throw(500, body => StringifyingException->new(data => [qw(ab cd)])) });
+$app->add_route( "/5alt", sub { shift->res->json; Kelp::Exception->throw(501, body => StringifyingException->new(data => [qw(ab cd)])) });
+$app->add_route( "/6", sub { Kelp::Exception->throw(300) });
 
 # these errors should be the same regardless of mode
-for (qw(deployment development)) {
-    $app->mode($_);
+subtest 'testing development' => sub {
+    $app->mode('development');
 
     $t->request( GET "/1" )
         ->code_is(400)
-        ->content_is('')
-        ->content_type_is('');
+        ->content_is('400 - Bad Request')
+        ->content_type_is('text/plain');
 
     $t->request( GET "/2" )
         ->code_is(403)
-        ->content_is('403 - body text')
-        ->content_type_is('text/html');
+        ->content_is('403 - Forbidden')
+        ->content_type_is('text/plain');
 
     $t->request( GET "/2alt" )
         ->code_is(404)
         ->content_like(qr/Four Oh Four/)
         ->content_type_is('text/html');
 
-    $t->request( GET "/3" )
-        ->code_is(501)
-        ->content_is('{"json":"object"}')
-        ->content_type_is('application/json');
+    $t->request( GET "/5" )
+        ->code_is(500)
+        ->content_like(qr/Exception with data: \Q[ab,cd]\E/)
+        ->content_type_is('text/html');
 
-    $t->request( GET "/4" )
-        ->code_is(503)
-        ->content_is('["json","array"]')
-        ->content_type_is('application/json');
+    $t->request( GET "/5alt" )
+        ->code_is(501)
+        ->content_like(qr/501 - Not Implemented/)
+        ->content_type_is('text/plain');
+
+    $t->request( GET "/6" )
+        ->code_is(500)
+        ->content_like(qr/5XX/)
+        ->content_type_is('text/html');
+};
+
+subtest 'testing deployment' => sub {
+    $app->mode('deployment');
+
+    $t->request( GET "/1" )
+        ->code_is(400)
+        ->content_is('400 - Bad Request')
+        ->content_type_is('text/plain');
+
+    $t->request( GET "/2" )
+        ->code_is(403)
+        ->content_is('403 - Forbidden')
+        ->content_type_is('text/plain');
+
+    $t->request( GET "/2alt" )
+        ->code_is(404)
+        ->content_like(qr/Four Oh Four/)
+        ->content_type_is('text/html');
 
     $t->request( GET "/5" )
         ->code_is(500)
-        ->content_is('')
-        ->content_type_is('');
+        ->content_unlike(qr/Exception/)
+        ->content_type_is('text/html');
 
-}
+    $t->request( GET "/5alt" )
+        ->code_is(501)
+        ->content_is('501 - Not Implemented')
+        ->content_type_is('text/plain');
 
-$app->add_route( "/6", sub { Kelp::Exception->throw(300) });
-$t->request( GET "/6" )
-    ->code_is(500)
-    ->content_like(qr/5XX/)
-    ->content_type_is('text/html');
+    $t->request( GET "/6" )
+        ->code_is(500)
+        ->content_like(qr/Five Hundred/)
+        ->content_type_is('text/html');
+};
+
 
 done_testing;
+

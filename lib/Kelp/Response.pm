@@ -5,6 +5,7 @@ use Kelp::Base 'Plack::Response';
 use Carp;
 use Try::Tiny;
 use Scalar::Util qw(blessed);
+use HTTP::Status qw(status_message);
 
 attr -app => sub { croak "app is required" };
 attr rendered => 0;
@@ -119,7 +120,7 @@ sub render_error {
     my ( $self, $code, $error ) = @_;
 
     $code  //= 500;
-    $error //= "Internal Server Error";
+    $error //= status_message($code) // 'Error';
 
     $self->set_code($code);
 
@@ -133,7 +134,7 @@ sub render_error {
         );
     }
     catch {
-        $self->render("$code - $error");
+        $self->text->render("$code - $error");
     };
 
     return $self;
@@ -142,25 +143,12 @@ sub render_error {
 sub render_exception {
     my ( $self, $exception ) = @_;
 
-    my $code = $exception->code;
-    my $body = $exception->body;
+    # If the error is 500, do the same thing normal errors do: provide more
+    # info on non-production
+    return $self->render_500($exception->body)
+        if $exception->code == 500;
 
-    $self->set_code($code);
-    if ( defined $body ) {
-        my $is_html = $self->content_type =~ m{^text/html};
-        my $guess_html = !$self->content_type && !ref($body);
-
-        if ( $is_html || $guess_html ) {
-            $self->render_error($code, $body);
-        }
-        else {
-            $self->render($body);
-        }
-
-    }
-    elsif ( $self->content_type ) {
-        $self->content_type('');
-    }
+    return $self->render_error($exception->code);
 }
 
 sub render_404 {
@@ -405,6 +393,9 @@ found it will render this message:
     510 - Not Extended
 
 A return code of 510 will also be set.
+
+If a standard error message is to be used, it may be skipped - will be pulled
+from L<HTTP::Status>.
 
 =head2 render_404
 

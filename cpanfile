@@ -8,10 +8,10 @@ requires 'Class::Inspector' => '0';
 requires 'namespace::autoclean' => '0';
 requires 'URI' => '0';
 requires 'Hash::MultiValue' => '0';
+requires 'HTTP::Message' => '0';
 
 on 'test' => sub {
 	requires 'Test::Deep' => '0';
 	requires 'Test::Exception' => '0';
-	requires 'HTTP::Request' => '0';
 };
 
