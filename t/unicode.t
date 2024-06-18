@@ -47,6 +47,12 @@ subtest 'plaintext encoding cp1250 ok' => sub {
     _t('/body_echo', 'application/x-www-form-urlencoded; charset=cp1250', $string, 200, encode($app->charset, $test_string));
 };
 
+subtest 'plaintext encoding CP1250 ok' => sub {
+    my $string = join '=', map { uri_escape encode 'cp1250', $_ } 'śś', $test_string;
+
+    _t('/body_echo', 'application/x-www-form-urlencoded; CHARSET=CP1250', $string, 200, encode($app->charset, $test_string));
+};
+
 subtest 'plaintext encoding unknown is utf8 ok' => sub {
     my $string = join '=', map { uri_escape encode 'utf-8', $_ } 'śś', $test_string;
 

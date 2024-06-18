@@ -95,8 +95,8 @@ sub is_json {
 sub charset {
     my $self = shift;
     return undef unless $self->content_type;
-    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)};
-    return $1;
+    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
+    return lc $1;
 }
 
 sub charset_decode {
@@ -107,7 +107,7 @@ sub charset_decode {
         # If the charset is unsupported by Encode, try to decode using
         # application charset. Worst case scenario is a server error with code
         # 500
-        state $supported = { map { $_ => $_ } Encode->encodings(':all') };
+        state $supported = { map { lc $_ => $_ } Encode->encodings(':all') };
         my $charset = $supported->{$self->charset} // $self->app->charset;
 
         return decode $charset, $string;
