@@ -6,6 +6,7 @@ requires 'Template::Tiny' => 0;
 requires 'Try::Tiny' => 0;
 requires 'Class::Inspector' => '0';
 requires 'HTTP::Cookies' => '0';
+requires 'namespace::autoclean' => '0';
 
 on 'test' => sub {
 	requires 'Test::Deep' => '0';
