@@ -271,8 +271,14 @@ sub match {
     my $key = "$path:$method";
     my $routes = $self->cache->get( $key );
     if ( !defined $routes ) {
-        # Look through all routes, grep the ones that match
-        # and sort them by 'bridge' and 'pattern'
+        # Look through all routes, grep the ones that match and sort them by
+        # 'bridge' and 'pattern'. Perl sort function is stable, meaning it will
+        # preserve the initial order of records it considers equal. This means
+        # that the order of registering routes is crucial when a couple of
+        # routes are registered with the same pattern: routes defined earlier
+        # will be run first and the first one to render will end the execution
+        # chain. If the patterns are not the same, their order will be changed
+        # by string sorting by patterns.
         @$routes =
             sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
             grep { $_->match( $path, $method ) } @{ $self->routes };
@@ -357,11 +363,24 @@ Then you add your application's routes and their descriptions:
 
 Once you have your routes added, you can match with the L</match> subroutine.
 
-    $r->match( $path, $method );
+    my $patterns_aref = $r->match( $path, $method );
 
 The Kelp framework already does matching for you, so you may never
 have to do your own matching. The above example is provided only for
 reference.
+
+The order of patterns in C<$patterns_aref> is the order in which the framework
+will be executing the routes. Bridges are always before regular routes, and
+shorter routes come first within a given type (bridge or no-bridge). If route
+patterns are exactly the same, the ones defined earlier will also be executed
+earlier.
+
+Routes will continue going through that execution chain until one of the
+bridges return a false value, one of the non-bridges return a defined value, or
+one of the routes renders something explicitly using methods in
+L<Kelp::Response>. It is generally not recommended to have more than one
+non-bridge route matching a pattern as it may be harder to debug which one gets
+to actually render a response.
 
 =item B<Building URLs from routes>
 
@@ -514,6 +533,13 @@ subroutines: C<Users::auth> and C<Users::dispatch>:
 
     my $arr = $r->match('/users/view');
     # $arr is an array of two routes now, the bridge and the last one matched
+
+Just like regular routes, bridges can render a response, but it must be done
+manually by calling C<< $self->res->render() >> or other methods from
+L<Kelp::Response>. When a render happens in a bridge, its return value will be
+discarded and no other routes in chain will be run as if a false value was
+returned. For example, this property can be used to render a login page in
+place instead of a 403 response, or just simply redirect to one.
 
 =head1 TREES
 
@@ -670,9 +696,20 @@ application instead of just raising a warning. False by default.
 =head2 cache
 
 Routes will be cached in memory, so repeating requests will be dispatched much
-faster. The C<cache> attribute can optionally be initialized with an instance of
-a caching module with interface similar to L<CHI> and L<Cache>.
-The module interface should at the very least provide the following methods:
+faster. The default cache entries never expire, so it will continue to grow as
+long as the process lives. It also stores full L<Kelp::Routes::Pattern>
+objects, which is fast and light when stored in Perl but makes it cumbersome
+when they are serialized.
+
+The C<cache> attribute can optionally be initialized with an instance of a
+caching module with interface similar to L<CHI> and L<Cache>. This allows for
+giving them expiration time and possibly sharing them between processes, but
+extra care must be taken to properly serialize them. Patterns are sure to
+contain hardly serializable code references and are way heavier when
+serialized. The cache should probably be configured to have an in-memory L1
+cache which will map a serialized route identifier (stored in the main cache)
+to a pattern object registered in the router. The module interface should at
+the very least provide the following methods:
 
 =head3 get($key)
 

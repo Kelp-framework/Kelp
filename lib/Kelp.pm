@@ -4,13 +4,12 @@ use Kelp::Base;
 
 use Carp qw/ longmess croak /;
 use FindBin;
-use Encode;
 use Try::Tiny;
-use Data::Dumper;
 use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
 use Scalar::Util qw(blessed);
+use Encode qw(encode decode);
 
 our $VERSION = '2.01';
 
@@ -22,13 +21,12 @@ attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
 attr  request_obj  => 'Kelp::Request';
 attr  response_obj => 'Kelp::Response';
 
-
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 
 # The charset is UTF-8 unless otherwise instructed
 attr -charset => sub {
-    $_[0]->config("charset") // 'UTF-8';
+    $_[0]->config('charset') // 'UTF-8';
 };
 
 # Name the config module
@@ -225,7 +223,7 @@ sub psgi {
         return $self->finalize;
     }
 
-    try {
+    return try {
 
         # Go over the entire route chain
         for my $route (@$match) {
@@ -235,23 +233,26 @@ sub psgi {
             $req->route_name( $route->name );
             my $data = $self->routes->dispatch( $self, $route );
 
-            # Is it a bridge? Bridges must return a true value
-            # to allow the rest of the routes to run.
             if ( $route->bridge ) {
+                # Is it a bridge? Bridges must return a true value to allow the
+                # rest of the routes to run. They may also have rendered
+                # something, in which case trust that and don't render 403 (but
+                # still end the execution chain)
+
                 if ( !$data ) {
                     $res->render_403 unless $res->rendered;
-                    last;
                 }
-                next;
             }
-
-            # If the route returned something, then analyze it and render it
-            if ( defined $data ) {
+            elsif ( defined $data ) {
+                # If the non-bridge route returned something, then analyze it and render it
 
                 # Handle delayed response if CODE
-                return $data if ref($data) eq 'CODE';
-                $res->render($data) unless $res->rendered;
+                return $data if ref $data eq 'CODE';
+                $res->render( $data ) unless $res->rendered;
             }
+
+            # Do not go any further if we got a render
+            last if $res->rendered;
         }
 
         # If nothing got rendered
@@ -268,7 +269,7 @@ sub psgi {
             }
         }
 
-        $self->finalize;
+        return $self->finalize;
     }
     catch {
         my $exception = $_;
@@ -287,9 +288,10 @@ sub psgi {
             $self->logger( 'critical', $message ) if $self->can('logger');
 
             # Render 500
-            $res->render_500($_);
+            $res->render_500($exception);
         }
-        $self->finalize;
+
+        return $self->finalize;
     };
 }
 
@@ -338,6 +340,18 @@ sub abs_url {
     my ( $self, $name, @args ) = @_;
     my $url = $self->url_for( $name, @args );
     return URI->new_abs( $url, $self->config('app_url') )->as_string;
+}
+
+sub charset_encode {
+    my ( $self, $string ) = @_;
+    return $string unless $self->charset;
+    return encode $self->charset, $string;
+}
+
+sub charset_decode {
+    my ( $self, $string ) = @_;
+    return $string unless $self->charset;
+    return decode $self->charset, $string;
 }
 
 1;
@@ -512,8 +526,8 @@ class will be used.
 
 =head2 charset
 
-Sets of gets the encoding charset of the app. It will be C<UTF-8>, if not set to
-anything else. The charset could also be changed in the config files.
+Gets the encoding charset of the app. It will be C<UTF-8>, if not set to
+anything else. The charset can changed in the config files.
 
 =head2 long_error
 
@@ -724,6 +738,12 @@ arguments.
 
 Same as L</url_for>, but returns the full absolute URI for the current
 application (based on configuration).
+
+=head2 charset_encode
+
+=head2 charset_decode
+
+Shortcut methods, which encode or decode a string using the application's current L</charset>.
 
 =head1 AUTHOR
 

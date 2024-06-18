@@ -5,13 +5,23 @@ use Plack::Test;
 use Plack::Util;
 use Test::More import => ['!note'];
 use Test::Deep;
+use Kelp::Test::CookieJar;
 use Carp;
-use Encode ();
-use HTTP::Cookies;
 use Try::Tiny;
 
 BEGIN {
     $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
+}
+
+sub import {
+    my ($me, @args) = @_;
+
+    if ($args[0] && $args[0] eq -utf8) {
+        my $builder = Test::More->builder;
+        binmode $builder->output,         ":encoding(utf8)";
+        binmode $builder->failure_output, ":encoding(utf8)";
+        binmode $builder->todo_output,    ":encoding(utf8)";
+    }
 }
 
 attr -psgi => undef;
@@ -25,7 +35,7 @@ attr -app => sub {
 
 attr res  => sub { die "res is not initialized" };
 
-attr cookies => sub { HTTP::Cookies->new };
+attr cookies => sub { Kelp::Test::CookieJar->new };
 
 sub request {
     my ( $self, $req ) = @_;
@@ -92,7 +102,7 @@ sub content_is {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is '$value'";
-    is Encode::decode( $self->app->charset, $self->res->content ), $value,
+    is $self->app->charset_decode( $self->res->content ), $value,
       $test_name;
     return $self;
 }
@@ -102,7 +112,7 @@ sub content_isnt {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is not '$value'";
-    isnt Encode::decode( $self->app->charset, $self->res->content ), $value,
+    isnt $self->app->charset_decode( $self->res->content ), $value,
       $test_name;
     return $self;
 }
@@ -112,7 +122,7 @@ sub content_like {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content matches $regexp";
-    like Encode::decode( $self->app->charset, $self->res->content ), $regexp,
+    like $self->app->charset_decode( $self->res->content ), $regexp,
       $test_name;
     return $self;
 }
@@ -122,7 +132,7 @@ sub content_unlike {
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content does not match $regexp";
-    unlike Encode::decode( $self->app->charset, $self->res->content ), $regexp,
+    unlike $self->app->charset_decode( $self->res->content ), $regexp,
       $test_name;
     return $self;
 }
@@ -254,6 +264,9 @@ Kelp::Test - Automated tests for a Kelp web app
     $t->request( POST '/api' )
       ->json_cmp({auth => 1});
 
+    # automatically sets wide output for Test::More (disables Wide character warnings)
+    use Kelp::Test -utf8;
+
 =head1 DESCRIPTION
 
 This module provides basic tools for testing a Kelp based web application. It
@@ -295,7 +308,19 @@ C<res>.
 
 =head2 cookies
 
-An L<HTTP::Cookies> object containing the cookie jar for all tests.
+An object of C<Kelp::Test::CookieJar> implementing the partial interface of
+L<HTTP::Cookies> module, containing the cookie jar for all tests. Compared to
+the module it's mocking, it does not handle cookie parameters other than name
+and value, but properly escapes the cookie name and value for the request.
+Its usage should usually be as trivial as this:
+
+    # NOTE: extra undef parameters are required to match HTTP::Cookies interface
+
+    $t->set_cookie(undef, $name, $value);
+    $t->request(...);
+
+    my $cookies_hash = $t->get_cookies;
+    my @cookie_values = $t->get_cookies(undef, 'cookie1', 'cookie2');
 
 =head1 METHODS
 
@@ -437,3 +462,4 @@ Prints the entire content for debugging purposes.
       ->diag_content();
 
 =cut
+

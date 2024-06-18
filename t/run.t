@@ -1,9 +1,11 @@
 use Kelp::Base -strict;
 
 use Kelp;
-use Kelp::Test;
+use Kelp::Test -utf8;
 use HTTP::Request::Common;
 use Test::More;
+use URI::Escape;
+use utf8;
 
 my $app = Kelp->new( mode => 'test' );
 $app->routes->base("main");
@@ -23,7 +25,8 @@ $app->add_route("/named/:a", sub {
     return "Got: " . $self->req->named->{a};
 });
 for my $a (qw{boo дума 123}) {
-    $t->request( GET "/named/$a" )
+    my $encoded = uri_escape $app->charset_encode($a);
+    $t->request( GET "/named/$encoded" )
       ->code_is(200)
       ->content_is("Got: $a");
 }
@@ -77,7 +80,8 @@ $app->add_route("/array/:a/:b", sub {
     return "Got: $a and $b";
 });
 for my $a (qw{boo дума 123}) {
-    $t->request( GET "/array/one/$a" )
+    my $encoded = uri_escape $app->charset_encode($a);
+    $t->request( GET "/array/one/$encoded" )
       ->code_is(200)
       ->content_is("Got: one and $a");
 }
@@ -88,7 +92,8 @@ $app->add_route("/param", sub {
     return "We have " . $self->param('word');
 });
 for my $word ('word', 'дума', 'كلمة', 'բառ', 'sözcük') {
-    $t->request( GET '/param?word=' . $word )
+    my $encoded = uri_escape $app->charset_encode($word);
+    $t->request( GET "/param?word=$encoded" )
       ->code_is(200)
       ->content_like(qr{$word});
 }
@@ -100,10 +105,17 @@ $t->request( GET '/view' )
   ->content_is("We are all living in America");
 
 # Delayed
+
+$app->add_route("/delayed", "not_really_delayed");
 $app->add_route("/delayed", "delayed");
-$t->request( GET '/delayed' )
+
+$t->request( GET '/delayed?yes' )
   ->code_is(200)
   ->content_is("Better late than never.");
+
+$t->request( GET '/delayed' )
+  ->code_is(200)
+  ->content_is("Why wait?");
 
 # Stash
 $app->add_route("/auth" => {
@@ -145,6 +157,18 @@ sub view {
             where => 'America'
         }
     );
+}
+
+sub not_really_delayed {
+    my $self = shift;
+
+    # render something unless the route wants delayed
+    if (!defined $self->param('yes')) {
+        return 'Why wait?';
+    }
+
+    # next route
+    return undef;
 }
 
 sub delayed {
