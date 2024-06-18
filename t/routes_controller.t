@@ -40,5 +40,8 @@ $t->request_ok( GET '/test_inherit' )
 $t->request_ok( GET '/test_module' )
   ->content_is('UTF-8');
 
+$t->request_ok( GET '/test_template' )
+  ->content_like( qr/confession: I control the Bar/ );
+
 done_testing;
 

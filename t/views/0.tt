@@ -1,0 +1,1 @@
+confession: [% app.naughty_secret %]

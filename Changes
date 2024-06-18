@@ -7,6 +7,7 @@
             - Added charset_encode, charset_decode methods to Kelp
             - Added charset method to Kelp::Request
             - Added charset_decode method to Kelp::Request, which decodes using either request or application charset
+            - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
 
             [Changes]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
@@ -24,6 +25,8 @@
               * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
               * Delayed responses will no longer override a previously rendered normal response
               * The destination will still be run if the render happened inside 'before_dispatch' hook
+            - A template named '0' will now be properly rendered
+            - An 'app' object available in Kelp::Response template is now a properly reblessed controller
 
             [Backward-Incompatible Changes]
             - Request data will now be properly decoded using either charset from Content-Type or application charset

@@ -16,6 +16,9 @@ sub build {
     $self->register(
         template => sub {
             my ( $app, $template, $vars, @rest ) = @_;
+            $vars //= {};
+            $vars->{app} //= $app;
+
             return $self->render( $self->_rename($template), $vars, @rest );
         }
     );
@@ -33,12 +36,14 @@ sub render {
 
 sub _rename {
     my ( $self, $name ) = @_;
-    return unless $name;
+    $name //= '';
+    return undef unless length $name;
 
-    return $name if ref($name) || $name =~ /\.(.+)$/;
+    my $ext = $self->ext // '';
+    return $name unless length $ext;
 
-    my $ext = $self->ext;
-    return (defined $ext && length $ext) ? "$name.$ext" : $name;
+    return $name if ref($name) || $name =~ /\./;
+    return "$name.$ext";
 }
 
 1;
@@ -85,6 +90,8 @@ C<template($filename, \%vars)>
 Renders a file using the currently loaded template engine. If the file doesn't
 have an extension, the one specified in L</ext> will be assigned to it.
 
+If there is no C<app> in C<%vars>, it will be automatically added.
+
 =head1 ATTRIBUTES
 
 =head2 ext
@@ -94,7 +101,8 @@ C<tt>, so
 
     $self->template( 'home' );
 
-will look for C<home.tt>.
+will look for C<home.tt>. Set to undef or empty string to skip adding the
+extension to filenames.
 
 =head2 engine
 
@@ -180,3 +188,4 @@ Overrides the L</render> method and renders using C<$self-E<gt>engine>.
 =back
 
 =cut
+

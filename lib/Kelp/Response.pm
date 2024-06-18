@@ -126,10 +126,8 @@ sub render_error {
     # Look for a template and if not found, then show a generic text
     try {
         local $SIG{__DIE__};  # Silence StackTrace
-        my $filename = "error/$code";
         $self->template(
-            $filename, {
-                app   => $self->app,
+            "error/$code", {
                 error => $error
             }
         );
@@ -204,9 +202,6 @@ sub redirect_to {
 
 sub template {
     my ( $self, $template, $vars, @rest ) = @_;
-
-    # Add the app object for convenience
-    $vars->{app} = $self->app;
 
     # Do we have a template module loaded?
     die "No template module loaded"
