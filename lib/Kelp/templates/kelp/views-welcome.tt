@@ -58,12 +58,12 @@
         width: 30%;
     }
 </style>
-<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/sgnix/kelp/master/art/logo.png">
+<link rel="icon" type="image/x-icon" href="https://raw.githubusercontent.com/Kelp-framework/Art/master/logo/logo.png">
 </head>
 
 <body>
     <header class="kelp">
-        <img src="https://raw.githubusercontent.com/sgnix/kelp/master/art/logo.png" alt="Kelp framework logo">
+        <img src="https://raw.githubusercontent.com/Kelp-framework/Art/master/logo/logo.png" alt="Kelp framework logo">
         <h1>
         Welcome to the Kelp web framework!
         </h1>
