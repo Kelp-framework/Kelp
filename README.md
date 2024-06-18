@@ -1,11 +1,10 @@
 <div align="center" width="100%">
-    <p><img width="80%" src="art/logo_wide.png" alt="logo"></p>
+    <p><img width="80%" src="https://raw.githubusercontent.com/Kelp-framework/Art/master/logo/logo_wide.png" alt="logo"></p>
     <p><b>A web framework light, yet rich in nutrients</b></p>
 </div>
 
 Kelp is a Perl web framework focused on Plack application toolkit. It's lean,
-fast and extensible.
-
+fast and extensible. [See our website](https://kelp-framework.github.io) for details.
 
 ## Installation
 Kelp is [distributed through CPAN](https://metacpan.org/release/Kelp). It can
@@ -64,6 +63,5 @@ Bartosz Jarzyna (bbrtj)
 
 ## License
 
-This module and all the modules in this package are governed by the same license
-as Perl itself.
+This framework is governed by the same license as Perl itself.
 

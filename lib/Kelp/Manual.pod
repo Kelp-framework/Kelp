@@ -807,15 +807,17 @@ L<Plack>
 
 =over
 
-=item * GitHub: L<https://github.com/sgnix/kelp>
+=item * GitHub: L<https://github.com/Kelp-framework/Kelp>
 
-=item * Mailing list: L<https://groups.google.com/forum/?fromgroups#!forum/perl-kelp>
+=item * Mailing list: L<https://groups.google.com/g/perl-kelp>
 
 =back
 
 =head1 AUTHOR
 
 Stefan Geneshky - minimal <at> cpan.org
+
+Currently maintained by Bartosz Jarzyna - bbrtj.pro <at> gmail.com
 
 =head1 CONTRIBUTORS
 
