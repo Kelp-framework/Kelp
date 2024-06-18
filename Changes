@@ -1,16 +1,22 @@
 2024-06-15: Version 2.01
             [New Features]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
-            - Added Kelp::Util::adapt_psgi (used by the new 'psgi' route flag)
-            - Added Kelp::Request::json_content
+            - Added Kelp::Util::adapt_psgi function (used by the new 'psgi' route flag)
+            - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
+            - Methods with prefix 'raw_' were added to Kelp::Request, returning encoded request data (see "Bug fixes" below)
+            - Added charset_encode, charset_decode methods to Kelp
+            - Added charset method to Kelp::Request
+            - Added charset_decode method to Kelp::Request, which decodes using either request or application charset
 
             [Changes]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
               * this is done in effort to make param method easier to use and harder to misuse
+            - Kelp::Test no longer uses HTTP::Cookies, implements a much slimmer cookie jar with the same interface
+              * The new cookie jar only stores key/value pairs without any special data for cookies like domains, paths or expiration dates
+            - Kelp::Test now has a new import flag: '-utf8'
+              * Importing with this flag will automatically set Test::More to encode wide characters on output
             - Repeatedly fetching parameters from json request with the param method is now much faster
-            - 'kelp' template has been adjusted to match framework looks
             - Documentation improvements
-            - Added a homepage on github
 
             [Bug fixes]
             - Route destination will no longer be executed if a response was already rendered by a previous one
@@ -18,6 +24,18 @@
               * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
               * Delayed responses will no longer override a previously rendered normal response
               * The destination will still be run if the render happened inside 'before_dispatch' hook
+
+            [Backward-Incompatible Changes]
+            - Request data will now be properly decoded using either charset from Content-Type or application charset
+              * Request paths, query parameters and body are automatically decoded
+              * Headers, cookies and sessions are unaffected (session encoding must be configured on the middleware level)
+              * Please use methods with prefix 'raw_' from Kelp::Request to access encoded request data if needed
+              * Not decoding input was a bug which needed to be fixed, but the application was already encoding the response correctly
+
+            [Tweaks]
+            - 'kelp' template has been adjusted to match framework looks
+            - Added a homepage on GitHub
+            - Kelp now has a logo and is developed by the Kelp-framework organization on GitHub
 
 
 2024-06-10: Version 2.00
