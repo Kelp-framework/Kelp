@@ -7,9 +7,9 @@
     middleware      => ['StackTrace'],
     middleware_init => {
         StackTrace => {
-            force => 1
+            force => 1,
+            no_print_errors => 1,
         }
     }
 };
-
 
