@@ -30,7 +30,7 @@ $app->add_route( "/5", sub { $_[0]->res->json->render({}) });
 $t->request( GET "/5" )->content_type_is('application/json');
 
 $app->add_route( "/51", sub { $_[0]->res->json->render("aaa") });
-$t->request( GET "/51" )->code_is(500);
+$t->request( GET "/51" )->code_is(200)->content_type_is('application/json');
 
 $app->add_route( "/52", sub { $_[0]->res->json->render(\"aaa") });
 $t->request( GET "/52" )->code_is(500);
@@ -102,3 +102,4 @@ $app->add_route( "/bin2", sub { $_[0]->res->set_content_type("image/png")->rende
 $t->request( GET "/bin2" )->code_is(200);
 
 done_testing;
+

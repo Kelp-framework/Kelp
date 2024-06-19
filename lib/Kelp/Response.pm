@@ -72,30 +72,26 @@ sub set_code {
 }
 
 sub render {
-    my $self = shift;
-    my $body = shift // '';
+    my ( $self, $body ) = @_;
+    my $ct = $self->content_type;
+    my $ref = ref $body;
 
     # Set code 200 if the code has not been set
     $self->set_code(200) unless $self->code;
 
-    my $is_json = $self->content_type eq 'application/json';
-    my $guess_json = !$self->content_type && ref($body);
-    my $guess_html = !$self->content_type && !ref($body);
-
     # If the content has been determined as JSON, then encode it
-    if ( $is_json || $guess_json ) {
-        die "No JSON decoder" unless $self->app->can('json');
-        die "Data must be a reference" unless ref($body);
-        my $json = $self->app->json;
-        $body = $json->encode($body);
-        $body = $self->app->charset_encode( $body ) unless $json->get_utf8;
-        $self->json if $guess_json;
-        $self->body( $body );
-    } else {
-        $self->html if $guess_html;
-        $self->body( $self->app->charset_encode( $body ) );
+    if ( $ref && (!$ct || $ct =~ m{^application/json}i) ) {
+        croak "No JSON encoder" unless $self->app->can('_json_internal');
+        $body = $self->app->_json_internal->encode($body);
+        $self->json if !$ct;
+    } elsif ( !$ref ) {
+        $self->html if !$ct;
+    }
+    else {
+        croak "Don't know how to handle non-json reference in response (forgot to serialize?)";
     }
 
+    $self->body( $self->app->charset_encode( $body ) );
     $self->rendered(1);
     return $self;
 }

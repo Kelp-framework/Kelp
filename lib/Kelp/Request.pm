@@ -136,7 +136,7 @@ sub json_content {
     return undef unless $self->is_json;
 
     return try {
-        $self->app->json->decode( $self->raw_body );
+        $self->app->_json_internal->decode( $self->content );
     }
     catch {
         undef;

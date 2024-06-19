@@ -17,6 +17,7 @@
             - Kelp::Test now has a new import flag: '-utf8'
               * Importing with this flag will automatically set Test::More to encode wide characters on output
             - Repeatedly fetching parameters from json request with the param method is now much faster
+            - 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
             - Documentation improvements
 
             [Bug fixes]
@@ -35,6 +36,10 @@
               * Headers, cookies and sessions are unaffected (session encoding must be configured on the middleware level)
               * Please use methods with prefix 'raw_' from Kelp::Request to access encoded request data if needed
               * Not decoding input was a bug which needed to be fixed, but the application was already encoding the response correctly
+            - JSON module now registers a second, separate encoder for internal purposes
+              * The extra encoder will be created with the same options as the normal one, but without utf8
+              * It will not react to runtime changes in config of the main encoder
+              * Request decodes and response encodes will happen using the extra encoder and then encode to application's charset
             - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
               * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
               * Log will happen at 'error' level, while regular errors are going to 'critical'
