@@ -8,17 +8,33 @@ use JsonError;
 my $app = JsonError->new;
 my $t = Kelp::Test->new( app => $app );
 
-# Check if json encoding does not cause json response enconding error
-# This happened in the past beacuse json content type was set before encoding
+# Check if json encoding does not cause json response enconding error (json
+# content type + non-reference body). This happened in the past because json
+# content type was set before encoding and not cleared when an error occured.
 
-$t->request( GET '/json' )
-    ->code_is(500)
-    ->content_unlike(qr{Data must be a reference});
+subtest 'testing mode development' => sub {
+    $app->mode('development');
 
-# TODO: This can be hopefully fixed in the future, but it requires more risky
-# changes
-$t->request( GET '/forced-json' )
-    ->code_is(500)
-    ->content_like(qr{Data must be a reference});
+    $t->request( GET '/json' )
+        ->code_is(500)
+        ->content_unlike(qr{Don't know how to handle non-json reference});
+
+    $t->request( GET '/forced-json' )
+        ->code_is(500)
+        ->content_unlike(qr{Don't know how to handle non-json reference});
+};
+
+subtest 'testing mode deployment' => sub {
+    $app->mode('deployment');
+
+    $t->request( GET '/json' )
+        ->code_is(500)
+        ->content_like(qr{Five Hundred});
+
+    $t->request( GET '/forced-json' )
+        ->code_is(500)
+        ->content_like(qr{Five Hundred});
+};
 
 done_testing;
+

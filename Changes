@@ -38,6 +38,8 @@
             - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
               * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
               * Log will happen at 'error' level, while regular errors are going to 'critical'
+            - Application main handler now clears all headers when an exception is caught
+              * This fixes a class of bugs where content encoding of the error page was mismatching the rendered error
 
             [Tweaks]
             - 'kelp' template has been adjusted to match framework looks

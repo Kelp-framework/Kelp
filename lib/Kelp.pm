@@ -274,6 +274,12 @@ sub psgi {
     catch {
         my $exception = $_;
 
+        # CONTEXT CHANGE: we need to clear response state because anything that
+        # was rendered beforehand is no longer valid. Body and code will be
+        # replaced automatically with render methods, but headers must be
+        # cleared explicitly
+        $res->headers->clear;
+
         if (blessed $exception && $exception->isa('Kelp::Exception')) {
             # only log it as an error if the body is present
             $self->logger( 'error', $exception->body )
@@ -287,7 +293,7 @@ sub psgi {
             # Log error
             $self->logger( 'critical', $message ) if $self->can('logger');
 
-            # Render 500
+            # Render an application erorr (hides details on production)
             $res->render_500($exception);
         }
 
