@@ -232,10 +232,10 @@ Starting with version 2.01, Kelp::Request simplifies input handling and
 improves correctness by automatically decoding path, query parameters and body
 parameters.
 
-Headers (so cookies as well) are unaffected, as they aren't
-consistently supported outside of ASCII range. JSON and session are configured
-separately in modules and middlewares, so they must themselves do the proper
-decoding.
+Headers (so cookies as well) are unaffected, as they aren't consistently
+supported outside of ASCII range. JSON now decodes request data into the proper
+charset instead of flat utf8 if so configured. Sessions are configured
+separately in middlewares, so they must themselves do the proper decoding.
 
 Following methods will return values decoded with charset either from
 C<Content-Type> header or the one specified in the app's configuration:

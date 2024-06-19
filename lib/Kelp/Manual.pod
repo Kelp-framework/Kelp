@@ -62,7 +62,45 @@ omitted adding certain components. This is where Kelp gets to shine. It provides
 a layer on top of Plack and puts everything together into a complete web
 framework.
 
+=head2 New Kelp versions and backward compatibility
+
+Major version 2 of Kelp introduced some breaking changes, especially when it
+comes to how requests are decoded and how the errors are rendered. If you are
+affected and don't want to modify your code, you are welcome to use a fixed
+version C<1.07> (before the big changes). You will be missing on a lot of
+improvements though.
+
+Kelp values backward compatibility, but at the same time it will not be
+hesitant to fix bugs, security issues or major inconveniences where it sees
+necessary. From 2.01 forward, non-bugfix breaking changes will only be
+introduced after a 3-month deprecation period. Changelog will list them under
+C<[Deprecations]> section.
+
 =head1 CREATING A NEW WEB APP
+
+=head2 Quick development using Kelp::Less
+
+For writing quick experimental web apps and to reduce the boiler plate, one
+could use L<Kelp::Less>. In this case all of the code can be put in C<app.psgi>:
+Look up the POD for L<Kelp::Less> for many examples, but to get you started off,
+here is a quick one:
+
+    # app.psgi
+    use Kelp::Less;
+
+    module 'JSON';
+
+    get '/api/:user/?action' => sub {
+        my ( $self, $user, $action ) = @_;
+        my $json = {
+            success => \1,
+            user    => $user,
+            action  => $action // 'ask'
+        };
+        return $json;
+    };
+
+    run;
 
 =head2 Using the C<Kelp> script
 
@@ -74,7 +112,7 @@ skeleton is by using the C<Kelp> script, which comes with this package.
 This will create C<lib/MyApp.pm>, C<app.psgi> and some other files (explained
 below).
 
-To create a L<Kelp::Less> app, use:
+To create a L<Kelp::Less> app file, use:
 
     > Kelp --type=less MyApp
 
@@ -229,6 +267,8 @@ L<Kelp::Base>:
     };
 
     1;
+
+=head1 FRAMEWORK BASICS
 
 =head2 Routing
 
@@ -387,6 +427,329 @@ the necessary arguments.
 
     my $url = $self->route->url('update', id => 1000); # /update/1000
 
+=head2 Reading a HTTP request
+
+All input data comes nicely packed inside L<Kelp::Request>, which inherits
+Plack::Request. It has a coulpe convenience methods and handles charset
+decoding automatically.
+
+=head3 Input data charsets
+
+All request methods showcased below will try to decode request data with either
+charset from the C<Content-Type> header (if present and supported by L<Encode>
+module) or with application charset otherwise.
+
+There are a couple methods starting with C<raw_> which return encoded data. See
+L<Kelp::Request/ENCODING> for details.
+
+=head3 C<param> and friends
+
+The request class has a couple of C<param> methods, which allow quick and easy access to request parameters.
+
+    sub fetch_params {
+        my $self = shift;
+        my $key = 'parameter_name';
+
+        # fetch parameters from query form, body form or JSON body
+        my $json_or_body_or_query = $self->param($key);
+        my $always_query = $self->res->query_param($key);
+        my $always_body = $self->res->body_param($key);
+        my $always_json = $self->res->json_param($key);
+    }
+
+These C<param> methods return a single value with a C<$key> or a list of
+available keys with no arguments.
+
+=head3 C<parameters> and friends
+
+These methods return a L<Hash::MultiValue> object with parameters:
+
+    sub fetch_parameters {
+        my $self = shift;
+
+        # fetch parameters from query form or body form
+        my $body_or_query = $self->res->parameters($key);
+        my $always_query = $self->res->query_parameters($key);
+        my $always_body = $self->res->body_parameters($key);
+    }
+
+They may be more useful to get a lot of parameters in one go.
+
+=head3 C<content>, C<raw_body> and C<json_content>
+
+These methods return the body of the request.
+
+C<content> returns the body properly decoded.
+
+C<json_content> tries to decode the C<content> as json and return a Perl
+structure or C<undef> on error or if it isn't a json request.
+
+C<raw_body> is same as C<content>, but it has the original request encoding.
+
+=head3 File uploads
+
+The request object has a C<uploads|Plack::Request/uploads> property. The
+uploads property returns a reference to a hash containing all uploads.
+
+    sub upload {
+        my $self = shift;
+        my $uploads  = $self->req->uploads;
+
+        # Now $uploads is a hashref to all uploads
+        ...
+    }
+
+For L<Kelp::Less>, then you can use the C<req> reserved word:
+
+    get '/upload' => sub {
+        my $uploads = req->uploads;
+    };
+
+=head3 Other request data
+
+See L<Kelp::Request> and L<Plack::Request> to see how to fetch some other data
+you may find useful.
+
+=head2 Building an HTTP response
+
+Kelp contains an elegant module, called L<Kelp::Response>, which extends
+C<Plack::Response> with several useful methods. Most methods return C<$self>
+after they do the required job. For the sake of the examples below, let's
+assume that all of the code is located inside a route definition.
+
+=head3 Automatic content type
+
+Your routes don't always have to set the C<response> object. You could just
+return a simple scalar value or a reference to a hash, array or anything that
+can be converted to JSON.
+
+    # Content-type automatically set to "text/html"
+    sub text_route {
+        return "There, there ...";
+    }
+
+    # Content-type automatically set to "application/json"
+    sub json_route {
+        return { error => 1,  message => "Fail" };
+    }
+
+=head3 Automatic charset encoding
+
+With Kelp, you don't have to worry about the encoding of the response - most of
+the methods will automatically encode the response into configured
+application's charset. Plaintext and HTML content types will by default have
+C<charset> part added. To make it all work flawlessly, remember to C<use utf8;>
+at the top of your files.
+
+If you'd like to instead take charset into your own hands, you will have to use
+L<Kelp::Response/render_binary> and manually set content types and charsets.
+
+=head3 Rendering text
+
+    # Render simple text
+    $self->res->text->render("It works!");
+
+=head3 Rendering HTML
+
+    $self->res->html->render("<h1>It works!</h1>");
+
+=head3 Custom content type
+
+    $self->res->set_content_type('image/png');
+
+=head3 Return 404 or 500 errors
+
+    sub some_route {
+        my $self = shift;
+        if ($missing) {
+            return $self->res->render_404;
+        }
+        if ($broken) {
+            return $self->res->render_500;
+        }
+    }
+
+=head3 Templates
+
+    sub hello {
+        my ( $self, $name ) = @_;
+        $self->res->template( 'hello.tt', { name => $name } );
+    }
+
+The above example will render the contents of C<hello.tt>, and it will set the
+content-type to C<text/html>. To set a different content-type, use
+C<set_content_type> or any of its aliases:
+
+    sub hello_txt {
+        my ( $self, $name ) = @_;
+        $self->res->text->template( 'hello_txt.tt', { name => $name } );
+    }
+
+=head3 Headers
+
+    $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
+
+=head3 Serving static files
+
+If you want to serve static pages, you can use the L<Plack::Middleware::Static>
+middleware that comes with Plack. Here is an example configuration that serves
+files in your C<public> folder (under the Kelp root folder) from URLs that
+begin with C</public>:
+
+    # conf/config.pl
+    {
+        middleware      => [qw/Static/],
+        middleware_init => {
+            Static => {
+                path => qr{^/public/},
+                root => '.',
+            }
+        }
+    };
+
+=head3 Delayed responses
+
+To send a delayed response, have your route return a subroutine.
+
+    sub delayed {
+        my $self = shift;
+        return sub {
+            my $responder = shift;
+            $self->res->code(200);
+            $self->res->text->body("Better late than never.");
+            $responder->($self->res->finalize);
+        };
+    }
+
+See the L<PSGI|PSGI/Delayed-Response-and-Streaming-Body> pod for more
+information and examples.
+
+=head1 CONFIGURING THE APPLICATION
+
+=head2 Adding middleware
+
+Kelp, being Plack-centric, will let you easily add middleware. There are three
+possible ways to add middleware to your application, and all three ways can be
+used separately or together.
+
+=head3 Using the configuration
+
+Adding middleware in your configuration is probably the easiest and best way for
+you. This way you can load different middleware for each running mode, e.g.
+C<Debug> in development only.
+
+Add middleware names to the C<middleware> array in your configuration file and
+the corresponding initializing arguments in the C<middleware_init> hash:
+
+    # conf/development.pl
+    {
+        middleware      => [qw/Session Debug/],
+        middleware_init => {
+            Session => { store => 'File' }
+        }
+    }
+
+The middleware will be added in the order you specify in the C<middleware>
+array.
+
+=head3 In C<app.psgi>:
+
+    # app.psgi
+    use MyApp;
+    use Plack::Builder;
+
+    my $app = MyApp->new();
+
+    builder {
+        enable "Plack::Middleware::ContentLength";
+        $app->run;
+    };
+
+=head3 By overriding the L<Kelp/run> subroutine in C<lib/MyApp.pm>:
+
+Make sure you call C<SUPER> first, and then wrap new middleware around the
+returned app.
+
+    # lib/MyApp.pm
+    sub run {
+        my $self = shift;
+        my $app = $self->SUPER::run(@_);
+        $app = Plack::Middleware::ContentLength->wrap($app);
+        return $app;
+    }
+
+Note that any middleware defined in your config file will be added first.
+
+=head2 Pluggable modules
+
+=head3 How to load modules using the config
+
+Kelp can be extended using custom I<modules>. There are two modules that are
+B<always> loaded by each application instance. Those are C<Config> and
+C<Routes>. The reason behind this is that each and every application always
+needs a router and configuration. All other modules must be loaded either using
+the L<Kelp/load_module> method, or using the C<modules> key in the
+configuration. The default configuration already loads these modules:
+C<Template>, C<Logger> and C<JSON>. Your configuration can remove some and/or
+add others. The configuration key C<modules_init> may contain hashes with
+initialization arguments. See L<Kelp::Module> for configuration examples.
+
+=head3 Creating your own module
+
+Each new module must be a
+subclass of the C<Kelp::Module> class. Modules' job is to initialize and
+register new methods into the web application class. Here is a simple module
+which initializes an extremely simple cache:
+
+    package Kelp::Module::ExampleCache;
+
+    use Kelp::Base 'Kelp::Module';
+
+    sub build {
+        my ($self, %args) = @_;
+
+        my $case_sensitive = !$args{case_insensitive};
+        my %cache;
+
+        $self->register(cache_set => sub {
+            my ($app, $key, $value) = @_;
+            $cache{$case_sensitive ? $key : lc $key} = $value;
+        });
+
+        $self->register(cache_get => sub {
+            my ($app, $key) = @_;
+            return $cache{$case_sensitive ? $key : lc $key};
+        });
+
+    }
+
+    1;
+
+What is happening here?
+
+=over
+
+=item
+
+First we create a class C<Kelp::Module::ExampleCache> which inherits C<Kelp::Module>.
+
+=item
+
+Then, we override the C<build> method (of C<Kelp::Module>), we fetch the
+C<case_insensitive> value from the configuration (configured under
+C<modules_init.ExampleCache.case_insensitive>).
+
+=item
+
+Last step is to initialize the hash which will store the keys and register two
+methods into the web application via the C<register> method. They will be ready
+to use in the main application class.
+
+=back
+
+See more examples and POD at L<Kelp::Module>.
+
+
 =head2 Reblessing into controller classes
 
 All of the examples here show routes which take a instance of the web
@@ -463,84 +826,7 @@ You no longer have to prefix destinations with the base controller class name.
 
     }
 
-
-=head2 Quick development using Kelp::Less
-
-For writing quick experimental web apps and to reduce the boiler plate, one
-could use L<Kelp::Less>. In this case all of the code can be put in C<app.psgi>:
-Look up the POD for C<Kelp::Less> for many examples, but to get you started off,
-here is a quick one:
-
-    # app.psgi
-    use Kelp::Less;
-
-    module 'JSON';
-
-    get '/api/:user/?action' => sub {
-        my ( $self, $user, $action ) = @_;
-        my $json = {
-            success => \1,
-            user    => $user,
-            action  => $action // 'ask'
-        };
-        return $json;
-    };
-
-    run;
-
-=head2 Adding middleware
-
-Kelp, being Plack-centric, will let you easily add middleware. There are three
-possible ways to add middleware to your application, and all three ways can be
-used separately or together.
-
-=head3 Using the configuration
-
-Adding middleware in your configuration is probably the easiest and best way for
-you. This way you can load different middleware for each running mode, e.g.
-C<Debug> in development only.
-
-Add middleware names to the C<middleware> array in your configuration file and
-the corresponding initializing arguments in the C<middleware_init> hash:
-
-    # conf/development.pl
-    {
-        middleware      => [qw/Session Debug/],
-        middleware_init => {
-            Session => { store => 'File' }
-        }
-    }
-
-The middleware will be added in the order you specify in the C<middleware>
-array.
-
-=head3 In C<app.psgi>:
-
-    # app.psgi
-    use MyApp;
-    use Plack::Builder;
-
-    my $app = MyApp->new();
-
-    builder {
-        enable "Plack::Middleware::ContentLength";
-        $app->run;
-    };
-
-=head3 By overriding the L<Kelp/run> subroutine in C<lib/MyApp.pm>:
-
-Make sure you call C<SUPER> first, and then wrap new middleware around the
-returned app.
-
-    # lib/MyApp.pm
-    sub run {
-        my $self = shift;
-        my $app = $self->SUPER::run(@_);
-        $app = Plack::Middleware::ContentLength->wrap($app);
-        return $app;
-    }
-
-Note that any middleware defined in your config file will be added first.
+=head1 NEXT STEPS
 
 =head2 Testing
 
@@ -612,196 +898,9 @@ Run the rest as usual, using C<prove>:
 
 Take a look at the L<Kelp::Test> for details and more examples.
 
-=head2 Building an HTTP response
+=head2 Common problems and solutions
 
-Kelp contains an elegant module, called L<Kelp::Response>, which extends
-C<Plack::Response> with several useful methods. Most methods return C<$self>
-after they do the required job.
-For the sake of the examples below, let's assume that all of the code is located
-inside a route definition.
-
-=head3 Automatic content type
-
-Your routes don't always have to set the C<response> object. You could just
-return a simple scalar value or a reference to a hash, array or anything that
-can be converted to JSON.
-
-    # Content-type automatically set to "text/html"
-    sub text_route {
-        return "There, there ...";
-    }
-
-    # Content-type automatically set to "application/json"
-    sub json_route {
-        return { error => 1,  message => "Fail" };
-    }
-
-=head3 Rendering text
-
-    # Render simple text
-    $self->res->text->render("It works!");
-
-=head3 Rendering HTML
-
-    $self->res->html->render("<h1>It works!</h1>");
-
-=head3 Custom content type
-
-    $self->res->set_content_type('image/png');
-
-=head3 Return 404 or 500 errors
-
-    sub some_route {
-        my $self = shift;
-        if ($missing) {
-            return $self->res->render_404;
-        }
-        if ($broken) {
-            return $self->res->render_500;
-        }
-    }
-
-=head3 Templates
-
-    sub hello {
-        my ( $self, $name ) = @_;
-        $self->res->template( 'hello.tt', { name => $name } );
-    }
-
-The above example will render the contents of C<hello.tt>, and it will set the
-content-type to C<text/html>. To set a different content-type, use
-C<set_content_type> or any of its aliases:
-
-    sub hello_txt {
-        my ( $self, $name ) = @_;
-        $self->res->text->template( 'hello_txt.tt', { name => $name } );
-    }
-
-=head3 Headers
-
-    $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
-
-=head3 Serving static files
-
-If you want to serve static pages, you can use the L<Plack::Middleware::Static>
-middleware that comes with Plack. Here is an example configuration that serves
-files in your C<public> folder (under the Kelp root folder) from URLs that
-begin with C</public>:
-
-    # conf/config.pl
-    {
-        middleware      => [qw/Static/],
-        middleware_init => {
-            Static => {
-                path => qr{^/public/},
-                root => '.',
-            }
-        }
-    };
-
-=head3 Uploading files
-
-File uploads are handled by L<Kelp::Request>, which inherits Plack::Request
-and has its C<uploads|Plack::Request/uploads> property. The uploads property returns a
-reference to a hash containing all uploads.
-
-    sub upload {
-        my $self = shift;
-        my $uploads  = $self->req->uploads;
-
-        # Now $uploads is a hashref to all uploads
-        ...
-    }
-
-For L<Kelp::Less>, then you can use the C<req> reserved word:
-
-    get '/upload' => sub {
-        my $uploads = req->uploads;
-    };
-
-=head3 Delayed responses
-
-To send a delayed response, have your route return a subroutine.
-
-    sub delayed {
-        my $self = shift;
-        return sub {
-            my $responder = shift;
-            $self->res->code(200);
-            $self->res->text->body("Better late than never.");
-            $responder->($self->res->finalize);
-        };
-    }
-
-See the L<PSGI|PSGI/Delayed-Response-and-Streaming-Body> pod for more
-information and examples.
-
-=head2 Pluggable modules
-
-Kelp can be extended using custom I<modules>. Each new module must be a subclass
-of the C<Kelp::Module> namespace. Modules' job is to initialize and register new
-methods into the web application class. The following is the full code of the
-L<Kelp::Module::JSON> for example:
-
-    package Kelp::Module::JSON;
-
-    use Kelp::Base 'Kelp::Module';
-    use JSON;
-
-    sub build {
-        my ( $self, %args ) = @_;
-        my $json = JSON::MaybeXS->new(
-            map { $_ => $args{$_} } keys %args
-        );
-        $self->register( json => $json );
-    }
-
-    1;
-
-What is happening here?
-
-=over
-
-=item
-
-First we create a class C<Kelp::Module::JSON> which inherits C<Kelp::Module>.
-
-=item
-
-Then, we override the C<build> method (of C<Kelp::Module>), create a new JSON
-object and register it into the web application via the C<register> method.
-
-=back
-
-If we instruct our web application to load the C<JSON::MaybeXS> module, it will have a
-new method C<json> which will be a link to the C<JSON::MaybeXS> object initialized in the
-module.
-
-See more examples and POD at L<Kelp::Module>.
-
-=head3 How to load modules using the config
-
-There are two modules that are B<always> loaded by each application instance.
-Those are C<Config> and C<Routes>. The reason behind this is that each and every
-application always needs a router and configuration.
-All other modules must be loaded either using the L<Kelp/load_module> method, or
-using the C<modules> key in the configuration. The default configuration already
-loads these modules: C<Template>, C<Logger> and C<JSON>. Your configuration can
-remove some and/or add others. The configuration key C<modules_init> may contain
-hashes with initialization arguments. See L<Kelp::Module> for configuration
-examples.
-
-=head1 NEXT STEPS
-
-To learn more, see the documentation for the following modules:
-
-L<Kelp::Manual::Cookbook>
-
-L<Kelp>
-
-L<Kelp::Routes>
-
-L<Plack>
+You may want to take a look at our L<Kelp::Manual::Cookbook>.
 
 =head1 SUPPORT
 
