@@ -24,24 +24,38 @@ sub set_content_type {
     return $self;
 }
 
+sub set_charset {
+    my ( $self, $charset ) = @_;
+    $charset //= $self->app->charset;
+
+    my $ct = $self->content_type;
+
+    croak 'Cannot set_charset in response before content_type is set'
+        unless $ct;
+
+    $ct =~ s{;\s*charset=[^;\$]+}{}i;
+    $self->set_content_type("$ct; charset=" . $charset);
+    return $self;
+}
+
 sub text {
     my $self = shift;
-    return $self->set_content_type( 'text/plain; charset=' . $self->app->charset );
+    return $self->set_content_type( 'text/plain' )->set_charset;
 }
 
 sub html {
     my $self = shift;
-    return $self->set_content_type( 'text/html; charset=' . $self->app->charset );
+    return $self->set_content_type( 'text/html' )->set_charset;
 }
 
 sub json {
     my $self = shift;
-    return $self->set_content_type('application/json');
+    return $self->set_content_type( 'application/json' );
 }
 
 sub xml {
     my $self = shift;
-    return $self->set_content_type('application/xml');
+    return $self->set_content_type( 'application/xml' );
 }
 
 sub finalize {
@@ -329,6 +343,19 @@ Sets the content type of the response and returns C<$self>.
     # Inside a route definition
     $self->res->set_content_type('image/png');
 
+=head2 set_charset
+
+    $self->res->json->set_charset;
+    $self->res->text->set_charset('UTF-16');
+
+Sets the charset inside the content type header to a given value. If the value
+is not given, sets it to application's charset.
+
+Returns C<$self>.
+
+B<WARNING>: setting a custom charset means you will have to use L</render_binary>, as
+using L</render> will still encode to application's charset.
+
 =head2 text, html, json, xml
 
 These methods are shortcuts for C<set_content_type> with the corresponding type.
@@ -338,6 +365,8 @@ chained.
     $self->res->text->render("word");
     $self->res->html->render("<p>word</p>");
     $self->res->json->render({ word => \1 });
+
+NOTE: C<text> and C<html> will also call L</set_charset>.
 
 =head2 set_header
 
@@ -363,8 +392,8 @@ Set the response code.
 
 =head2 render_binary
 
-Render binary files, such as images, etc. You must explicitly set the content_type
-before that.
+Render binary data such as byte streams, files, images, etc. You must
+explicitly set the content_type before that.
 
     use Kelp::Less;
 
