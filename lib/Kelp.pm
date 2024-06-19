@@ -8,6 +8,7 @@ use Try::Tiny;
 use Sys::Hostname;
 use Plack::Util;
 use Class::Inspector;
+use List::Util qw(any);
 use Scalar::Util qw(blessed);
 use Encode qw(encode decode);
 
@@ -334,6 +335,11 @@ sub named {
 #----------------------------------------------------------------
 # Utility
 #----------------------------------------------------------------
+
+sub is_production {
+    my $self = shift;
+    return any { lc $self->mode eq $_ } qw(deployment production);
+}
 
 sub url_for {
     my ( $self, $name, @args ) = @_;
@@ -750,6 +756,11 @@ application (based on configuration).
 =head2 charset_decode
 
 Shortcut methods, which encode or decode a string using the application's current L</charset>.
+
+=head2 is_production
+
+Returns whether the application is in production mode. Checks if L</mode> is
+either C<deployment> or C<production>.
 
 =head1 AUTHOR
 

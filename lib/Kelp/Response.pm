@@ -151,29 +151,34 @@ sub render_exception {
     return $self->render_error($exception->code);
 }
 
+sub render_401 {
+    $_[0]->render_error( 401 );
+}
+
+sub render_403 {
+    $_[0]->render_error( 403 );
+}
+
 sub render_404 {
-    $_[0]->render_error( 404, "File Not Found" );
+    $_[0]->render_error( 404 );
 }
 
 sub render_500 {
     my ( $self, $error ) = @_;
 
-    if ( !defined $error || $self->app->mode eq 'deployment' ) {
+    # Do not leak information on production!
+    if ( $self->app->is_production ) {
         return $self->render_error;
     }
 
-    # if render_500 gets blessed object as error stringify it
-    $error = ref $error if blessed $error;
+    # if render_500 gets blessed object as error, stringify it
+    $error = "$error" if blessed $error;
+    $error //= 'No error, something is wrong';
 
-    return $self->set_code(500)->render($error);
-}
-
-sub render_401 {
-    $_[0]->render_error( 401, "Unauthorized" );
-}
-
-sub render_403 {
-    $_[0]->render_error( 403, "Forbidden" );
+    # at this point, error will never be in HTML, since the exception body
+    # would have to be HTML itself. Try to nest it inside a template. NOTE: We
+    # don't currently handle ref errors here which aren't objects
+    return $self->render_error(500, $error);
 }
 
 sub redirect {

@@ -4,7 +4,7 @@
             - Added Kelp::Util::adapt_psgi function (used by the new 'psgi' route flag)
             - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
             - Methods with prefix 'raw_' were added to Kelp::Request, returning encoded request data (see "Bug fixes" below)
-            - Added charset_encode, charset_decode methods to Kelp
+            - Added charset_encode, charset_decode, is_production methods to Kelp
             - Added charset method to Kelp::Request
             - Added charset_decode method to Kelp::Request, which decodes using either request or application charset
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
