@@ -3,9 +3,10 @@ package Kelp::Template;
 use Kelp::Base;
 use Template::Tiny;
 use Path::Tiny;
+use Carp;
 
 attr paths => sub { [] };
-attr encoding => 'utf8';
+attr encoding => 'UTF-8';
 attr tt => sub { Template::Tiny->new };
 
 sub process {
@@ -15,19 +16,14 @@ sub process {
 
     # A GLOB or an IO object will be read and returned as a SCALAR template
     # No reference means a file name
-    if ( $ref =~ /^IO/ || $ref eq 'GLOB' || !$ref ) {
-        if ( !$ref ) {
-            for my $p ( '.', @{ $self->paths } ) {
-                if ( -e ( my $fullpath = "$p/$template" ) ) {
-                    $template = $fullpath;
-                    last;
-                }
-            }
-        }
+    if ( !$ref ) {
+        $template = $self->_read_file($self->find_template($template));
+    }
+    elsif ( $ref =~ /^IO/ || $ref eq 'GLOB' ) {
         $template = $self->_read_file($template);
     }
     elsif ( $ref ne 'SCALAR' ) {
-        die "Template reference must be SCALAR, GLOB or an IO object";
+        croak "Template reference must be SCALAR, GLOB or an IO object";
     }
 
     my $output;
@@ -35,15 +31,24 @@ sub process {
     return $output;
 }
 
+sub find_template {
+    my ( $self, $name ) = @_;
+
+    my $file;
+    for my $p ( '.', @{ $self->paths } ) {
+        $file = "$p/$name";
+        return $file if -e $file;
+    }
+
+    return undef;
+}
+
 sub _read_file {
     my ( $self, $file ) = @_;
 
-    local $/ = undef;
-    my $text =
-        ref $file
-        ? <$file>
-        : path($file)->slurp({ binmode => ':encoding(' . $self->encoding . ')' })
-    ;
+    my $text = ref $file ? <$file> : path($file)->slurp(
+        { binmode => ':encoding(' . $self->encoding . ')' }
+    );
 
     return \$text;
 }
@@ -75,7 +80,7 @@ An arrayref of paths to use when looking for template files.
 
 =head2 encoding
 
-Specifies the text encoding of the template files. The default value is C<utf8>.
+Specifies the text encoding of the template files. The default value is C<UTF-8>.
 
 =head1 METHODS
 
@@ -87,3 +92,4 @@ a reference to a text, a GLOB or an IO object.
     say $t->process(\"Hello [% who %]", { who => 'you' });
 
 =cut
+
