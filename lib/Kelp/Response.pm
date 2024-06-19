@@ -60,6 +60,7 @@ sub xml {
 
 sub finalize {
     my $self = shift;
+
     my $arr  = $self->SUPER::finalize(@_);
     pop @$arr if $self->partial;
     return $arr;
@@ -111,14 +112,14 @@ sub render {
 }
 
 sub render_binary {
-    my $self = shift;
-    my $body = shift // '';
+    my ( $self, $body ) = @_;
+    $body //= '';
 
     # Set code 200 if the code has not been set
     $self->set_code(200) unless $self->code;
 
     if ( !$self->content_type ) {
-        die "Content-type must be explicitly set for binaries";
+        croak "Content-type must be explicitly set for binaries";
     }
 
     $self->body($body);
@@ -207,8 +208,8 @@ sub template {
     my ( $self, $template, $vars, @rest ) = @_;
 
     # Do we have a template module loaded?
-    die "No template module loaded"
-      unless $self->app->can('template');
+    croak "No template module loaded"
+        unless $self->app->can('template');
 
     my $output = $self->app->template( $template, $vars, @rest );
     $self->render($output);
