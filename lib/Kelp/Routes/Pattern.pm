@@ -4,39 +4,52 @@ use Carp;
 
 use Kelp::Base;
 
-attr pattern  => sub { die "pattern is required" };
-attr via      => undef;
-attr method   => sub { $_[0]->via };
+attr pattern => sub { die "pattern is required" };
+attr via => undef;
+attr method => sub { $_[0]->via };
 attr has_name => undef;
-attr name     => sub { $_[0]->pattern };
-attr check    => sub { {} };
+attr name => sub { $_[0]->pattern };
+attr check => sub { {} };
 attr defaults => sub { {} };
-attr bridge   => 0;
-attr regex    => sub { $_[0]->_build_regex };
-attr named    => sub { {} };
-attr param    => sub { [] };
-attr to       => undef;
-attr dest     => undef;
+attr bridge => 0;
+attr regex => sub { $_[0]->_build_regex };
+attr named => sub { {} };
+attr param => sub { [] };
+attr to => undef;
+attr dest => undef;
 
 # helpers for matching different types of wildcards
-sub __noslash  { 1 == grep { $_[0] eq $_ } ':', '?' }
-sub __matchall { 1 == grep { $_[0] eq $_ } '*', '>' }
-sub __optional { 1 == grep { $_[0] eq $_ } '?', '>' }
+sub __noslash
+{
+    1 == grep { $_[0] eq $_ } ':', '?';
+}
 
-sub new {
+sub __matchall
+{
+    1 == grep { $_[0] eq $_ } '*', '>';
+}
+
+sub __optional
+{
+    1 == grep { $_[0] eq $_ } '?', '>';
+}
+
+sub new
+{
     my $class = shift;
     my $self = $class->SUPER::new(@_);
-    $self->has_name(defined $self->{name} && length $self->{name}); # remember if pattern was named
+    $self->has_name(defined $self->{name} && length $self->{name});    # remember if pattern was named
 
     $self->_fix_pattern;
-    $self->regex; # Compile the regex
+    $self->regex;    # Compile the regex
     return $self;
 }
 
-sub _fix_pattern {
-    my ( $self ) = @_;
+sub _fix_pattern
+{
+    my ($self) = @_;
     my $pattern = $self->pattern;
-    return if ref $pattern; # only fix non-regex patterns
+    return if ref $pattern;    # only fix non-regex patterns
 
     # operations performed
     $pattern =~ s{/+}{/}g;
@@ -44,8 +57,9 @@ sub _fix_pattern {
     $self->pattern($pattern);
 }
 
-sub _rep_regex {
-    my ( $self, $char, $switch, $token ) = @_;
+sub _rep_regex
+{
+    my ($self, $char, $switch, $token) = @_;
     my $re;
 
     my $optional = sub {
@@ -55,7 +69,7 @@ sub _rep_regex {
     };
 
     # no token - only valid for the wildcard * and slurpy >
-    if ( !defined $token ) {
+    if (!defined $token) {
 
         # do nothing
         return $char . $switch
@@ -66,12 +80,12 @@ sub _rep_regex {
     else {
         push @{$self->{_tokens}}, $token;
 
-        my ( $prefix, $suffix ) = ( "(?<$token>", ')' );
-        if ( __noslash($switch) ) {
-            $re = $char . $prefix . ( $self->check->{$token} // '[^\/]+' ) . $suffix;
+        my ($prefix, $suffix) = ("(?<$token>", ')');
+        if (__noslash($switch)) {
+            $re = $char . $prefix . ($self->check->{$token} // '[^\/]+') . $suffix;
         }
-        elsif ( __matchall($switch) ) {
-            $re = $char . $prefix .  ( $self->check->{$token} // '.+' ) . $suffix;
+        elsif (__matchall($switch)) {
+            $re = $char . $prefix . ($self->check->{$token} // '.+') . $suffix;
         }
     }
 
@@ -79,14 +93,15 @@ sub _rep_regex {
     return $re;
 }
 
-sub _build_regex {
+sub _build_regex
+{
     my $self = shift;
     $self->{_tokens} = [];
 
     return $self->pattern if ref $self->pattern eq 'Regexp';
 
     my $PAT = '(.?)([:*?>])(\w+)?';
-    my $pattern =  $self->pattern;
+    my $pattern = $self->pattern;
 
     # Curly braces and brackets are only used for separation.
     # We replace all of them with \0, then convert the pattern
@@ -101,8 +116,9 @@ sub _build_regex {
     return qr{^$pattern};
 }
 
-sub _rep_build {
-    my ( $self, $switch, $token, %args ) = @_;
+sub _rep_build
+{
+    my ($self, $switch, $token, %args) = @_;
 
     if (!defined $token) {
         return $switch unless __matchall($switch);
@@ -110,23 +126,24 @@ sub _rep_build {
     }
 
     my $rep = $args{$token} // $self->defaults->{$token} // '';
-    if ( !__optional($switch) && !$rep) {
+    if (!__optional($switch) && !$rep) {
         return '{?' . $token . '}';
     }
 
     my $check = $self->check->{$token};
-    if ( $check && $args{$token} !~ $check ) {
+    if ($check && $args{$token} !~ $check) {
         return '{!' . $token . '}';
     }
 
     return $rep;
 }
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
 
     my $pattern = $self->pattern;
-    if ( ref $pattern eq 'Regexp' ) {
+    if (ref $pattern eq 'Regexp') {
         carp "Can't build a path for regular expressions";
         return;
     }
@@ -142,29 +159,31 @@ sub build {
     return $pattern;
 }
 
-sub match {
-    my ( $self, $path, $method ) = @_;
-    return 0 if ( $self->method && $self->method ne ( $method // '' ) );
+sub match
+{
+    my ($self, $path, $method) = @_;
+    return 0 if ($self->method && $self->method ne ($method // ''));
     return 0 unless my @matched = $path =~ $self->regex;
-    my $has_matches = $#+; # see perlvar @+
+    my $has_matches = $#+;    # see perlvar @+
 
     # Initialize the named parameters hash and its default values
-    my %named = ( %{ $self->defaults }, %+ );
+    my %named = (%{$self->defaults}, %+);
 
-    if ( @{ $self->{_tokens} } ) {
+    if (@{$self->{_tokens}}) {
+
         # values of the named placeholders in the order they appear in the
         # regex.
-        @matched = map { $named{$_} } @{ $self->{_tokens} };
+        @matched = map { $named{$_} } @{$self->{_tokens}};
     }
-    elsif ( $has_matches ) {
+    elsif ($has_matches) {
         @matched = map { length($_ // '') ? $_ : undef } @matched;
     }
     else {
         @matched = ();
     }
 
-    $self->named( \%named );
-    $self->param( \@matched );
+    $self->named(\%named);
+    $self->param(\@matched);
 
     return 1;
 }

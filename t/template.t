@@ -7,10 +7,10 @@ use utf8;
 
 my $text = "Hello, world! ☃\n";
 
-my $t = Kelp::Template->new( paths => ['views', 't/views']);
-is $t->process( \$text ), $text, "Render SCALAR";
+my $t = Kelp::Template->new(paths => ['views', 't/views']);
+is $t->process(\$text), $text, "Render SCALAR";
 is $t->process('home.tt'), $text, "Render file";
-is $t->process(\*DATA ), $text, "Render GLOB";
+is $t->process(\*DATA), $text, "Render GLOB";
 my $f = IO::File->new("t/views/home.tt", "<:encoding(utf8)") or die $!;
 is $t->process($f), $text, "Render IO object";
 

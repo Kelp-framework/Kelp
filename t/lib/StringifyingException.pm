@@ -6,9 +6,10 @@ attr data => undef;
 use overload
     q{""} => 'stringify',
     fallback => 1,
-;
+    ;
 
-sub stringify {
+sub stringify
+{
     return 'Exception with data: [' . (join ',', @{$_[0]->data}) . ']';
 }
 

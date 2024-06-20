@@ -4,13 +4,14 @@ use Kelp::Base 'Kelp::Module';
 
 use JSON::MaybeXS;
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
     my $json = JSON::MaybeXS->new(%args);
     my $json_internal = JSON::MaybeXS->new(%args, utf8 => 0);
 
-    $self->register( json => $json );
-    $self->register( _json_internal => $json_internal );
+    $self->register(json => $json);
+    $self->register(_json_internal => $json_internal);
 }
 
 1;

@@ -5,19 +5,20 @@ use Plack::Util;
 
 my $DEFAULT_ROUTER = 'Kelp::Routes';
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
 
     my $router = delete($args{router}) // ('+' . $DEFAULT_ROUTER);
 
-    my $router_class = Plack::Util::load_class( $router, $DEFAULT_ROUTER );
-    my $r = $router_class->new( %args );
+    my $router_class = Plack::Util::load_class($router, $DEFAULT_ROUTER);
+    my $r = $router_class->new(%args);
 
     # Register two methods:
     # * routes - contains the routes instance
     # * add_route - a shortcut to the 'add' method
     $self->register(
-        routes    => $r,
+        routes => $r,
         add_route => sub {
             my $app = shift;
             return $r->add(@_);

@@ -2,15 +2,16 @@ package Kelp::Module::Logger::Simple;
 use Kelp::Base 'Kelp::Module::Logger';
 use Plack::Util;
 
-sub _logger {
-    my ( $self, %args ) = @_;
+sub _logger
+{
+    my ($self, %args) = @_;
     return $self->SUPER::_logger(
         outputs => [
             [
                 'Screen',
                 min_level => $args{min_level} // 'debug',
-                newline   => 1,
-                stderr    => 1
+                newline => 1,
+                stderr => 1
             ]
         ]
     );

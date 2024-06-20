@@ -3,7 +3,8 @@ use Kelp::Base 'Kelp::Module::Config';
 
 attr ext => 'null';
 
-sub load {
+sub load
+{
     return {
         injected => 1
     };

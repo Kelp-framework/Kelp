@@ -1,7 +1,8 @@
 package MyApp::Routes;
 
-sub greet {
-    my ( $self, $name ) = @_;
+sub greet
+{
+    my ($self, $name) = @_;
     return "OK $name";
 }
 

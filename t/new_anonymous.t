@@ -2,7 +2,7 @@ package TestApp;
 
 use Kelp::Base 'Kelp';
 
-sub hello {}
+sub hello { }
 
 1;
 
@@ -18,9 +18,10 @@ use Scalar::Util qw(blessed refaddr);
 my ($app1, $app2);
 
 lives_ok sub {
-    $app1 = TestApp->new_anon( mode => 'test' );
-    $app2 = TestApp->new_anon( mode => 'test' );
-}, 'construction ok';
+    $app1 = TestApp->new_anon(mode => 'test');
+    $app2 = TestApp->new_anon(mode => 'test');
+    },
+    'construction ok';
 
 ok $app1, 'first anonymous app ok';
 ok $app2, 'second anonymous app ok';
@@ -45,18 +46,24 @@ is $app1->routes->routes->[0]->to, 'TestApp::hello', 'route destination ok';
 
 # Check for possible string eval problems
 throws_ok sub {
-    Kelp::new_anon(qq[';#\ndie 'not what was expected']); # <- try hack the class name
-}, qr/invalid class for new_anon/i, 'eval checks ok';
+    Kelp::new_anon(qq[';#\ndie 'not what was expected']);    # <- try hack the class name
+    },
+    qr/invalid class for new_anon/i,
+    'eval checks ok';
 
 throws_ok sub {
-    Kelp::new_anon(undef); # <- silly but possible usage
-}, qr/invalid class for new_anon/i, 'eval checks ok';
+    Kelp::new_anon(undef);    # <- silly but possible usage
+    },
+    qr/invalid class for new_anon/i,
+    'eval checks ok';
 
 # The limitation is that we can't mix ->new and ->new_anon
 throws_ok sub {
-    $app1 = Kelp->new( mode => 'test' );
-    $app2 = Kelp->new_anon( mode => 'test' );
-}, qr/redefining of .+ not allowed/i, 'limitations ok';
+    $app1 = Kelp->new(mode => 'test');
+    $app2 = Kelp->new_anon(mode => 'test');
+    },
+    qr/redefining of .+ not allowed/i,
+    'limitations ok';
 
 done_testing;
 

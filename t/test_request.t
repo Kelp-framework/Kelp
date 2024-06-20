@@ -7,16 +7,15 @@ use Test::Deep;
 use HTTP::Request::Common;
 use URI::Escape;
 
-my $app = Kelp->new( mode => 'test' );
-my $t = Kelp::Test->new( app => $app );
+my $app = Kelp->new(mode => 'test');
+my $t = Kelp::Test->new(app => $app);
 
 # Request
 {
-    $app->add_route( '/a' => sub { 1 } );
-    $t->request_ok( GET '/a' );
-    $t->request( GET '//a' )->code_isnt(200);
+    $app->add_route('/a' => sub { 1 });
+    $t->request_ok(GET '/a');
+    $t->request(GET '//a')->code_isnt(200);
 }
-
 
 # Cookies
 {
@@ -42,9 +41,9 @@ my $t = Kelp::Test->new( app => $app );
     );
 
     $t->cookies->set_cookie(undef, $user_cookie_name, $user_cookie_val);
-    $t->request_ok( GET '/auth' );
-    $t->request_ok( GET '/user/foo' )->content_is($cookie_val);
-    $t->request_ok( GET '/user/' . uri_escape($user_cookie_name) )->content_is($user_cookie_val);
+    $t->request_ok(GET '/auth');
+    $t->request_ok(GET '/user/foo')->content_is($cookie_val);
+    $t->request_ok(GET '/user/' . uri_escape($user_cookie_name))->content_is($user_cookie_val);
 
     # check if tester itself handles cookies
     is_deeply

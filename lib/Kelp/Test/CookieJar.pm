@@ -7,14 +7,16 @@ use URI::Escape;
 
 attr cookies => sub { {} };
 
-sub set_cookie {
+sub set_cookie
+{
     my ($self, undef, $name, $value) = @_;
 
     $self->cookies->{$name} = $value;
     return 1;
 }
 
-sub get_cookies {
+sub get_cookies
+{
     my ($self, undef, @names) = @_;
 
     my %ret;
@@ -30,20 +32,22 @@ sub get_cookies {
     }
 }
 
-sub clear {
+sub clear
+{
     my ($self, undef, undef, $name) = @_;
 
     if ($name) {
         delete $self->cookies->{$name};
     }
     else {
-        %{ $self->cookies } = ();
+        %{$self->cookies} = ();
     }
 
     return $self;
 }
 
-sub add_cookie_header {
+sub add_cookie_header
+{
     my ($self, $request) = @_;
 
     my %c = %{$self->cookies};
@@ -53,7 +57,8 @@ sub add_cookie_header {
     return $request;
 }
 
-sub extract_cookies {
+sub extract_cookies
+{
     my ($self, $response) = @_;
 
     my @headers = split ', ', $response->header('Set-Cookie') // '';

@@ -9,33 +9,35 @@ attr paths => sub { [] };
 attr encoding => 'UTF-8';
 attr tt => sub { Template::Tiny->new };
 
-sub process {
-    my ( $self, $template, $vars ) = @_;
+sub process
+{
+    my ($self, $template, $vars) = @_;
 
     my $ref = ref $template;
 
     # A GLOB or an IO object will be read and returned as a SCALAR template
     # No reference means a file name
-    if ( !$ref ) {
+    if (!$ref) {
         $template = $self->_read_file($self->find_template($template));
     }
-    elsif ( $ref =~ /^IO/ || $ref eq 'GLOB' ) {
+    elsif ($ref =~ /^IO/ || $ref eq 'GLOB') {
         $template = $self->_read_file($template);
     }
-    elsif ( $ref ne 'SCALAR' ) {
+    elsif ($ref ne 'SCALAR') {
         croak "Template reference must be SCALAR, GLOB or an IO object";
     }
 
     my $output;
-    $self->tt->process( $template, $vars, \$output );
+    $self->tt->process($template, $vars, \$output);
     return $output;
 }
 
-sub find_template {
-    my ( $self, $name ) = @_;
+sub find_template
+{
+    my ($self, $name) = @_;
 
     my $file;
-    for my $p ( '.', @{ $self->paths } ) {
+    for my $p ('.', @{$self->paths}) {
         $file = "$p/$name";
         return $file if -e $file;
     }
@@ -43,11 +45,12 @@ sub find_template {
     return undef;
 }
 
-sub _read_file {
-    my ( $self, $file ) = @_;
+sub _read_file
+{
+    my ($self, $file) = @_;
 
     my $text = ref $file ? <$file> : path($file)->slurp(
-        { binmode => ':encoding(' . $self->encoding . ')' }
+        {binmode => ':encoding(' . $self->encoding . ')'}
     );
 
     return \$text;

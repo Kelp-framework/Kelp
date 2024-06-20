@@ -6,13 +6,15 @@ use Carp;
 use Log::Dispatch;
 use Data::Dumper;
 
-sub _logger {
-    my ( $self, %args ) = @_;
+sub _logger
+{
+    my ($self, %args) = @_;
     Log::Dispatch->new(%args);
 }
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
     $self->{logger} = $self->_logger(%args);
 
     # Register a few levels
@@ -23,7 +25,7 @@ sub build {
         my $level = $_;
         $level => sub {
             shift;
-            $self->message( $level, @_ );
+            $self->message($level, @_);
         };
     } @levels_to_register;
 
@@ -31,15 +33,18 @@ sub build {
     $self->register(%LEVELS);
 
     # Also register the message method as 'logger'
-    $self->register( logger => sub {
-        shift;
-        $self->message(@_);
-    });
+    $self->register(
+        logger => sub {
+            shift;
+            $self->message(@_);
+        }
+    );
 }
 
-sub message {
-    my ( $self, $level, @messages ) = @_;
-    my @a    = localtime(time);
+sub message
+{
+    my ($self, $level, @messages) = @_;
+    my @a = localtime(time);
     my $date = sprintf(
         "%4i-%02i-%02i %02i:%02i:%02i",
         $a[5] + 1900,
@@ -49,9 +54,11 @@ sub message {
 
     for (@messages) {
         $self->{logger}->log(
-            level   => $level,
-            message => sprintf( '%s - %s - %s',
-                $date, $level, ref($_) ? Dumper($_) : $_ )
+            level => $level,
+            message => sprintf(
+                '%s - %s - %s',
+                $date, $level, ref($_) ? Dumper($_) : $_
+            )
         );
     }
 }

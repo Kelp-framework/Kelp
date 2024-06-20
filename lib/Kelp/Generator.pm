@@ -7,14 +7,16 @@ use Carp;
 
 attr -templates_dir => sub { path(__FILE__)->parent . '/templates' };
 
-sub list_templates {
+sub list_templates
+{
     my ($self) = @_;
 
     my $dir = $self->templates_dir;
     return map { path($_)->basename } glob "$dir/*";
 }
 
-sub get_template_files {
+sub get_template_files
+{
     my ($self, $template) = @_;
 
     my $dir = $self->templates_dir;
@@ -25,7 +27,7 @@ sub get_template_files {
     my ($index_file) = map { "$dir/$_/template" }
         grep { $_ eq $template }
         $self->list_templates
-    ;
+        ;
     return unless $index_file;
 
     my $index = path($index_file);
@@ -35,7 +37,8 @@ sub get_template_files {
     return map { "$dir/$template/$_" } grep { length } @files;
 }
 
-sub get_template {
+sub get_template
+{
     my ($self, $template, $name, %args) = @_;
 
     my $vars = {'name' => $name, %args};

@@ -8,7 +8,8 @@ attr -code => sub { croak 'code is required' };
 
 attr body => undef;
 
-sub new {
+sub new
+{
     my ($class, $code, %params) = @_;
 
     croak 'Kelp::Exception can only accept 4XX or 5XX codes'
@@ -18,7 +19,8 @@ sub new {
     return $class->SUPER::new(%params);
 }
 
-sub throw {
+sub throw
+{
     my $class = shift;
     my $ex = $class->new(@_);
     die $ex;

@@ -6,7 +6,6 @@ use Try::Tiny;
 use Test::Deep;
 use Path::Tiny;
 
-
 # Extension to look for
 attr ext => 'pl';
 
@@ -19,7 +18,7 @@ attr path => sub {
         $self->app->path,
         $self->app->path . '/conf',
         $self->app->path . '/../conf'
-    ]
+    ];
 };
 
 attr separator => sub { qr/\./ };
@@ -57,9 +56,9 @@ attr data => sub {
 
             # JSON
             JSON => {
-                allow_blessed   => 1,
+                allow_blessed => 1,
                 convert_blessed => 1,
-                utf8            => 1
+                utf8 => 1
             },
         },
 
@@ -72,13 +71,14 @@ attr data => sub {
     };
 };
 
-sub get {
-    my ( $self, $path ) = @_;
+sub get
+{
+    my ($self, $path) = @_;
     return unless $path;
-    my @a = split( $self->separator, $path );
+    my @a = split($self->separator, $path);
     my $val = $self->data;
     for my $chunk (@a) {
-        if ( ref($val) eq 'HASH' ) {
+        if (ref($val) eq 'HASH') {
             $val = $val->{$chunk};
         }
         else {
@@ -89,8 +89,9 @@ sub get {
 }
 
 # Override this one to use other config formats.
-sub load {
-    my ( $self, $filename ) = @_;
+sub load
+{
+    my ($self, $filename) = @_;
 
     # Open and read file
     my $text;
@@ -103,7 +104,7 @@ sub load {
         return {};
     }
 
-    my ( $hash, $error );
+    my ($hash, $error);
     {
         local $@;
         my $app = $self->app;
@@ -111,38 +112,40 @@ sub load {
         $module =~ s/\W/_/g;
         $hash =
             eval "package Kelp::Module::Config::Sandbox::$module;"
-          . "use Kelp::Base -strict;"
-          . "sub app; local *app = sub { \$app };"
-          . "sub include(\$); local *include = sub { \$self->load(\@_) };"
-          . $text;
+            . "use Kelp::Base -strict;"
+            . "sub app; local *app = sub { \$app };"
+            . "sub include(\$); local *include = sub { \$self->load(\@_) };"
+            . $text;
         $error = $@;
     }
 
     die "Config file $filename parse error: " . $error if $error;
     die "Config file $filename did not return a HASH - $hash"
-      unless ref $hash eq 'HASH';
+        unless ref $hash eq 'HASH';
 
     return $hash;
 }
 
-sub process_mode {
-    my ( $self, $mode ) = @_;
+sub process_mode
+{
+    my ($self, $mode) = @_;
 
-    my $filename =  sub {
-        my @paths = ref( $self->path ) ? @{ $self->path } : ( $self->path );
+    my $filename = sub {
+        my @paths = ref($self->path) ? @{$self->path} : ($self->path);
         for my $path (@paths) {
             next unless defined $path;
-            my $filename = sprintf( '%s/%s.%s', $path, $mode, $self->ext );
+            my $filename = sprintf('%s/%s.%s', $path, $mode, $self->ext);
             return $filename if -r $filename;
         }
-    }->();
+        }
+        ->();
 
-    unless ( $filename ) {
-        if ( $ENV{KELP_CONFIG_WARN} ) {
+    unless ($filename) {
+        if ($ENV{KELP_CONFIG_WARN}) {
             my $message =
-              $mode eq 'config'
-              ? "Main config file not found or not readable"
-              : "Config file for mode '$mode' not found or not readable";
+                $mode eq 'config'
+                ? "Main config file not found or not readable"
+                : "Config file for mode '$mode' not found or not readable";
             warn $message;
         }
         return;
@@ -155,15 +158,16 @@ sub process_mode {
     catch {
         die "Parsing $filename died with error: '${_}'";
     };
-    $self->data( _merge( $self->data, $parsed ) );
+    $self->data(_merge($self->data, $parsed));
 }
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
 
     # Find, parse and merge 'config' and mode files
-    for my $name ( 'config', $self->app->mode ) {
-        $self->process_mode( $name );
+    for my $name ('config', $self->app->mode) {
+        $self->process_mode($name);
     }
 
     # Undocumented! Add 'extra' argument to unlock these special features:
@@ -174,19 +178,19 @@ sub build {
     # the configuration, clear it, or set it to a new value. You can do those
     # at any point in the life of the app.
     #
-    if ( my $extra = delete $args{extra} ) {
-        $self->data( _merge( $self->data, $extra ) ) if ref($extra) eq 'HASH';
+    if (my $extra = delete $args{extra}) {
+        $self->data(_merge($self->data, $extra)) if ref($extra) eq 'HASH';
         $self->register(
 
-         # A tiny object containing only merge, clear and set. Very useful when
-         # you're writing tests and need to add new config options, set the
-         # entire config hash to a new value, or clear it completely.
+            # A tiny object containing only merge, clear and set. Very useful when
+            # you're writing tests and need to add new config options, set the
+            # entire config hash to a new value, or clear it completely.
             _cfg => Plack::Util::inline_object(
                 merge => sub {
-                    $self->data( _merge( $self->data, $_[0] ) );
+                    $self->data(_merge($self->data, $_[0]));
                 },
-                clear => sub { $self->data( {} ) },
-                set   => sub { $self->data( $_[0] ) }
+                clear => sub { $self->data({}) },
+                set => sub { $self->data($_[0]) }
             )
         );
     }
@@ -198,47 +202,48 @@ sub build {
 
         # A wrapper arount the get method
         config => sub {
-            my ( $app, $path ) = @_;
+            my ($app, $path) = @_;
             return $self->get($path);
         }
     );
 }
 
-sub _merge {
-    my ( $a, $b, $sigil ) = @_;
+sub _merge
+{
+    my ($a, $b, $sigil) = @_;
 
     return $b
-      if !ref($a)
-      || !ref($b)
-      || ref($a) ne ref($b);
+        if !ref($a)
+        || !ref($b)
+        || ref($a) ne ref($b);
 
-    if ( ref $a eq 'ARRAY' ) {
+    if (ref $a eq 'ARRAY') {
         return $b unless $sigil;
-        if ( $sigil eq '+' ) {
+        if ($sigil eq '+') {
             for my $e (@$b) {
-                push @$a, $e unless grep { eq_deeply( $_, $e ) } @$a;
+                push @$a, $e unless grep { eq_deeply($_, $e) } @$a;
             }
         }
         else {
             $a = [
                 grep {
                     my $e = $_;
-                    !grep { eq_deeply( $_, $e ) } @$b
+                    !grep { eq_deeply($_, $e) } @$b
                 } @$a
             ];
         }
         return $a;
     }
-    elsif ( ref $a eq 'HASH' ) {
-        for my $k ( keys %$b ) {
+    elsif (ref $a eq 'HASH') {
+        for my $k (keys %$b) {
 
             # If the key is an array then look for a merge sigil
             my $s = ref($b->{$k}) eq 'ARRAY' && $k =~ s/^(\+|\-)// ? $1 : '';
 
             $a->{$k} =
-              exists $a->{$k}
-              ? _merge( $a->{$k}, $b->{"$s$k"}, $s )
-              : $b->{$k};
+                exists $a->{$k}
+                ? _merge($a->{$k}, $b->{"$s$k"}, $s)
+                : $b->{$k};
         }
 
         return $a;

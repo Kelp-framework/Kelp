@@ -6,36 +6,40 @@ use Kelp::Template;
 attr ext => 'tt';
 attr engine => sub { die "'engine' must be initialized" };
 
-sub build {
-    my ( $self, %args ) = @_;
+sub build
+{
+    my ($self, %args) = @_;
 
     # Build and initialize the engine attribute
-    $self->engine( $self->build_engine(%args) );
+    $self->engine($self->build_engine(%args));
 
     # Register one method - template
     $self->register(
         template => sub {
-            my ( $app, $template, $vars, @rest ) = @_;
+            my ($app, $template, $vars, @rest) = @_;
             $vars //= {};
             $vars->{app} //= $app;
 
-            return $self->render( $self->_rename($template), $vars, @rest );
+            return $self->render($self->_rename($template), $vars, @rest);
         }
     );
 }
 
-sub build_engine {
-    my ( $self, %args ) = @_;
-    return Kelp::Template->new( %args );
+sub build_engine
+{
+    my ($self, %args) = @_;
+    return Kelp::Template->new(%args);
 }
 
-sub render {
-    my ( $self, $template, $vars ) = @_;
-    return $self->engine->process( $template, $vars );
+sub render
+{
+    my ($self, $template, $vars) = @_;
+    return $self->engine->process($template, $vars);
 }
 
-sub _rename {
-    my ( $self, $name ) = @_;
+sub _rename
+{
+    my ($self, $name) = @_;
     $name //= '';
     return undef unless length $name;
 

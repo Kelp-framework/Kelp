@@ -10,7 +10,7 @@ use Kelp::Base -strict;
 use Test::More;
 
 # Basic
-my $app = Kelp->new( config_module => 'Config::Null' );
+my $app = Kelp->new(config_module => 'Config::Null');
 is $app->config("injected"), 1;
 is $app->config("shoulda"), undef;
 

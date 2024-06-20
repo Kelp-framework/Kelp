@@ -10,23 +10,23 @@ use Plack::Util;
 dies_ok { Kelp::Module->new() } "Dies when no app";
 
 my %types = (
-    hash => { bar => 'foo' },
-    array  => [ 9, 8, 7 ],
-    object => Plack::Util::inline_object( something => sub {1} ),
+    hash => {bar => 'foo'},
+    array => [9, 8, 7],
+    object => Plack::Util::inline_object(something => sub { 1 }),
     code => sub { "Moo!" }
 );
 
-my $app = Kelp->new( mode => 'test' );
-my $m = Kelp::Module->new( app => $app );
+my $app = Kelp->new(mode => 'test');
+my $m = Kelp::Module->new(app => $app);
 isa_ok $m, 'Kelp::Module';
 
 # Register
-for my $name ( keys %types ) {
+for my $name (keys %types) {
     my $type = $types{$name};
-    $m->register( $name => $type );
+    $m->register($name => $type);
     can_ok $app, $name;
 
-    if ( ref $type eq 'CODE' ) {
+    if (ref $type eq 'CODE') {
         is $app->$name, $type->(), "CODE checks out";
     }
     else {
@@ -35,20 +35,20 @@ for my $name ( keys %types ) {
 }
 
 # Redefine
-for my $name ( keys %types ) {
+for my $name (keys %types) {
     my $type = $types{$name};
 
     # Redefine 'em all one by one.
-    for my $t ( values %types ) {
-        dies_ok { $m->register( $name => $t ) }
-        "Dies when redefining " . ref $t;
+    for my $t (values %types) {
+        dies_ok { $m->register($name => $t) }
+            "Dies when redefining " . ref $t;
     }
 
     # Now allow redefining and do it again
     $ENV{KELP_REDEFINE} = 1;
     for my $t (values %types) {
-        $m->register( $name => $t );
-        if ( ref $t eq 'CODE' ) {
+        $m->register($name => $t);
+        if (ref $t eq 'CODE') {
             is $app->$name, $t->(), "Redefines CODE";
         }
         else {

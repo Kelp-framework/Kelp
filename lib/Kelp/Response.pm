@@ -9,23 +9,26 @@ use HTTP::Status qw(status_message);
 
 attr -app => sub { croak "app is required" };
 attr rendered => 0;
-attr partial  => 0;
+attr partial => 0;
 
-sub new {
-    my ( $class, %args ) = @_;
+sub new
+{
+    my ($class, %args) = @_;
     my $self = $class->SUPER::new();
     $self->{$_} = $args{$_} for keys %args;
     return $self;
 }
 
-sub set_content_type {
-    my ( $self, $type ) = @_;
-    $self->content_type( $type );
+sub set_content_type
+{
+    my ($self, $type) = @_;
+    $self->content_type($type);
     return $self;
 }
 
-sub set_charset {
-    my ( $self, $charset ) = @_;
+sub set_charset
+{
+    my ($self, $charset) = @_;
     $charset //= $self->app->charset;
 
     my $ct = $self->content_type;
@@ -38,56 +41,65 @@ sub set_charset {
     return $self;
 }
 
-sub text {
+sub text
+{
     my $self = shift;
-    return $self->set_content_type( 'text/plain' )->set_charset;
+    return $self->set_content_type('text/plain')->set_charset;
 }
 
-sub html {
+sub html
+{
     my $self = shift;
-    return $self->set_content_type( 'text/html' )->set_charset;
+    return $self->set_content_type('text/html')->set_charset;
 }
 
-sub json {
+sub json
+{
     my $self = shift;
-    return $self->set_content_type( 'application/json' );
+    return $self->set_content_type('application/json');
 }
 
-sub xml {
+sub xml
+{
     my $self = shift;
-    return $self->set_content_type( 'application/xml' );
+    return $self->set_content_type('application/xml');
 }
 
-sub finalize {
+sub finalize
+{
     my $self = shift;
 
-    my $arr  = $self->SUPER::finalize(@_);
+    my $arr = $self->SUPER::finalize(@_);
     pop @$arr if $self->partial;
     return $arr;
 }
 
-sub set_header {
+sub set_header
+{
     my $self = shift;
     $self->SUPER::header(@_);
     return $self;
 }
 
-sub no_cache {
+sub no_cache
+{
     my $self = shift;
-    $self->set_header( 'Cache-Control' => 'no-cache, no-store, must-revalidate' );
-    $self->set_header( 'Pragma'        => 'no-cache' );
-    $self->set_header( 'Expires'       => '0' );
+    $self->set_header('Cache-Control' => 'no-cache, no-store, must-revalidate');
+    $self->set_header('Pragma' => 'no-cache');
+    $self->set_header('Expires' => '0');
     return $self;
 }
 
-sub set_code {
+sub set_code
+{
     my $self = shift;
     $self->SUPER::code(@_);
     return $self;
 }
 
-sub render {
-    my ( $self, $body ) = @_;
+sub render
+{
+    my ($self, $body) = @_;
     my $ct = $self->content_type;
     my $ref = ref $body;
 
@@ -95,30 +107,32 @@ sub render {
     $self->set_code(200) unless $self->code;
 
     # If the content has been determined as JSON, then encode it
-    if ( $ref && (!$ct || $ct =~ m{^application/json}i) ) {
+    if ($ref && (!$ct || $ct =~ m{^application/json}i)) {
         croak "No JSON encoder" unless $self->app->can('_json_internal');
         $body = $self->app->_json_internal->encode($body);
         $self->json if !$ct;
-    } elsif ( !$ref ) {
+    }
+    elsif (!$ref) {
         $self->html if !$ct;
     }
     else {
         croak "Don't know how to handle non-json reference in response (forgot to serialize?)";
     }
 
-    $self->body( $self->app->charset_encode( $body ) );
+    $self->body($self->app->charset_encode($body));
     $self->rendered(1);
     return $self;
 }
 
-sub render_binary {
-    my ( $self, $body ) = @_;
+sub render_binary
+{
+    my ($self, $body) = @_;
     $body //= '';
 
     # Set code 200 if the code has not been set
     $self->set_code(200) unless $self->code;
 
-    if ( !$self->content_type ) {
+    if (!$self->content_type) {
         croak "Content-type must be explicitly set for binaries";
     }
 
@@ -127,17 +141,18 @@ sub render_binary {
     return $self;
 }
 
-sub render_error {
-    my ( $self, $code, $error ) = @_;
+sub render_error
+{
+    my ($self, $code, $error) = @_;
 
-    $code  //= 500;
+    $code //= 500;
     $error //= status_message($code) // 'Error';
 
     $self->set_code($code);
 
     # Look for a template and if not found, then show a generic text
     try {
-        local $SIG{__DIE__};  # Silence StackTrace
+        local $SIG{__DIE__};    # Silence StackTrace
         $self->template(
             "error/$code", {
                 error => $error
@@ -151,8 +166,9 @@ sub render_error {
     return $self;
 }
 
-sub render_exception {
-    my ( $self, $exception ) = @_;
+sub render_exception
+{
+    my ($self, $exception) = @_;
 
     # If the error is 500, do the same thing normal errors do: provide more
     # info on non-production
@@ -162,23 +178,27 @@ sub render_exception {
     return $self->render_error($exception->code);
 }
 
-sub render_401 {
-    $_[0]->render_error( 401 );
+sub render_401
+{
+    $_[0]->render_error(401);
 }
 
-sub render_403 {
-    $_[0]->render_error( 403 );
+sub render_403
+{
+    $_[0]->render_error(403);
 }
 
-sub render_404 {
-    $_[0]->render_error( 404 );
+sub render_404
+{
+    $_[0]->render_error(404);
 }
 
-sub render_500 {
-    my ( $self, $error ) = @_;
+sub render_500
+{
+    my ($self, $error) = @_;
 
     # Do not leak information on production!
-    if ( $self->app->is_production ) {
+    if ($self->app->is_production) {
         return $self->render_error;
     }
 
@@ -192,26 +212,29 @@ sub render_500 {
     return $self->render_error(500, $error);
 }
 
-sub redirect {
+sub redirect
+{
     my $self = shift;
     $self->rendered(1);
     $self->SUPER::redirect(@_);
 }
 
-sub redirect_to {
-    my ( $self, $where, $args, $code ) = @_;
+sub redirect_to
+{
+    my ($self, $where, $args, $code) = @_;
     my $url = $self->app->url_for($where, %$args);
-    $self->redirect( $url, $code );
+    $self->redirect($url, $code);
 }
 
-sub template {
-    my ( $self, $template, $vars, @rest ) = @_;
+sub template
+{
+    my ($self, $template, $vars, @rest) = @_;
 
     # Do we have a template module loaded?
     croak "No template module loaded"
         unless $self->app->can('template');
 
-    my $output = $self->app->template( $template, $vars, @rest );
+    my $output = $self->app->template($template, $vars, @rest);
     $self->render($output);
 }
 

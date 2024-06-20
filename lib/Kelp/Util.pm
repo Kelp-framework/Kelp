@@ -4,14 +4,15 @@ use Kelp::Base -strict;
 use Carp;
 use Scalar::Util qw(blessed);
 
-sub camelize {
-    my ( $string, $base ) = @_;
+sub camelize
+{
+    my ($string, $base) = @_;
     return $string unless $string;
 
     my $sigil = defined $string && $string =~ s/^(\+)// ? $1 : undef;
     $base = undef if $sigil;
 
-    my @parts = split( /\#/, $string );
+    my @parts = split(/\#/, $string);
     my $sub = pop @parts;
 
     @parts = map {
@@ -19,11 +20,12 @@ sub camelize {
     } @parts;
     unshift @parts, $base if $base;
 
-    return join( '::', @parts, $sub );
+    return join('::', @parts, $sub);
 }
 
-sub extract_class {
-    my ( $string ) = @_;
+sub extract_class
+{
+    my ($string) = @_;
     return undef unless $string;
 
     if ($string =~ /^(.+)::(\w+)$/ && $1 ne 'main') {
@@ -33,8 +35,9 @@ sub extract_class {
     return undef;
 }
 
-sub extract_function {
-    my ( $string ) = @_;
+sub extract_function
+{
+    my ($string) = @_;
     return undef unless $string;
 
     if ($string =~ /^(.+)::(\w+)$/) {
@@ -44,8 +47,9 @@ sub extract_function {
     return $string;
 }
 
-sub adapt_psgi {
-    my ( $app ) = @_;
+sub adapt_psgi
+{
+    my ($app) = @_;
 
     croak 'Cannot adapt_psgi, unknown destination type - must be a coderef'
         unless ref $app eq 'CODE';
@@ -78,16 +82,16 @@ sub adapt_psgi {
 
         # produce a response
         if (ref $result eq 'ARRAY') {
-                my ($status, $headers, $body) = @{$result};
+            my ($status, $headers, $body) = @{$result};
 
-                my $res = $kelp->res;
-                $res->status($status) if $status;
-                $res->headers($headers) if $headers;
-                $res->body($body) if $body;
-                $res->rendered(1);
+            my $res = $kelp->res;
+            $res->status($status) if $status;
+            $res->headers($headers) if $headers;
+            $res->body($body) if $body;
+            $res->rendered(1);
         }
         elsif (ref $result eq 'CODE') {
-                return $result;
+            return $result;
         }
 
         # this should be an error unless already rendered

@@ -6,7 +6,8 @@ use feature ();
 use Carp;
 use namespace::autoclean ();
 
-sub import {
+sub import
+{
     my $class = shift;
     my $caller = caller;
 
@@ -15,16 +16,16 @@ sub import {
 
     my $base = shift || $class;
 
-    if ( $base ne '-strict' ) {
+    if ($base ne '-strict') {
         no strict 'refs';
         no warnings 'redefine';
 
         my $file = $base;
         $file =~ s/::|'/\//g;
-        require "$file.pm" unless $base->can('new'); # thanks sri
+        require "$file.pm" unless $base->can('new');    # thanks sri
 
         push @{"${caller}::ISA"}, $base;
-        *{"${caller}::attr"} = sub { attr( $caller, @_ ) };
+        *{"${caller}::attr"} = sub { attr($caller, @_) };
     }
 
     strict->import;
@@ -36,14 +37,16 @@ sub import {
     );
 }
 
-sub new {
-    bless { @_[ 1 .. $#_ ] }, $_[0];
+sub new
+{
+    bless {@_[1 .. $#_]}, $_[0];
 }
 
-sub attr {
-    my ( $class, $name, $default ) = @_;
+sub attr
+{
+    my ($class, $name, $default) = @_;
 
-    if ( ref $default && ref $default ne 'CODE' ) {
+    if (ref $default && ref $default ne 'CODE') {
         croak "Default value for '$name' can not be a reference.";
     }
 
@@ -54,14 +57,14 @@ sub attr {
     my $readonly = $name =~ s/^\-//;
 
     *{"${class}::$name"} = sub {
-        if ( @_ > 1 && !$readonly ) {
+        if (@_ > 1 && !$readonly) {
             $_[0]->{$name} = $_[1];
         }
         return $_[0]->{$name} if exists $_[0]->{$name};
         return $_[0]->{$name} =
-          ref $default eq 'CODE'
-          ? $default->( $_[0] )
-          : $default;
+            ref $default eq 'CODE'
+            ? $default->($_[0])
+            : $default;
     };
 }
 

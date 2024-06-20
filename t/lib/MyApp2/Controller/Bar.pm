@@ -5,7 +5,8 @@ sub naughty_secret { "I control the Bar" }
 
 sub test_inherit { "OK" }
 
-sub test_template {
+sub test_template
+{
     return $_[0]->template('0');
 }
 

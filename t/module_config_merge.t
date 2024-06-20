@@ -8,118 +8,118 @@ use Kelp::Module::Config;
     my $H = {};
     my $A = [];
     my @arr = (
-        [ 1, 2, 2 ],
-        [ 1, undef, undef ],
-        [ 1, $H, $H ],
-        [ 1, $A, $A ],
-        [ undef, 1, 1 ],
-        [ undef, undef, undef ],
-        [ $H, $A, $A ],
-        [ $A, $H, $H ]
+        [1, 2, 2],
+        [1, undef, undef],
+        [1, $H, $H],
+        [1, $A, $A],
+        [undef, 1, 1],
+        [undef, undef, undef],
+        [$H, $A, $A],
+        [$A, $H, $H]
     );
-    _try( @arr );
+    _try(@arr);
 }
 
 # Overwrite
 {
     my @arr = (
         [
-            { a => 1 },
-            { a => 2 },
-            { a => 2 }
+            {a => 1},
+            {a => 2},
+            {a => 2}
         ],
         [
-            { a => 1, b => 2 },
-            { b => 3 },
-            { a => 1, b => 3 }
+            {a => 1, b => 2},
+            {b => 3},
+            {a => 1, b => 3}
         ],
         [
             {},
-            { a => 1 },
-            { a => 1 }
+            {a => 1},
+            {a => 1}
         ],
         [
-            { a => 1 },
+            {a => 1},
             {},
-            { a => 1 }
+            {a => 1}
         ],
         [
-            { a => [1,2,3] },
-            { a => [4,5] },
-            { a => [4,5] },
+            {a => [1, 2, 3]},
+            {a => [4, 5]},
+            {a => [4, 5]},
         ],
         [
-            { a => "bar", b => [1,2] },
-            { a => [1,2] },
-            { a => [1,2], b => [1,2] }
+            {a => "bar", b => [1, 2]},
+            {a => [1, 2]},
+            {a => [1, 2], b => [1, 2]}
         ],
         [
-            { a => { b => 'bar' } },
-            { a => { c => 'foo' } },
-            { a => { b => 'bar', c => 'foo' } },
+            {a => {b => 'bar'}},
+            {a => {c => 'foo'}},
+            {a => {b => 'bar', c => 'foo'}},
         ],
         [
-            { a => { b => 'bar' } },
-            { a => { b => [1,2] } },
-            { a => { b => [1,2] } },
+            {a => {b => 'bar'}},
+            {a => {b => [1, 2]}},
+            {a => {b => [1, 2]}},
         ],
     );
-    _try( @arr );
+    _try(@arr);
 }
 
 # Add to adday
 {
     my @arr = (
         [
-            { a => { b    => [ 1, 2 ] } },
-            { a => { "+b" => [ 3, 4 ] } },
-            { a => { b    => [ 1, 2, 3, 4 ] } }
+            {a => {b => [1, 2]}},
+            {a => {"+b" => [3, 4]}},
+            {a => {b => [1, 2, 3, 4]}}
         ],
 
         [
-            { a => { b    => [ 1, 2 ] } },
-            { a => { "+b" => [ 1, 2, 4 ] } },
-            { a => { b    => [ 1, 2, 4 ] } }
+            {a => {b => [1, 2]}},
+            {a => {"+b" => [1, 2, 4]}},
+            {a => {b => [1, 2, 4]}}
         ],
 
         [
-            { a => { b    => [ 1, 2 ] } },
-            { a => { "+b" => [ 1, 2 ] } },
-            { a => { b    => [ 1, 2 ] } }
+            {a => {b => [1, 2]}},
+            {a => {"+b" => [1, 2]}},
+            {a => {b => [1, 2]}}
         ],
 
         [
-            { a => { b    => [ 1, 'bar' ] } },
-            { a => { "+b" => [ 2, 'foo' ] } },
-            { a => { b    => [ 1, 'bar', 2, 'foo' ] } }
+            {a => {b => [1, 'bar']}},
+            {a => {"+b" => [2, 'foo']}},
+            {a => {b => [1, 'bar', 2, 'foo']}}
         ],
 
         [
-            { a => { b    => [ 1, { bar => 'foo' } ] } },
-            { a => { "+b" => [ 2, { bar => 'foo' } ] } },
-            { a => { b    => [ 1, { bar => 'foo' }, 2 ] } }
+            {a => {b => [1, {bar => 'foo'}]}},
+            {a => {"+b" => [2, {bar => 'foo'}]}},
+            {a => {b => [1, {bar => 'foo'}, 2]}}
         ],
 
         # Merging only applies to arrays
-        [ { a => "bar" }, { "+a" => "foo" }, { a => "bar", "+a" => "foo" } ],
+        [{a => "bar"}, {"+a" => "foo"}, {a => "bar", "+a" => "foo"}],
 
         # A real modules initialization test
         [
             {
-                modules      => ["+MyApp::Fully::Qualified"],
+                modules => ["+MyApp::Fully::Qualified"],
                 modules_init => {
-                    "+MyApp::Fully::Qualified" => { bar => 1, foo => 'baz' }
+                    "+MyApp::Fully::Qualified" => {bar => 1, foo => 'baz'}
                 }
             },
             {
                 modules_init => {
-                    "+MyApp::Fully::Qualified" => { coo => 'bah' }
+                    "+MyApp::Fully::Qualified" => {coo => 'bah'}
                 }
             },
             {
-                modules      => ["+MyApp::Fully::Qualified"],
+                modules => ["+MyApp::Fully::Qualified"],
                 modules_init => {
-                    "+MyApp::Fully::Qualified" => { bar => 1, foo => 'baz', coo => 'bah' }
+                    "+MyApp::Fully::Qualified" => {bar => 1, foo => 'baz', coo => 'bah'}
                 }
             }
         ]
@@ -132,33 +132,34 @@ use Kelp::Module::Config;
 {
     my @arr = (
         [
-            { a => { b    => [ 1, 2 ] } },
-            { a => { "-b" => [ 2 ] } },
-            { a => { b    => [ 1 ] } }
+            {a => {b => [1, 2]}},
+            {a => {"-b" => [2]}},
+            {a => {b => [1]}}
         ],
         [
-            { a => { b    => [ 1, 2 ] } },
-            { a => { "-b" => [ 2, 3, 4 ] } },
-            { a => { b    => [ 1 ] } }
+            {a => {b => [1, 2]}},
+            {a => {"-b" => [2, 3, 4]}},
+            {a => {b => [1]}}
         ],
         [
-            { a => { b    => [ 1, 2, "bar" ] } },
-            { a => { "-b" => [ "bar", 3, 2] } },
-            { a => { b    => [ 1 ] } }
+            {a => {b => [1, 2, "bar"]}},
+            {a => {"-b" => ["bar", 3, 2]}},
+            {a => {b => [1]}}
         ],
         [
-            { a => { b    => [ 1, 2, { bar => 'foo' } ] } },
-            { a => { "-b" => [ { bar => 'foo' }, 1 ] } },
-            { a => { b    => [ 2 ] } }
+            {a => {b => [1, 2, {bar => 'foo'}]}},
+            {a => {"-b" => [{bar => 'foo'}, 1]}},
+            {a => {b => [2]}}
         ],
     );
     _try(@arr);
 }
 
-sub _try {
+sub _try
+{
     for (@_) {
-        my ( $a, $b, $c ) = @$_;
-        my $m = Kelp::Module::Config::_merge( $a, $b );
+        my ($a, $b, $c) = @$_;
+        my $m = Kelp::Module::Config::_merge($a, $b);
         is_deeply($m, $c) or diag explain $m;
     }
 }

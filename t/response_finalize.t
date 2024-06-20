@@ -4,8 +4,8 @@ use Kelp;
 use Kelp::Response;
 use Test::More;
 
-my $app = Kelp->new( mode => 'test' );
-my $r = Kelp::Response->new( app => $app );
+my $app = Kelp->new(mode => 'test');
+my $r = Kelp::Response->new(app => $app);
 
 $r->text;
 $r->set_code(200);

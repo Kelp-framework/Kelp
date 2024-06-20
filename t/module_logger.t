@@ -12,20 +12,23 @@ use HTTP::Request::Common;
 
 # Levels
 {
-    my $app = Kelp->new( mode => 'nomod' );
+    my $app = Kelp->new(mode => 'nomod');
     my $m = $app->load_module('Logger');
 
     isa_ok $m, "Kelp::Module::Logger";
     can_ok $app, $_ for qw/error debug/;
 
     my $t = Kelp::Test->new(app => $app);
-    $app->add_route('/log', sub {
-        my $self = shift;
-        $self->debug("Debug message");
-        $self->error("Error message");
-        $self->logger('critical', "Critical message");
-        "ok";
-    });
+    $app->add_route(
+        '/log',
+        sub {
+            my $self = shift;
+            $self->debug("Debug message");
+            $self->error("Error message");
+            $self->logger('critical', "Critical message");
+            "ok";
+        }
+    );
     $t->request(GET '/log')->code_is(200);
 }
 

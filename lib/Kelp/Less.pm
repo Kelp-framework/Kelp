@@ -4,32 +4,33 @@ use Kelp;
 use Kelp::Base -strict;
 
 our @EXPORT = qw/
-  app
-  attr
-  config
-  del
-  debug
-  error
-  get
-  module
-  named
-  param
-  post
-  put
-  req
-  res
-  route
-  run
-  session
-  stash
-  template
-  view
-  /;
+    app
+    attr
+    config
+    del
+    debug
+    error
+    get
+    module
+    named
+    param
+    post
+    put
+    req
+    res
+    route
+    run
+    session
+    stash
+    template
+    view
+    /;
 
 our $app;
 
-sub import {
-    my $class  = shift;
+sub import
+{
+    my $class = shift;
     my $caller = caller;
     no strict 'refs';
     for my $sub (@EXPORT) {
@@ -44,52 +45,58 @@ sub import {
     $app->routes->base('main');
 }
 
-sub route {
-    my ( $path, $to ) = @_;
-    $app->add_route( $path, $to );
+sub route
+{
+    my ($path, $to) = @_;
+    $app->add_route($path, $to);
 }
 
-sub get {
-    my ( $path, $to ) = @_;
-    route ref($path) ? $path : [ GET => $path ], $to;
+sub get
+{
+    my ($path, $to) = @_;
+    route ref($path) ? $path : [GET => $path], $to;
 }
 
-sub post {
-    my ( $path, $to ) = @_;
-    route ref($path) ? $path : [ POST => $path ], $to;
+sub post
+{
+    my ($path, $to) = @_;
+    route ref($path) ? $path : [POST => $path], $to;
 }
 
-sub put {
-    my ( $path, $to ) = @_;
-    route ref($path) ? $path : [ PUT => $path ], $to;
+sub put
+{
+    my ($path, $to) = @_;
+    route ref($path) ? $path : [PUT => $path], $to;
 }
 
-sub del {
-    my ( $path, $to ) = @_;
-    route ref($path) ? $path : [ DELETE => $path ], $to;
+sub del
+{
+    my ($path, $to) = @_;
+    route ref($path) ? $path : [DELETE => $path], $to;
 }
 
-sub run {
+sub run
+{
 
     # If we're running a test, then return the entire app,
     # otherwise return the PSGI subroutine
     return $ENV{KELP_TESTING} ? $app : $app->run;
 }
 
-sub app      { $app }
-sub attr     { Kelp::Base::attr( ref($app), @_ ) }
-sub param    { $app->param(@_) }
-sub session  { $app->session(@_) }
-sub stash    { $app->stash(@_) }
-sub named    { $app->named(@_) }
-sub req      { $app->req }
-sub res      { $app->res }
+sub app { $app }
+sub attr { Kelp::Base::attr(ref($app), @_) }
+sub param { $app->param(@_) }
+sub session { $app->session(@_) }
+sub stash { $app->stash(@_) }
+sub named { $app->named(@_) }
+sub req { $app->req }
+sub res { $app->res }
 sub template { $app->res->template(@_) }
-sub view     { $app->res->template(@_) }
-sub debug    { $app->debug(@_) if $app->can('debug') }
-sub error    { $app->error(@_) if $app->can('error') }
-sub module   { $app->load_module(@_) }
-sub config   { $app->config(@_) }
+sub view { $app->res->template(@_) }
+sub debug { $app->debug(@_) if $app->can('debug') }
+sub error { $app->error(@_) if $app->can('error') }
+sub module { $app->load_module(@_) }
+sub config { $app->config(@_) }
 
 1;
 

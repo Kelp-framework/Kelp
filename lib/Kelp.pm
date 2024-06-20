@@ -16,11 +16,11 @@ our $VERSION = '2.01';
 
 # Basic attributes
 attr -host => hostname;
-attr  mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
+attr mode => $ENV{KELP_ENV} // $ENV{PLACK_ENV} // 'development';
 attr -path => $FindBin::Bin;
-attr -name => sub { ( ref( $_[0] ) =~ /(\w+)$/ ) ? $1 : 'Noname' };
-attr  request_obj  => 'Kelp::Request';
-attr  response_obj => 'Kelp::Response';
+attr -name => sub { (ref($_[0]) =~ /(\w+)$/) ? $1 : 'Noname' };
+attr request_obj => 'Kelp::Request';
+attr response_obj => 'Kelp::Response';
 
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
@@ -45,7 +45,8 @@ attr req => undef;
 attr res => undef;
 
 # Initialization
-sub new {
+sub new
+{
     my $self = shift->SUPER::new(@_);
 
     # Always load these modules, but allow client to override
@@ -53,7 +54,7 @@ sub new {
     $self->_load_routes();
 
     # Load the modules from the config
-    if ( defined( my $modules = $self->config('modules') ) ) {
+    if (defined(my $modules = $self->config('modules'))) {
         $self->load_module($_) for (@$modules);
     }
 
@@ -61,17 +62,18 @@ sub new {
     return $self;
 }
 
-sub new_anon {
+sub new_anon
+{
     state $last_anon = 0;
     my $class = shift;
 
     # make sure we don't eval something dodgy
     die "invalid class for new_anon"
-        if ref $class                         # not a string
-        || !$class                            # not an empty string, undef or 0
-        || !Class::Inspector->loaded($class)  # not a loaded class
-        || !$class->isa(__PACKAGE__)          # not a correct class
-    ;
+        if ref $class    # not a string
+        || !$class    # not an empty string, undef or 0
+        || !Class::Inspector->loaded($class)    # not a loaded class
+        || !$class->isa(__PACKAGE__)    # not a correct class
+        ;
 
     my $anon_class = "Kelp::Anonymous::$class" . ++$last_anon;
     my $err = do {
@@ -96,28 +98,32 @@ sub new_anon {
     return $anon_class->new(@_);
 }
 
-sub _load_config {
+sub _load_config
+{
     my $self = shift;
-    $self->load_module( $self->config_module, extra => $self->__config );
+    $self->load_module($self->config_module, extra => $self->__config);
 }
 
-sub _load_routes {
+sub _load_routes
+{
     my $self = shift;
     $self->load_module('Routes');
 }
 
 # Create a shallow copy of the app, optionally blessed into a
 # different subclass.
-sub _clone {
+sub _clone
+{
     my $self = shift;
     my $subclass = shift || ref($self);
 
     ref $self or croak '_clone requires instance';
-    return bless { %$self }, $subclass;
+    return bless {%$self}, $subclass;
 }
 
-sub load_module {
-    my ( $self, $name, %args ) = @_;
+sub load_module
+{
+    my ($self, $name, %args) = @_;
 
     # A module name with a leading + indicates it's already fully
     # qualified (i.e., it does not need the Kelp::Module:: prefix).
@@ -126,72 +132,78 @@ sub load_module {
     # Make sure the module was not already loaded
     return if $self->loaded_modules->{$name};
 
-    my $class = Plack::Util::load_class( $name, $prefix );
-    my $module = $self->loaded_modules->{$name} = $class->new( app => $self );
+    my $class = Plack::Util::load_class($name, $prefix);
+    my $module = $self->loaded_modules->{$name} = $class->new(app => $self);
 
     # When loading the Config module itself, we don't have
     # access to $self->config yet. This is why we check if
     # config is available, and if it is, then we pull the
     # initialization hash.
     my $args_from_config = {};
-    if ( $self->can('config') ) {
+    if ($self->can('config')) {
         $args_from_config = $self->config("modules_init.$name") // {};
     }
 
-    $module->build( %$args_from_config, %args );
+    $module->build(%$args_from_config, %args);
     return $module;
 }
 
 # Override this one to add custom initializations
-sub build {
+sub build
+{
 }
 
 # Override to use a custom request object
-sub build_request {
-    my ( $self, $env ) = @_;
+sub build_request
+{
+    my ($self, $env) = @_;
     my $package = $self->request_obj;
     eval qq{require $package};
-    return $package->new( app => $self, env => $env);
+    return $package->new(app => $self, env => $env);
 }
 
 # Override to use a custom response object
-sub build_response {
+sub build_response
+{
     my $self = shift;
     my $package = $self->response_obj;
     eval qq{require $package};
-    return $package->new( app => $self );
+    return $package->new(app => $self);
 }
 
 # Override to change what happens before the route is handled
-sub before_dispatch {
-    my ( $self, $destination ) = @_;
+sub before_dispatch
+{
+    my ($self, $destination) = @_;
 
     # Log info about the route
-    if ( $self->can('logger') ) {
+    if ($self->can('logger')) {
         my $req = $self->req;
 
         $self->info(
             sprintf "%s: %s - %s %s - %s",
-                ref $self,
-                $req->address, $req->method,
-                $req->path,    $destination
+            ref $self,
+            $req->address, $req->method,
+            $req->path, $destination
         );
     }
 }
 
 # Override to manipulate the end response
-sub before_finalize {
+sub before_finalize
+{
     my $self = shift;
     $self->res->header('X-Framework' => 'Perl Kelp');
 }
 
 # Override this to wrap more middleware around the app
-sub run {
+sub run
+{
     my $self = shift;
     my $app = sub { $self->psgi(@_) };
 
     # Add middleware
-    if ( defined( my $middleware = $self->config('middleware') ) ) {
+    if (defined(my $middleware = $self->config('middleware'))) {
         for my $class (@$middleware) {
 
             # Make sure the middleware was not already loaded
@@ -201,25 +213,26 @@ sub run {
 
             my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
             my $args = $self->config("middleware_init.$class") // {};
-            $app = $mw->wrap( $app, %$args );
+            $app = $mw->wrap($app, %$args);
         }
     }
 
     return $app;
 }
 
-sub psgi {
-    my ( $self, $env ) = @_;
+sub psgi
+{
+    my ($self, $env) = @_;
 
     # Create the request and response objects
-    my $req = $self->req( $self->build_request($env) );
-    my $res = $self->res( $self->build_response );
+    my $req = $self->req($self->build_request($env));
+    my $res = $self->res($self->build_response);
 
     # Get route matches
-    my $match = $self->routes->match( $req->path, $req->method );
+    my $match = $self->routes->match($req->path, $req->method);
 
     # None found? Show 404 ...
-    if ( !@$match ) {
+    if (!@$match) {
         $res->render_404;
         return $self->finalize;
     }
@@ -230,26 +243,28 @@ sub psgi {
         for my $route (@$match) {
 
             # Dispatch
-            $req->named( $route->named );
-            $req->route_name( $route->name );
-            my $data = $self->routes->dispatch( $self, $route );
+            $req->named($route->named);
+            $req->route_name($route->name);
+            my $data = $self->routes->dispatch($self, $route);
 
-            if ( $route->bridge ) {
+            if ($route->bridge) {
+
                 # Is it a bridge? Bridges must return a true value to allow the
                 # rest of the routes to run. They may also have rendered
                 # something, in which case trust that and don't render 403 (but
                 # still end the execution chain)
 
-                if ( !$data ) {
+                if (!$data) {
                     $res->render_403 unless $res->rendered;
                 }
             }
-            elsif ( defined $data ) {
+            elsif (defined $data) {
+
                 # If the non-bridge route returned something, then analyze it and render it
 
                 # Handle delayed response if CODE
                 return $data if ref $data eq 'CODE';
-                $res->render( $data ) unless $res->rendered;
+                $res->render($data) unless $res->rendered;
             }
 
             # Do not go any further if we got a render
@@ -257,16 +272,18 @@ sub psgi {
         }
 
         # If nothing got rendered
-        if ( !$res->rendered ) {
+        if (!$res->rendered) {
+
             # render 404 if only briges matched
-            if ( $match->[-1]->bridge ) {
+            if ($match->[-1]->bridge) {
                 $res->render_404;
             }
+
             # or die with error
             else {
-              die $match->[-1]->to
-              . " did not render for method "
-              . $req->method;
+                die $match->[-1]->to
+                    . " did not render for method "
+                    . $req->method;
             }
         }
 
@@ -282,8 +299,9 @@ sub psgi {
         $res->headers->clear;
 
         if (blessed $exception && $exception->isa('Kelp::Exception')) {
+
             # only log it as an error if the body is present
-            $self->logger( 'error', $exception->body )
+            $self->logger('error', $exception->body)
                 if $self->can('logger') && defined $exception->body;
 
             $res->render_exception($exception);
@@ -292,7 +310,7 @@ sub psgi {
             my $message = $self->long_error ? longmess($exception) : $exception;
 
             # Log error
-            $self->logger( 'critical', $message ) if $self->can('logger');
+            $self->logger('critical', $message) if $self->can('logger');
 
             # Render an application erorr (hides details on production)
             $res->render_500($exception);
@@ -302,17 +320,18 @@ sub psgi {
     };
 }
 
-sub finalize {
+sub finalize
+{
     my $self = shift;
     $self->before_finalize;
     $self->res->finalize;
 }
 
-
 #----------------------------------------------------------------
 # Request and Response shortcuts
 #----------------------------------------------------------------
-sub param {
+sub param
+{
     my $self = shift;
     unshift @_, $self->req;
 
@@ -322,12 +341,14 @@ sub param {
 
 sub session { shift->req->session(@_) }
 
-sub stash {
+sub stash
+{
     my $self = shift;
     @_ ? $self->req->stash->{$_[0]} : $self->req->stash;
 }
 
-sub named {
+sub named
+{
     my $self = shift;
     @_ ? $self->req->named->{$_[0]} : $self->req->named;
 }
@@ -336,32 +357,37 @@ sub named {
 # Utility
 #----------------------------------------------------------------
 
-sub is_production {
+sub is_production
+{
     my $self = shift;
     return any { lc $self->mode eq $_ } qw(deployment production);
 }
 
-sub url_for {
-    my ( $self, $name, @args ) = @_;
+sub url_for
+{
+    my ($self, $name, @args) = @_;
     my $result = $name;
-    try { $result = $self->routes->url( $name, @args ) };
+    try { $result = $self->routes->url($name, @args) };
     return $result;
 }
 
-sub abs_url {
-    my ( $self, $name, @args ) = @_;
-    my $url = $self->url_for( $name, @args );
-    return URI->new_abs( $url, $self->config('app_url') )->as_string;
+sub abs_url
+{
+    my ($self, $name, @args) = @_;
+    my $url = $self->url_for($name, @args);
+    return URI->new_abs($url, $self->config('app_url'))->as_string;
 }
 
-sub charset_encode {
-    my ( $self, $string ) = @_;
+sub charset_encode
+{
+    my ($self, $string) = @_;
     return $string unless $self->charset;
     return encode $self->charset, $string;
 }
 
-sub charset_decode {
-    my ( $self, $string ) = @_;
+sub charset_decode
+{
+    my ($self, $string) = @_;
     return $string unless $self->charset;
     return decode $self->charset, $string;
 }

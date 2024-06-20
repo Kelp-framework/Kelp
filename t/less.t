@@ -6,34 +6,34 @@ use Test::More;
 module 'JSON', utf8 => 1;
 module 'Template';
 
-my $t = Kelp::Test->new( app => app );
+my $t = Kelp::Test->new(app => app);
 
 # route
 route '/route' => sub { "A" };
-$t->request( GET '/route' )->content_is("A");
-$t->request( POST '/route' )->content_is("A");
-$t->request( PUT '/route' )->content_is("A");
+$t->request(GET '/route')->content_is("A");
+$t->request(POST '/route')->content_is("A");
+$t->request(PUT '/route')->content_is("A");
 
 # get, post, put
-get '/get'   => sub { "B" };
+get '/get' => sub { "B" };
 post '/post' => sub { "C" };
-put '/put'   => sub { "D" };
-del '/del'   => sub { "DD" };
-$t->request( GET '/get' )->content_is("B");
-$t->request( POST '/get' )->code_is(404);
-$t->request( GET '/post' )->code_is(404);
-$t->request( POST '/post' )->content_is("C");
-$t->request( GET '/put' )->code_is(404);
-$t->request( POST '/put' )->code_is(404);
-$t->request( PUT '/put' )->content_is("D");
-$t->request( DELETE '/del' )->content_is("DD");
-$t->request( GET '/del' )->code_is(404);
+put '/put' => sub { "D" };
+del '/del' => sub { "DD" };
+$t->request(GET '/get')->content_is("B");
+$t->request(POST '/get')->code_is(404);
+$t->request(GET '/post')->code_is(404);
+$t->request(POST '/post')->content_is("C");
+$t->request(GET '/put')->code_is(404);
+$t->request(POST '/put')->code_is(404);
+$t->request(PUT '/put')->content_is("D");
+$t->request(DELETE '/del')->content_is("DD");
+$t->request(GET '/del')->code_is(404);
 
 # param
-route '/param' => sub { [ sort(param()) ] };
-$t->request( GET '/param?a=bar&b=foo' )->json_cmp(['a','b']);
+route '/param' => sub { [sort(param())] };
+$t->request(GET '/param?a=bar&b=foo')->json_cmp(['a', 'b']);
 route '/param2' => sub { param 'a' };
-$t->request( GET '/param2?a=bar&b=foo' )->content_is("bar");
+$t->request(GET '/param2?a=bar&b=foo')->content_is("bar");
 
 # session
 route '/session' => sub {
@@ -43,37 +43,37 @@ route '/session' => sub {
 
 # stash
 route '/stash' => sub { stash->{a} = "E"; stash 'a' };
-$t->request( GET '/stash' )->content_is("E");
+$t->request(GET '/stash')->content_is("E");
 
 # named
 route '/named/:a' => sub { named 'a' };
-$t->request( GET '/named/F' )->content_is("F");
+$t->request(GET '/named/F')->content_is("F");
 
 # req
 route '/req' => sub { ref(req) eq 'Kelp::Request' ? "G" : "FAIL" };
-$t->request( POST '/req' )->content_is("G");
+$t->request(POST '/req')->content_is("G");
 
 # res
 route '/res' => sub { ref(res) eq 'Kelp::Response' ? "H" : "FAIL" };
-$t->request( POST '/res' )->content_is("H");
+$t->request(POST '/res')->content_is("H");
 
 # template
-route '/template' => sub { template \"[% letter %]", { letter => 'I' } };
-$t->request( GET '/template' )->content_is("I");
+route '/template' => sub { template \"[% letter %]", {letter => 'I'} };
+$t->request(GET '/template')->content_is("I");
 
 # attr
 attr active => "J";
 attr lazy => sub { app->active };
 route '/attr' => sub { app->lazy };
-$t->request( GET '/attr' )->content_is("J");
+$t->request(GET '/attr')->content_is("J");
 
 # sub
 route '/sub' => 'func';
 sub func { "K" }
-$t->request( GET '/sub' )->content_is("K");
+$t->request(GET '/sub')->content_is("K");
 
 # config
 route '/config' => sub { config('charset') };
-$t->request( GET '/config')->content_is('UTF-8');
+$t->request(GET '/config')->content_is('UTF-8');
 
 done_testing;

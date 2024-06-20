@@ -1,5 +1,10 @@
-package A; sub b{} 1;
-package Ab; sub c{} 1;
+package A;
+sub b { }
+1;
+
+package Ab;
+sub c { }
+1;
 
 package main;
 use strict;
@@ -10,10 +15,10 @@ use Kelp::Routes;
 
 my $r = Kelp::Routes->new;
 
-$r->add( '/a' => { to => 'a#b', name => 'a' } );
-$r->add( '/b' => { to => 'ab#c', name => 'b' } );
-$r->add( '/a/b' => { to => 'a#b', name => 'ab' } );
-$r->add( '/a/b/c' => 'ab#c');
+$r->add('/a' => {to => 'a#b', name => 'a'});
+$r->add('/b' => {to => 'ab#c', name => 'b'});
+$r->add('/a/b' => {to => 'a#b', name => 'ab'});
+$r->add('/a/b/c' => 'ab#c');
 
 is $r->url('noname'), 'noname';
 is $r->url('a'), '/a';
@@ -21,8 +26,8 @@ is $r->url('b'), '/b';
 is $r->url('ab'), '/a/b';
 
 $r->clear;
-$r->add('/:a/:b', { to => 'a#b', name => 'a' });
-$r->add('/:a/?b', { to => 'ab#c', name => 'b', defaults => { b => 'foo' } });
+$r->add('/:a/:b', {to => 'a#b', name => 'a'});
+$r->add('/:a/?b', {to => 'ab#c', name => 'b', defaults => {b => 'foo'}});
 
 is $r->url(qw/a a bar b foo/), '/bar/foo';
 is $r->url(qw/b a bar b moo/), '/bar/moo';

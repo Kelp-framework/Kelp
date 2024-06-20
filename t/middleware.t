@@ -5,22 +5,22 @@ use Kelp::Test;
 use HTTP::Request::Common;
 use Test::More;
 
-my $app = Kelp->new( mode => 'test', __config => 1 );
+my $app = Kelp->new(mode => 'test', __config => 1);
 $app->routes->base("main");
 
 # Need only one route
-$app->add_route( '/mw', sub { "OK" } );
+$app->add_route('/mw', sub { "OK" });
 
-my $t = Kelp::Test->new( app => $app );
+my $t = Kelp::Test->new(app => $app);
 
 # No middleware
-$t->request( GET '/mw' )
-  ->header_is( "X-Framework", "Perl Kelp" );
+$t->request(GET '/mw')
+    ->header_is("X-Framework", "Perl Kelp");
 
 # Add middleware
 $app->_cfg->merge(
     {
-        middleware      => [ 'XFramework', 'ContentLength' ],
+        middleware => ['XFramework', 'ContentLength'],
         middleware_init => {
             XFramework => {
                 framework => 'Changed'
@@ -29,8 +29,8 @@ $app->_cfg->merge(
     }
 );
 
-$t->request( GET '/mw' )
-  ->header_is( "X-Framework", "Changed" )
-  ->header_is( "Content-Length", 2 );
+$t->request(GET '/mw')
+    ->header_is("X-Framework", "Changed")
+    ->header_is("Content-Length", 2);
 
 done_testing;

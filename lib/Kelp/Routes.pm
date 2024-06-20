@@ -9,12 +9,12 @@ use Kelp::Routes::Location;
 use Try::Tiny;
 use Class::Inspector;
 
-attr base          => ''; # the default is set by config module
-attr rebless       => 0;  # do not rebless app by default
-attr pattern_obj   => 'Kelp::Routes::Pattern';
-attr fatal         => 0;
-attr routes        => sub { [] };
-attr names         => sub { {} };
+attr base => '';    # the default is set by config module
+attr rebless => 0;    # do not rebless app by default
+attr pattern_obj => 'Kelp::Routes::Pattern';
+attr fatal => 0;
+attr routes => sub { [] };
+attr names => sub { {} };
 
 # Cache
 attr cache => sub {
@@ -22,41 +22,45 @@ attr cache => sub {
     my %cache;
 
     Plack::Util::inline_object(
-        get   => sub { $cache{ $_[0] } },
-        set   => sub { $cache{ $_[0] } = $_[1] },
+        get => sub { $cache{$_[0]} },
+        set => sub { $cache{$_[0]} = $_[1] },
         clear => sub { %cache = () }
     );
 };
 
-sub add {
-    my ( $self, $pattern, $descr, $parent ) = @_;
+sub add
+{
+    my ($self, $pattern, $descr, $parent) = @_;
     $parent = {} if !$parent || ref $parent ne 'HASH';
 
-    my $route = $self->_parse_route( $parent, $pattern, $descr );
+    my $route = $self->_parse_route($parent, $pattern, $descr);
     return $self->_build_location($route);
 }
 
-sub clear {
-    my ( $self ) = @_;
+sub clear
+{
+    my ($self) = @_;
 
-    $self->routes( [] );
+    $self->routes([]);
     $self->cache->clear;
-    $self->names( {} );
+    $self->names({});
 }
 
-sub url {
+sub url
+{
     my $self = shift;
     my $name = shift // croak "Route name is missing";
-    my %args = @_ == 1 ? %{ $_[0] } : @_;
+    my %args = @_ == 1 ? %{$_[0]} : @_;
 
     return $name unless exists $self->names->{$name};
-    my $route = $self->routes->[ $self->names->{$name} ];
+    my $route = $self->routes->[$self->names->{$name}];
     return $route->build(%args);
 }
 
-sub _build_location {
+sub _build_location
+{
     # build a specific location object on which ->add can be called again
-    my ( $self, $route ) = @_;
+    my ($self, $route) = @_;
 
     return Kelp::Routes::Location->new(
         router => $self,
@@ -64,55 +68,59 @@ sub _build_location {
     );
 }
 
-sub _message {
-    my ( $self, $type_str, @parts ) = @_;
+sub _message
+{
+    my ($self, $type_str, @parts) = @_;
     my $message = "[ROUTES] $type_str: ";
 
     for my $part (@parts) {
         $part //= '';
-        $part =~ s/ at .+? line \d+.\n//g; # way prettier errors
+        $part =~ s/ at .+? line \d+.\n//g;    # way prettier errors
     }
 
-    return $message . join ' - ', @parts;;
+    return $message . join ' - ', @parts;
 }
 
-sub _error {
-    my ( $self, @parts ) = @_;
+sub _error
+{
+    my ($self, @parts) = @_;
 
-    croak $self->_message( 'ERROR', @parts ) if $self->fatal;
-    carp $self->_message( 'WARNING, route is skipped', @parts );
+    croak $self->_message('ERROR', @parts) if $self->fatal;
+    carp $self->_message('WARNING, route is skipped', @parts);
     return;
 }
 
-sub _warning {
-    my ( $self, @parts ) = @_;
+sub _warning
+{
+    my ($self, @parts) = @_;
 
-    carp $self->_message( 'WARNING', @parts );
+    carp $self->_message('WARNING', @parts);
 }
 
-sub _parse_route {
-    my ( $self, $parent, $key, $val ) = @_;
+sub _parse_route
+{
+    my ($self, $parent, $key, $val) = @_;
 
     # Scalar, e.g. 'bar#foo'
     # CODE, e.g. sub { ... }
-    if ( !ref $val || ref $val eq 'CODE' ) {
-        $val = { to => $val };
+    if (!ref $val || ref $val eq 'CODE') {
+        $val = {to => $val};
     }
 
     # Sanity check
-    if ( ref $val ne 'HASH' ) {
+    if (ref $val ne 'HASH') {
         return $self->_error('Route description must be a string, CODE or HASH');
     }
 
     # Handle key in form of [METHOD => 'pattern']
-    if ( ref $key eq 'ARRAY' ) {
-        if ( ( grep { defined } @$key ) != 2 ) {
-            return $self->_error( "Path as an ARRAY is expected to have two parameters" );
+    if (ref $key eq 'ARRAY') {
+        if ((grep { defined } @$key) != 2) {
+            return $self->_error("Path as an ARRAY is expected to have two parameters");
         }
 
-        my ( $method, $pattern ) = @$key;
-        if ( !grep { $method eq $_ } qw/GET POST PUT DELETE/ ) {
-            $self->_warning( "Using an odd method '$method'" );
+        my ($method, $pattern) = @$key;
+        if (!grep { $method eq $_ } qw/GET POST PUT DELETE/) {
+            $self->_warning("Using an odd method '$method'");
         }
 
         $val->{method} = $method;
@@ -120,8 +128,8 @@ sub _parse_route {
     }
 
     # Only SCALAR and Regexp allowed
-    if ( ref $key && ref $key ne 'Regexp' ) {
-        return $self->_error( "Pattern '$key' can not be computed" );
+    if (ref $key && ref $key ne 'Regexp') {
+        return $self->_error("Pattern '$key' can not be computed");
     }
 
     $val->{pattern} = $key;
@@ -129,101 +137,105 @@ sub _parse_route {
     # Format and load the target of 'to'
     my $error;
     try {
-        $val->{to} = $self->format_to( $val->{to} );
-        $val->{dest} = $self->load_destination( $val->{to} );
+        $val->{to} = $self->format_to($val->{to});
+        $val->{dest} = $self->load_destination($val->{to});
     }
     catch {
         $error = $_;
     };
 
-    if ( !defined $val->{dest} || $error ) {
-        return $self->_error( "Invalid destination for route '$key'", $error );
+    if (!defined $val->{dest} || $error) {
+        return $self->_error("Invalid destination for route '$key'", $error);
     }
 
     # store tree for later and set up bridge based on it
     my $tree = delete $val->{tree};
     if ($tree && (ref $tree ne 'ARRAY' || @$tree % 2 != 0)) {
-        return $self->_error( "Tree must be an even-sized ARRAY" );
+        return $self->_error("Tree must be an even-sized ARRAY");
     }
     $val->{bridge} ||= defined $tree;
 
     # psgi + bridge is incompatible, as psgi route will only render (not return true values)
-    if ( $val->{psgi} && $val->{bridge} ) {
-        return $self->_error( "Route '$key' cannot have both 'psgi' and 'bridge'" );
+    if ($val->{psgi} && $val->{bridge}) {
+        return $self->_error("Route '$key' cannot have both 'psgi' and 'bridge'");
     }
 
     # Adjust the destination for psgi
-    $val->{dest} = $self->wrap_psgi( $val->{to}, $val->{dest} )
+    $val->{dest} = $self->wrap_psgi($val->{to}, $val->{dest})
         if $val->{psgi};
 
     # Credit stuff from tree parent, if possible
-    if ( defined $parent->{pattern} ) {
-        if ( $val->{name} && $parent->{name} ) {
+    if (defined $parent->{pattern}) {
+        if ($val->{name} && $parent->{name}) {
             $val->{name} = $parent->{name} . '_' . $val->{name};
         }
         $val->{pattern} = $parent->{pattern} . $val->{pattern};
     }
 
     # Can now add the object to routes
-    my $route = $self->build_pattern( $val );
-    push @{ $self->routes }, $route;
+    my $route = $self->build_pattern($val);
+    push @{$self->routes}, $route;
 
     # Add route index to names
-    if ( my $name = $val->{name} ) {
-        if ( exists $self->names->{$name} ) {
-            $self->_warning( "Multiple routes named '$name'" );
+    if (my $name = $val->{name}) {
+        if (exists $self->names->{$name}) {
+            $self->_warning("Multiple routes named '$name'");
         }
-        $self->names->{$name} = $#{ $self->routes };
+        $self->names->{$name} = $#{$self->routes};
     }
 
     # handle further tree levels, if any
     $tree //= [];
     while (@$tree) {
-        my ( $k, $v ) = splice( @$tree, 0, 2 );
-        $self->_parse_route( $val, $k, $v );
+        my ($k, $v) = splice(@$tree, 0, 2);
+        $self->_parse_route($val, $k, $v);
     }
 
     return $route;
 }
 
 # Override to change what 'to' values are valid
-sub format_to {
-    my ( $self, $to ) = @_;
+sub format_to
+{
+    my ($self, $to) = @_;
     my $ref = ref $to;
 
-    if ( !defined $to ) {
+    if (!defined $to) {
         croak 'missing';
     }
-    elsif ( !$to || ( $ref && $ref ne 'CODE' ) ) {
+    elsif (!$to || ($ref && $ref ne 'CODE')) {
         croak 'neither a string nor a coderef';
     }
 
-    $to = Kelp::Util::camelize( $to, $self->base )
+    $to = Kelp::Util::camelize($to, $self->base)
         unless $ref;
 
     return $to;
 }
 
 # Override to change the way the application loads the destination from 'to'
-sub load_destination {
-    my ( $self, $to ) = @_;
+sub load_destination
+{
+    my ($self, $to) = @_;
     my $ref = ref $to;
 
-    if ( !$ref && $to ) {
+    if (!$ref && $to) {
+
         # Load the class, if there is one
-        if ( my $class = Kelp::Util::extract_class( $to ) ) {
-            my $method = Kelp::Util::extract_function( $to );
+        if (my $class = Kelp::Util::extract_class($to)) {
+            my $method = Kelp::Util::extract_function($to);
 
-            Plack::Util::load_class( $class )
-                unless Class::Inspector->loaded( $class );
+            Plack::Util::load_class($class)
+                unless Class::Inspector->loaded($class);
 
-            my $method_code = $class->can( $method );
+            my $method_code = $class->can($method);
             croak "method '$method' does not exist in class '$class'"
                 unless $method_code;
 
-            return [$self->rebless && $class->isa( $self->base ) ? $class : undef, $method_code];
+            return [$self->rebless && $class->isa($self->base) ? $class : undef, $method_code];
         }
-        elsif ( exists &$to ) {
+        elsif (exists &$to) {
+
             # Move to reference
             return [undef, \&{$to}];
         }
@@ -231,7 +243,7 @@ sub load_destination {
             croak "function '$to' does not exist";
         }
     }
-    elsif ( $ref ) {
+    elsif ($ref) {
         croak "don't know how to load from reftype '$ref'"
             unless $ref eq 'CODE';
 
@@ -242,8 +254,9 @@ sub load_destination {
 }
 
 # Override to change the way a psgi application is adapted to kelp
-sub wrap_psgi {
-    my ( $self, $to, $destination ) = @_;
+sub wrap_psgi
+{
+    my ($self, $to, $destination) = @_;
 
     # adjust the subroutine to load
     # don't adjust the controller (index 0) to still call the proper hooks if
@@ -254,23 +267,26 @@ sub wrap_psgi {
 }
 
 # Override to use a custom pattern object
-sub build_pattern {
-    my ( $self, $args ) = @_;
+sub build_pattern
+{
+    my ($self, $args) = @_;
     my $package = $self->pattern_obj;
     eval qq{require $package};
-    return $package->new( %$args );
+    return $package->new(%$args);
 }
 
-sub match {
-    my ( $self, $path, $method ) = @_;
+sub match
+{
+    my ($self, $path, $method) = @_;
     $method //= '';
 
     # Look for this path and method in the cache. If found,
     # return the array of routes that matched the previous time.
     # If not found, then return all routes.
     my $key = "$path:$method";
-    my $routes = $self->cache->get( $key );
-    if ( !defined $routes ) {
+    my $routes = $self->cache->get($key);
+    if (!defined $routes) {
+
         # Look through all routes, grep the ones that match and sort them by
         # 'bridge' and 'pattern'. Perl sort function is stable, meaning it will
         # preserve the initial order of records it considers equal. This means
@@ -281,36 +297,37 @@ sub match {
         # by string sorting by patterns.
         @$routes =
             sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
-            grep { $_->match( $path, $method ) } @{ $self->routes };
+            grep { $_->match($path, $method) } @{$self->routes};
 
-        $self->cache->set( $key, $routes );
+        $self->cache->set($key, $routes);
     }
     else {
         # matching fills the route parameters
-        $_->match( $path, $method ) for @$routes;
+        $_->match($path, $method) for @$routes;
     }
 
     # shallow copy to make sure nothing pollutes the cache
-    return [ @$routes ];
+    return [@$routes];
 }
 
 # dispatch does not do many sanity checks on the destination, since those are
 # done in format_to and load_destination. A single check is present, which
 # lazy-computes dest if it is not set (since some code might have overrode add).
-sub dispatch {
-    my ( $self, $app, $route ) = @_;
-    $app   || die "Application instance required";
+sub dispatch
+{
+    my ($self, $app, $route) = @_;
+    $app || die "Application instance required";
     $route || die "No route pattern instance supplied";
 
     my $dest = $route->dest;
-    $route->dest( $self->load_destination( $route->to ) )
+    $route->dest($self->load_destination($route->to))
         unless $dest;
 
-    my ( $to, $controller, $action ) = ( $route->to, @{ $dest } );
-    $app = $app->_clone( $controller ) if $controller;
+    my ($to, $controller, $action) = ($route->to, @{$dest});
+    $app = $app->_clone($controller) if $controller;
 
-    $app->before_dispatch( $to );
-    return $action->( $app, @{ $route->param } );
+    $app->before_dispatch($to);
+    return $action->($app, @{$route->param});
 }
 
 1;

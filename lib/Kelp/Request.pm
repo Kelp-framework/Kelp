@@ -20,188 +20,210 @@ attr route_name => sub { undef };
 
 attr query_parameters => sub {
     my $self = shift;
-    my $raw = $self->_charset_decode_array( $self->_query_parameters );
+    my $raw = $self->_charset_decode_array($self->_query_parameters);
     return Hash::MultiValue->new(@{$raw});
 };
 
 attr body_parameters => sub {
     my $self = shift;
-    my $raw = $self->_charset_decode_array( $self->_body_parameters );
+    my $raw = $self->_charset_decode_array($self->_body_parameters);
     return Hash::MultiValue->new(@{$raw});
 };
 
 attr parameters => sub {
     my $self = shift;
 
-    my $raw_query = $self->_charset_decode_array( $self->_query_parameters );
-    my $raw_body = $self->_charset_decode_array( $self->_body_parameters );
+    my $raw_query = $self->_charset_decode_array($self->_query_parameters);
+    my $raw_body = $self->_charset_decode_array($self->_body_parameters);
     return Hash::MultiValue->new(@{$raw_query}, @{$raw_body});
 };
 
 # Raw methods - methods in Plack::Request (without decoding)
 # in Kelp::Request, they are replaced with decoding versions
 
-sub raw_path {
+sub raw_path
+{
     my $self = shift;
-    return $self->SUPER::path( @_ );
+    return $self->SUPER::path(@_);
 }
 
-sub raw_body {
+sub raw_body
+{
     my $self = shift;
-    return $self->SUPER::content( @_ );
+    return $self->SUPER::content(@_);
 }
 
-sub raw_body_parameters {
+sub raw_body_parameters
+{
     my $self = shift;
-    return $self->SUPER::body_parameters( @_ );
+    return $self->SUPER::body_parameters(@_);
 }
 
-sub raw_query_parameters {
+sub raw_query_parameters
+{
     my $self = shift;
-    return $self->SUPER::query_parameters( @_ );
+    return $self->SUPER::query_parameters(@_);
 }
 
-sub raw_parameters {
+sub raw_parameters
+{
     my $self = shift;
-    return $self->SUPER::parameters( @_ );
+    return $self->SUPER::parameters(@_);
 }
 
 # If you're running the web app as a proxy, use Plack::Middleware::ReverseProxy
-sub address     { $_[0]->env->{REMOTE_ADDR} }
+sub address { $_[0]->env->{REMOTE_ADDR} }
 sub remote_host { $_[0]->env->{REMOTE_HOST} }
-sub user        { $_[0]->env->{REMOTE_USER} }
+sub user { $_[0]->env->{REMOTE_USER} }
 
 # Interface
 
-sub new {
-    my ( $class, %args ) = @_;
-    my $self = $class->SUPER::new( delete $args{env} );
+sub new
+{
+    my ($class, %args) = @_;
+    my $self = $class->SUPER::new(delete $args{env});
     $self->{$_} = $args{$_} for keys %args;
     return $self;
 }
 
-sub is_ajax {
+sub is_ajax
+{
     my $self = shift;
     return 0 unless my $with = $self->headers->header('X-Requested-With');
     return $with =~ m{XMLHttpRequest}i;
 }
 
-sub is_json {
+sub is_json
+{
     my $self = shift;
     return 0 unless $self->content_type;
     return $self->content_type =~ m{^application/json}i;
 }
 
-sub charset {
+sub charset
+{
     my $self = shift;
 
     # charset must be supported by Encode
-    state $supported = { map { lc $_ => $_ } Encode->encodings(':all') };
+    state $supported = {map { lc $_ => $_ } Encode->encodings(':all')};
 
     return undef unless $self->content_type;
     return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
     return $supported->{lc $1};
 }
 
-sub charset_encode {
-    my ( $self, $string ) = @_;
+sub charset_encode
+{
+    my ($self, $string) = @_;
 
     # Worst case scenario is a server error with code 500
     return encode $self->charset, $string
         if $self->charset;
-    return $self->app->charset_encode($string)
+    return $self->app->charset_encode($string);
 }
 
-sub charset_decode {
-    my ( $self, $string ) = @_;
+sub charset_decode
+{
+    my ($self, $string) = @_;
 
     # Worst case scenario is a server error with code 500
     return decode $self->charset, $string
         if $self->charset;
-    return $self->app->charset_decode($string)
+    return $self->app->charset_decode($string);
 }
 
-sub _charset_decode_array {
-    my ( $self, $arr ) = @_;
-    return [ map { $self->charset_decode($_) } @$arr ];
+sub _charset_decode_array
+{
+    my ($self, $arr) = @_;
+    return [map { $self->charset_decode($_) } @$arr];
 }
 
-sub path {
+sub path
+{
     my $self = shift;
-    return $self->charset_decode( $self->SUPER::path( @_ ) );
+    return $self->charset_decode($self->SUPER::path(@_));
 }
 
-sub content {
+sub content
+{
     my $self = shift;
-    return $self->charset_decode( $self->SUPER::content( @_ ) );
+    return $self->charset_decode($self->SUPER::content(@_));
 }
 
-sub json_content {
+sub json_content
+{
     my $self = shift;
     return undef unless $self->is_json;
 
     return try {
-        $self->app->_json_internal->decode( $self->content );
+        $self->app->_json_internal->decode($self->content);
     }
     catch {
         undef;
     };
 }
 
-sub param {
+sub param
+{
     my $self = shift;
 
-    if ( $self->is_json && $self->app->can('json') ) {
-        return $self->json_param( @_ );
+    if ($self->is_json && $self->app->can('json')) {
+        return $self->json_param(@_);
     }
 
     # safe method without calling Plack::Request::param
     return $self->parameters->get($_[0]) if @_;
-    return keys %{ $self->parameters };
+    return keys %{$self->parameters};
 }
 
-sub cgi_param {
-    shift->SUPER::param( @_ );
+sub cgi_param
+{
+    shift->SUPER::param(@_);
 }
 
-sub query_param {
+sub query_param
+{
     my $self = shift;
 
     return $self->query_parameters->get($_[0]) if @_;
-    return keys %{ $self->query_parameters };
+    return keys %{$self->query_parameters};
 }
 
-sub body_param {
+sub body_param
+{
     my $self = shift;
 
     return $self->body_parameters->get($_[0]) if @_;
-    return keys %{ $self->body_parameters };
+    return keys %{$self->body_parameters};
 }
 
-sub json_param {
+sub json_param
+{
     my $self = shift;
 
     my $hash = $self->{_param_json_content} //= do {
         my $hash = $self->json_content // {};
-        ref $hash eq 'HASH' ? $hash : { ref $hash, $hash };
+        ref $hash eq 'HASH' ? $hash : {ref $hash, $hash};
     };
 
-    return $hash->{ $_[0] } if @_;
+    return $hash->{$_[0]} if @_;
     if (!wantarray) {
-        carp "param() called in scalar context on json request is deprecated and will return the number of keys in the future. Use json_content instead";
+        carp
+            "param() called in scalar context on json request is deprecated and will return the number of keys in the future. Use json_content instead";
         return $hash;
     }
     return keys %$hash;
 }
 
-sub session {
-    my $self    = shift;
+sub session
+{
+    my $self = shift;
     my $session = $self->env->{'psgix.session'}
-      // croak "No Session middleware wrapped";
+        // croak "No Session middleware wrapped";
 
     return $session if !@_;
 
-    if ( @_ == 1 ) {
+    if (@_ == 1) {
         my $value = shift;
         return $session->{$value} unless ref $value;
         return $self->env->{'psgix.session'} = $value;
