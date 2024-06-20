@@ -12,6 +12,8 @@ use StringifyingException;
 my $app = Kelp->new( mode => 'test' );
 my $t = Kelp::Test->new( app => $app );
 
+my $ex = StringifyingException->new(data => [qw(ab cd)]);
+
 $app->add_route( "/0", sub { die 'died' });
 $t->request( GET "/0" )
     ->code_is(500)
@@ -21,8 +23,8 @@ $t->request( GET "/0" )
 $app->add_route( "/1", sub { Kelp::Exception->throw(400) });
 $app->add_route( "/2", sub { Kelp::Exception->throw(403, body => 'body text') });
 $app->add_route( "/2alt", sub { Kelp::Exception->throw(404, body => 'body text') });
-$app->add_route( "/5", sub { shift->res->json; Kelp::Exception->throw(500, body => StringifyingException->new(data => [qw(ab cd)])) });
-$app->add_route( "/5alt", sub { shift->res->json; Kelp::Exception->throw(501, body => StringifyingException->new(data => [qw(ab cd)])) });
+$app->add_route( "/5", sub { shift->res->json; Kelp::Exception->throw(500, body => $ex) });
+$app->add_route( "/5alt", sub { shift->res->json; Kelp::Exception->throw(501, body => $ex) });
 $app->add_route( "/6", sub { Kelp::Exception->throw(300) });
 
 # these errors should be the same regardless of mode
@@ -46,7 +48,7 @@ subtest 'testing development' => sub {
 
     $t->request( GET "/5" )
         ->code_is(500)
-        ->content_like(qr/Exception with data: \Q[ab,cd]\E/)
+        ->content_like(qr/\Q$ex\E/)
         ->content_type_is('text/html');
 
     $t->request( GET "/5alt" )

@@ -13,6 +13,7 @@ BEGIN {
     $ENV{KELP_REDEFINE} = 1;
 }
 
+my $ex = StringifyingException->new(data => [3, 2, 1]);
 
 # Error templates present
 {
@@ -46,11 +47,11 @@ BEGIN {
       ->code_is(500)
       ->content_like(qr/Exception=HASH/);
 
-    $r->add("/exception_stringify", sub { die StringifyingException->new(data => [3, 2, 1]) });
+    $r->add("/exception_stringify", sub { die $ex });
     $t->request( GET '/exception_stringify' )
         ->code_is(500)
         ->content_type_is('text/html')
-        ->content_like(qr/\QException with data: [3,2,1]\E/);
+        ->content_like(qr/\Q$ex\E/);
 }
 
 # No error templates
@@ -121,7 +122,7 @@ BEGIN {
       ->content_type_is('text/html')
       ->content_like(qr/Five Hundred/);
 
-    $r->add("/500_exception", sub { die StringifyingException->new(data => [3, 2, 1]) });
+    $r->add("/500_exception", sub { die $ex });
     $t->request( GET '/500_exception' )
         ->code_is(500)
         ->content_type_is('text/html')
@@ -155,10 +156,10 @@ BEGIN {
         ->code_is(500)
         ->content_like(qr/^HASH/, 'json is not stringified');
 
-    $r->add("/500_exception", sub { die StringifyingException->new(data => [3, 2, 1]) });
+    $r->add("/500_exception", sub { die $ex });
     $t->request( GET '/500_exception' )
         ->code_is(500)
-        ->content_like(qr/\QException with data: [3,2,1]\E/);
+        ->content_like(qr/\Q$ex\E/);
 }
 
 # Deployment no error templates
@@ -194,10 +195,10 @@ BEGIN {
       ->code_is(500)
       ->content_like(qr/500 - Internal Server Error/);
 
-    $r->add("/500_exception", sub { die StringifyingException->new(data => [3, 2, 1]) });
+    $r->add("/500_exception", sub { die $ex });
     $t->request( GET '/500_exception' )
         ->code_is(500)
-        ->content_unlike(qr/\QException with data: [3,2,1]\E/);
+        ->content_unlike(qr/\Q$ex\E/);
 }
 
 done_testing;

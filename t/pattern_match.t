@@ -4,7 +4,9 @@ use warnings;
 use v5.10;
 
 use Test::More;
+use Kelp::Test -utf8;
 use Kelp::Routes::Pattern;
+use utf8;
 
 # No placeholders
 _match(
