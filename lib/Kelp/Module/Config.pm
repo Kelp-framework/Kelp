@@ -90,11 +90,11 @@ sub get
 
     my $val = $self->data;
     for my $chunk (split($self->separator, $path)) {
-        croak "Config path $path breaks at '$chunk'"
-            unless ref $val eq 'HASH';
-
         return $default
             unless exists $val->{$chunk};
+
+        croak "Config path $path breaks at '$chunk'"
+            unless ref $val eq 'HASH';
 
         $val = $val->{$chunk};
     }

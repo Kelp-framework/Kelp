@@ -11,6 +11,7 @@
             - Added log_format, date_format configuration values to Kelp::Module::Logger
             - Added 'default_modes' attribute and an optional argument for 'get' which will be the default value returned to Kelp::Module::Config
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
+            - Added Kelp::Module::Config::Least, which has no defaults at all
 
             [Changes]
             - Response 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
@@ -29,6 +30,7 @@
             - Documentation improvements
             - Kelp::Module::Null now really does nothing
             - Kelp::Module::Template::Null now really renders nothing
+            - Kelp::Module::Config::Null now really has no configuration
 
             [Bug fixes]
             - Route destination will no longer be executed if a response was already rendered by a previous one

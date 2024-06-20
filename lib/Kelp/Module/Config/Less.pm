@@ -19,9 +19,9 @@ __END__
 
 =pod
 
-=head1 TITLE
+=head1 NAME
 
-Kelp::Module::Config::Less
+Kelp::Module::Config::Less - Configuration with less defaults
 
 =head1 DESCRIPTION
 
@@ -32,7 +32,7 @@ defaults and used by L<Kelp::Less>.
 
 L<Kelp::Module::Config>
 
-L<Kelp::Module::Config::Null>
+L<Kelp::Module::Config::Least>
 
 =cut
 
