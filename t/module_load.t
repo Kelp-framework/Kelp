@@ -13,24 +13,28 @@ dies_ok {
     $app->load_module('Shibboleet');
 };
 
+# Check if Null module loads
+$app->load_module('Null', name => 'value');
+pass 'Null module loaded';
+
 # Direct
-$app->load_module('Null', number => 2);
+$app->load_module('Plus', number => 2);
 is $app->plus(5), 7;
 
 # Via config
 my $bpp = Kelp->new;
-$bpp->config_hash->{modules_init}->{Null} = {
+$bpp->config_hash->{modules_init}->{Plus} = {
     number => 3
 };
-$bpp->load_module('Null');
+$bpp->load_module('Plus');
 is $bpp->plus(5), 8;
 
 # Direct overrides
 my $cpp = Kelp->new;
-$cpp->config_hash->{modules_init}->{Null} = {
+$cpp->config_hash->{modules_init}->{Plus} = {
     number => 3
 };
-$cpp->load_module('Null', number => 5);
+$cpp->load_module('Plus', number => 5);
 is $cpp->plus(5), 10;
 
 # Fully qualified module name

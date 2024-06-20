@@ -37,6 +37,7 @@
             - A template named '0' will now be properly rendered
             - An 'app' object available in Kelp::Response template is now a properly reblessed controller
             - Kelp::Module::Config::Less no longer uses the same reference for middleware and modules
+            - Kelp::Module::Null now does nothing
 
             [Deprecations]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
