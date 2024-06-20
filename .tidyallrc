@@ -1,0 +1,7 @@
+[PerlTidy]
+select = **/*.{pl,pm,t}
+ignore = .build/**/*
+ignore = conf/**/*
+ignore = t/conf/**/*
+argv = -pro=./.perltidyrc --character-encoding=none
+

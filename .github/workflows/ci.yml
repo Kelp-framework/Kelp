@@ -32,21 +32,26 @@ jobs:
         perl -v
         cpanm -v
 
+    - name: Check if the code is tidy
+      if:  ${{ startsWith(matrix.runner, 'ubuntu-') && startsWith(matrix.perl, '5.40') }}
+      run: |
+        cpanm --notest Perl::Tidy Code::TidyAll
+        tidyall -a --check-only
     - name: Install dependencies
       run: |
         cpanm --installdeps --notest .
     - name: Show Errors on Windows
-      if:  ${{ failure() && startsWith( matrix.runner, 'windows-') }}
+      if:  ${{ failure() && startsWith(matrix.runner, 'windows-') }}
       run: |
          ls -l C:/Users/
          ls -l C:/Users/RUNNER~1/
          cat C:/Users/runneradmin/.cpanm/work/*/build.log
     - name: Show Errors on Ubuntu
-      if:  ${{ failure() && startsWith( matrix.runner, 'ubuntu-') }}
+      if:  ${{ failure() && startsWith(matrix.runner, 'ubuntu-') }}
       run: |
          cat /home/runner/.cpanm/work/*/build.log
     - name: Show Errors on OSX
-      if:  ${{ failure() && startsWith( matrix.runner, 'macos-') }}
+      if:  ${{ failure() && startsWith(matrix.runner, 'macos-') }}
       run: |
          cat  /Users/runner/.cpanm/work/*/build.log
     - name: Run tests
