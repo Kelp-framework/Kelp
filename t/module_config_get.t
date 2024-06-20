@@ -33,6 +33,10 @@ is_deeply $c->get('test.f.g.h'), {i => 4};
 is $c->get(''), undef;
 is $c->get(), undef;
 
-dies_ok { $c->get('test.b.c') } "Path breaks";
+is $c->get('test.d.f.g'), undef, 'path doesnt break when key does not exist';
+is $c->get('test.d.f.g', 'woohoo'), 'woohoo', 'default is returned';
+
+dies_ok { $c->get('test.b.c') } "Path breaks on invalid type";
 
 done_testing;
+

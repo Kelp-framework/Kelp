@@ -9,6 +9,9 @@ use Path::Tiny;
 # Extension to look for
 attr ext => 'pl';
 
+# Default modes to be processed before the app mode
+attr default_modes => sub { [qw(config)] };
+
 # Directory where config files are
 attr path => sub {
     my $self = shift;
@@ -21,7 +24,7 @@ attr path => sub {
     ];
 };
 
-attr separator => sub { qr/\./ };
+attr separator => sub { quotemeta '.' };
 
 # Defaults
 attr data => sub {
@@ -82,18 +85,20 @@ attr data => sub {
 
 sub get
 {
-    my ($self, $path) = @_;
+    my ($self, $path, $default) = @_;
     return unless $path;
-    my @a = split($self->separator, $path);
+
     my $val = $self->data;
-    for my $chunk (@a) {
-        if (ref($val) eq 'HASH') {
-            $val = $val->{$chunk};
-        }
-        else {
-            croak "Config path $path breaks at '$chunk'";
-        }
+    for my $chunk (split($self->separator, $path)) {
+        croak "Config path $path breaks at '$chunk'"
+            unless ref $val eq 'HASH';
+
+        return $default
+            unless exists $val->{$chunk};
+
+        $val = $val->{$chunk};
     }
+
     return $val;
 }
 
@@ -175,7 +180,7 @@ sub build
     my ($self, %args) = @_;
 
     # Find, parse and merge 'config' and mode files
-    for my $name ('config', $self->app->mode) {
+    for my $name (@{$self->default_modes}, $self->app->mode) {
         $self->process_mode($name);
     }
 
@@ -417,6 +422,10 @@ A wrapper for the C</get> method.
 
     # Gets {row}->{col}->{position} from the config hash
 
+    my $hello = $self->config('hello', 'world');
+
+    # gets {hello} from the config hash and returns 'world' if not found
+
 =head2 config_hash
 
 A reference to the entire configuration hash.
@@ -450,6 +459,11 @@ This module implements some attributes, which can be overridden by subclasses.
 
 The file extension of the configuration files. Default is C<pl>.
 
+=head2 default_modes
+
+An array reference of modes to be processed before the application's mode.
+Default is C<['config']>.
+
 =head2 separator
 
 A regular expression for the value separator used by L</get>. The default is
@@ -474,6 +488,8 @@ be overridden in extending classes.
 
 C<get($string)>
 
+C<get($string, $default)>
+
 Get a value from the config using a separated string.
 
     my $value = $c->get('bar.foo.baz');
@@ -482,6 +498,11 @@ Get a value from the config using a separated string.
 
 By default the separator is a dot, but this can be changed via the
 L</separator> attribute.
+
+If it doesn't find the requested value, C<$default> will be returned (or undef
+if not passed). If along the way it finds a different type that C<HASH> (for
+example you requested C<a.b>, but C<a> is a string) then an exception will be
+raised.
 
 =head2 load
 

@@ -9,10 +9,11 @@
             - Added set_charset method to Kelp::Response
             - Added Kelp::Module::Encoder, a base class for encoders (to be used by the new get_encoder method)
             - Added log_format, date_format configuration values to Kelp::Module::Logger
+            - Added 'default_modes' attribute and an optional argument for 'get' which will be the default value returned to Kelp::Module::Config
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
 
             [Changes]
-            - 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
+            - Response 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
             - Kelp::Test no longer uses HTTP::Cookies, implements a much slimmer cookie jar with the same interface
               * The new cookie jar only stores key/value pairs without any special data for cookies like domains, paths or expiration dates
             - Framework now internally uses a utf8-disabled JSON encoder
@@ -21,9 +22,10 @@
               * Application will now encode the JSON response manually using proper charset
             - Kelp::Test now has a new import flag: '-utf8'
               * Importing with this flag will automatically set Test::More to encode wide characters on output
-            - Repeatedly fetching parameters from json request with the param method is now much faster
+            - Kelp::Module::Config method 'get' never croaks if the config value was not set at all
             - Kelp::Module::Logger now sorts keys in Data::Dumper output
             - Kelp attribute 'charset' is now read/write (was documented as rw, but was readonly)
+            - Repeatedly fetching parameters from json request with the param method is now much faster
             - Documentation improvements
 
             [Bug fixes]
@@ -34,6 +36,7 @@
               * The destination will still be run if the render happened inside 'before_dispatch' hook
             - A template named '0' will now be properly rendered
             - An 'app' object available in Kelp::Response template is now a properly reblessed controller
+            - Kelp::Module::Config::Less no longer uses the same reference for middleware and modules
 
             [Deprecations]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
