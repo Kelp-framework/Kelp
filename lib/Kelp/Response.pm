@@ -108,8 +108,7 @@ sub render
 
     # If the content has been determined as JSON, then encode it
     if ($ref && (!$ct || $ct =~ m{^application/json}i)) {
-        croak "No JSON encoder" unless $self->app->can('_json_internal');
-        $body = $self->app->_json_internal->encode($body);
+        $body = $self->app->get_encoder(json => 'internal')->encode($body);
         $self->json if !$ct;
     }
     elsif (!$ref) {

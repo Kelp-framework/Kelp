@@ -38,6 +38,15 @@ attr data => sub {
         # Modules to load
         modules => [qw/JSON Template/],
 
+        # Encoders
+        encoders => {
+            json => {
+                internal => {
+                    utf8 => 0,
+                },
+            },
+        },
+
         # Module initialization params
         modules_init => {
 
@@ -507,6 +516,12 @@ C<UTF-8>
 =head2 app_url
 
 C<http://localhost:5000>
+
+=head2 encoders
+
+A hashref of extra encoder configs to be used by L<Kelp/get_encoder>. By
+default, only C<encoders.json.internal> is defined and disables C<utf8> flag of
+the JSON module.
 
 =head2 modules
 

@@ -44,6 +44,9 @@ attr -loaded_modules => sub { {} };
 attr req => undef;
 attr res => undef;
 
+# registered application encoder modules
+attr encoder_modules => sub { {} };
+
 # Initialization
 sub new
 {
@@ -392,6 +395,16 @@ sub charset_decode
     return decode $self->charset, $string;
 }
 
+sub get_encoder
+{
+    my ($self, $type, $name) = @_;
+
+    my $encoder = $self->encoder_modules->{$type} //
+        croak "No $type encoder";
+
+    return $encoder->get_encoder($name);
+}
+
 1;
 
 __END__
@@ -585,6 +598,7 @@ contain a reference to the current L<Kelp::Request> instance.
         }
     }
 
+
 =head2 res
 
 This attribute only makes sense if called within a route definition. It will
@@ -594,6 +608,11 @@ contain a reference to the current L<Kelp::Response> instance.
         my $self = shift;
         $self->res->json->render( { success => 1 } );
     }
+
+=head2 encoder_modules
+
+A hash reference of registered encoder modules. Should only be interacted with
+through L</get_encoder> or inside encoder module's code.
 
 =head1 METHODS
 
@@ -787,6 +806,24 @@ Shortcut methods, which encode or decode a string using the application's curren
 
 Returns whether the application is in production mode. Checks if L</mode> is
 either C<deployment> or C<production>.
+
+=head2 get_encoder
+
+    my $json_encoder = $self->get_encoder('json');
+
+Gets an instance of a given encoder. It takes two arguments:
+
+=over
+
+=item * type of the encoder module (eg. C<json>)
+
+=item * optional name of the encoder (default is C<default>)
+
+=back
+
+It will get extra config (if available) from C<encoders.TYPE.NAME>
+configuration hash. Will instantiate the encoder just once and then reuse it.
+Croaks when there is no such encoder type.
 
 =head1 AUTHOR
 

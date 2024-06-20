@@ -1,7 +1,7 @@
 use Kelp::Base -strict;
 
 use Kelp;
-use Kelp::Test;
+use Kelp::Test -utf8;
 use HTTP::Request::Common;
 use Test::More;
 use utf8;
@@ -123,3 +123,4 @@ $t->request(POST 'via_legacy')
     ->content_is("OK");
 
 done_testing;
+
