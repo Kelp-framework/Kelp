@@ -41,12 +41,14 @@ sub _rename
 {
     my ($self, $name) = @_;
     $name //= '';
+
+    return $name if ref $name;
     return undef unless length $name;
 
     my $ext = $self->ext // '';
     return $name unless length $ext;
 
-    return $name if ref($name) || $name =~ /\./;
+    return $name if $name =~ /\./;
     return "$name.$ext";
 }
 
