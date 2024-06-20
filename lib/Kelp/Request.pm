@@ -20,21 +20,26 @@ attr route_name => sub { undef };
 
 attr query_parameters => sub {
     my $self = shift;
-    my $raw = $self->_charset_decode_array($self->_query_parameters);
+
+    $self->SUPER::query_parameters;
+    my $raw = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'});
     return Hash::MultiValue->new(@{$raw});
 };
 
 attr body_parameters => sub {
     my $self = shift;
-    my $raw = $self->_charset_decode_array($self->_body_parameters);
+
+    $self->SUPER::body_parameters;
+    my $raw = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
     return Hash::MultiValue->new(@{$raw});
 };
 
 attr parameters => sub {
     my $self = shift;
 
-    my $raw_query = $self->_charset_decode_array($self->_query_parameters);
-    my $raw_body = $self->_charset_decode_array($self->_body_parameters);
+    $self->SUPER::parameters;
+    my $raw_query = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'});
+    my $raw_body = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
     return Hash::MultiValue->new(@{$raw_query}, @{$raw_body});
 };
 

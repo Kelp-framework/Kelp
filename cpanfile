@@ -1,4 +1,4 @@
-requires 'Plack' => '0';
+requires 'Plack' => '1.0041';
 requires 'Log::Dispatch' => '0';
 requires 'JSON::MaybeXS' => '0';
 requires 'Path::Tiny' => '0';
