@@ -5,19 +5,17 @@
             - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
             - Methods with prefix 'raw_' were added to Kelp::Request, returning encoded request data (see "Bug fixes" below)
             - Added charset_encode, charset_decode, is_production methods to Kelp
-            - Added charset method to Kelp::Request
+            - Added charset, charset_encode, charset_decode methods to Kelp::Request
             - Added set_charset method to Kelp::Response
-            - Added charset_decode method to Kelp::Request, which decodes using either request or application charset
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
 
             [Changes]
-              * this is done in effort to make param method easier to use and harder to misuse
+            - 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
             - Kelp::Test no longer uses HTTP::Cookies, implements a much slimmer cookie jar with the same interface
               * The new cookie jar only stores key/value pairs without any special data for cookies like domains, paths or expiration dates
             - Kelp::Test now has a new import flag: '-utf8'
               * Importing with this flag will automatically set Test::More to encode wide characters on output
             - Repeatedly fetching parameters from json request with the param method is now much faster
-            - 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
             - Documentation improvements
 
             [Bug fixes]
@@ -31,6 +29,7 @@
 
             [Deprecations]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
+              * this is done in effort to make param method easier to use and harder to misuse
 
             [Backward-Incompatible Changes]
             - Request data will now be properly decoded using either charset from Content-Type or application charset
@@ -41,11 +40,12 @@
             - JSON module now registers a second, separate encoder for internal purposes
               * The extra encoder will be created with the same options as the normal one, but without utf8
               * It will not react to runtime changes in config of the main encoder
-              * Request decodes and response encodes will happen using the extra encoder and then encode to application's charset
+              * Decodes and encodes will happen using the extra encoder and decode/encode to application's charset
             - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
               * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
               * Log will happen at 'error' level, while regular errors are going to 'critical'
-            - Application main handler now clears all headers when an exception is caught
+              * Status 500 exceptions will behave the same as errors - print their body on non-production
+            - Application main handler now clears all headers when an error or exception is caught
               * This fixes a class of bugs where content encoding of the error page was mismatching the rendered error
 
             [Tweaks]

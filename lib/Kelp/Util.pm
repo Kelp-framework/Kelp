@@ -52,7 +52,7 @@ sub adapt_psgi {
 
     return sub {
         my $kelp = shift;
-        my $path = pop() // '';
+        my $path = $kelp->req->charset_encode(pop() // '');
         my $env = $kelp->req->env;
 
         # remember script and path

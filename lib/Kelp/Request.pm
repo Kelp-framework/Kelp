@@ -94,26 +94,31 @@ sub is_json {
 
 sub charset {
     my $self = shift;
+
+    # charset must be supported by Encode
+    state $supported = { map { lc $_ => $_ } Encode->encodings(':all') };
+
     return undef unless $self->content_type;
     return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
-    return lc $1;
+    return $supported->{lc $1};
+}
+
+sub charset_encode {
+    my ( $self, $string ) = @_;
+
+    # Worst case scenario is a server error with code 500
+    return encode $self->charset, $string
+        if $self->charset;
+    return $self->app->charset_encode($string)
 }
 
 sub charset_decode {
     my ( $self, $string ) = @_;
 
-    if ( $self->charset ) {
-
-        # If the charset is unsupported by Encode, try to decode using
-        # application charset. Worst case scenario is a server error with code
-        # 500
-        state $supported = { map { lc $_ => $_ } Encode->encodings(':all') };
-        my $charset = $supported->{$self->charset} // $self->app->charset;
-
-        return decode $charset, $string;
-    }
-
-    return $self->app->charset_decode($string);
+    # Worst case scenario is a server error with code 500
+    return decode $self->charset, $string
+        if $self->charset;
+    return $self->app->charset_decode($string)
 }
 
 sub _charset_decode_array {
@@ -510,11 +515,19 @@ Returns true if the request's content type was C<application/json>.
 
 =head2 charset
 
-Returns the charset from the C<Content-Type> HTTP header or C<undef> if there is none.
+Returns the charset from the C<Content-Type> HTTP header or C<undef> if there
+is none. Also checks whether the charset is supported by Encode and returns
+C<undef> if it isn't.
 
 =head2 charset_decode
 
 Same as L<Kelp/charset_decode>, but will prefer using L</charset> to L<Kelp/charset>.
+
+=head2 charset_encode
+
+Encoding counterpart of L</charset_decode>. It's only useful in very narrow
+scenario, so avoid using it - usually you want to encode into response's
+charset, which will be an application charset.
 
 =cut
 
