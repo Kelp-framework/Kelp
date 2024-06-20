@@ -8,6 +8,7 @@
             - Added charset, charset_encode, charset_decode methods to Kelp::Request
             - Added set_charset method to Kelp::Response
             - Added Kelp::Module::Encoder, a base class for encoders (to be used by the new get_encoder method)
+            - Added log_format, date_format configuration values to Kelp::Module::Logger
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
 
             [Changes]
@@ -21,6 +22,7 @@
             - Kelp::Test now has a new import flag: '-utf8'
               * Importing with this flag will automatically set Test::More to encode wide characters on output
             - Repeatedly fetching parameters from json request with the param method is now much faster
+            - Kelp::Module::Logger now sorts keys in Data::Dumper output
             - Documentation improvements
 
             [Bug fixes]
