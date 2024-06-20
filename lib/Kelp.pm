@@ -25,10 +25,9 @@ attr response_obj => 'Kelp::Response';
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 
-# The charset is UTF-8 unless otherwise instructed
-attr -charset => sub {
-    $_[0]->config('charset') // 'UTF-8';
-};
+# The charset is set to UTF-8 by default in config module.
+# No default here because we want to support 'undef' charset
+attr charset => sub { $_[0]->config('charset') };
 
 # Name the config module
 attr config_module => 'Config';
@@ -577,8 +576,12 @@ class will be used.
 
 =head2 charset
 
-Gets the encoding charset of the app. It will be C<UTF-8>, if not set to
-anything else. The charset can changed in the config files.
+Gets or sets the encoding charset of the app. It will be C<UTF-8>, if not set
+to anything else. The charset can also changed in the config files.
+
+If the charset is explicitly configured to be C<undef> or false, the
+application won't do any automatic encoding of responses or decoding of
+requests (unless a request defines its own charset).
 
 =head2 long_error
 

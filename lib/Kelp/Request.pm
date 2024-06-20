@@ -4,7 +4,7 @@ use Kelp::Base 'Plack::Request';
 
 use Carp;
 use Try::Tiny;
-use Encode qw(decode);
+use Encode qw(encode decode);
 use Hash::MultiValue;
 
 attr -app => sub { croak "app is required" };
@@ -109,37 +109,46 @@ sub charset
 {
     my $self = shift;
 
+    return undef unless $self->content_type;
+    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
+    return $1;
+}
+
+sub effective_charset
+{
+    my $self = shift;
+
     # charset must be supported by Encode
     state $supported = {map { lc $_ => $_ } Encode->encodings(':all')};
 
-    return undef unless $self->content_type;
-    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
-    return $supported->{lc $1};
+    # try to get the charset from the request
+    my $charset = $self->charset;
+    $charset = $supported->{lc $charset} if $charset;
+
+    # if no charset or unsupported, app's charset will be used
+    return $charset || $self->app->charset;
 }
 
 sub charset_encode
 {
     my ($self, $string) = @_;
 
-    # Worst case scenario is a server error with code 500
-    return encode $self->charset, $string
-        if $self->charset;
-    return $self->app->charset_encode($string);
+    return encode $self->effective_charset, $string;
+    return $string unless $self->effective_charset;
 }
 
 sub charset_decode
 {
     my ($self, $string) = @_;
 
-    # Worst case scenario is a server error with code 500
-    return decode $self->charset, $string
-        if $self->charset;
-    return $self->app->charset_decode($string);
+    return $string unless $self->effective_charset;
+    return decode $self->effective_charset, $string;
 }
 
 sub _charset_decode_array
 {
     my ($self, $arr) = @_;
+
     return [map { $self->charset_decode($_) } @$arr];
 }
 
@@ -543,8 +552,13 @@ Returns true if the request's content type was C<application/json>.
 =head2 charset
 
 Returns the charset from the C<Content-Type> HTTP header or C<undef> if there
-is none. Also checks whether the charset is supported by Encode and returns
-C<undef> if it isn't.
+is none.
+
+=head2 effective_charset
+
+Like L</charset>, but also checks whether the charset is supported by Encode.
+If there is no charset in request or it isn't supported, L<Kelp/charset> will
+be returned.
 
 =head2 charset_decode
 
