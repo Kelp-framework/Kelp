@@ -11,7 +11,7 @@ sub _logger
                 'Screen',
                 min_level => $args{min_level} // 'debug',
                 newline => 1,
-                stderr => 1
+                stderr => !$args{stdout},
             ]
         ]
     );
@@ -23,23 +23,22 @@ __END__
 
 =pod
 
-=head1 TITLE
+=head1 NAME
 
-Kelp::Module::Logger::Simple
+Kelp::Module::Logger::Simple - Simple log to standard output
 
 =head1 SYNOPSIS
 
     use Kelp::Less;
 
-    module 'Logger::Simple', min_level => 'error';
+    module 'Logger::Simple', min_level => 'error', stdout => 1;
 
     ...
 
 =head1 DESCRIPTION
 
-A very simple logger that dumps everything to STDERR
-
+A very simple logger that dumps everything to C<STDERR> or C<STDOUT> if C<<
+stdout => 1 >> was configured.
 
 =cut
 
-1;

@@ -7,22 +7,9 @@ sub load { {} }
 
 1;
 
-__END__
-
-=pod
-
-=head1 NAME
-
-Kelp::Module::Config::None - Completely empty configuration
-
-=head1 DESCRIPTION
-
-It has no defaults and won't load your configuration files. The configuration
-will be completely empty and can be only set by hand in code.
-
-=head1 SEE ALSO
-
-L<Kelp::Module::Config>
-
-=cut
+# This config module has no defaults and won't load your configuration files.
+# The configuration will be completely empty and can be only set by hand in
+# code. It's very likely going to make some parts of the system not function as
+# they should unless you provide the same set of defaults as
+# Kelp::Module::Config::Less (and keep it updated)
 

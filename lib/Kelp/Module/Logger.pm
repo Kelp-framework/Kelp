@@ -119,7 +119,9 @@ L<Log::Dispatch> as underlying logging module.
 
 =head1 CONFIGURATION
 
-In addition to configuration passed to L<Log::Dispatch>, following keys can be configured:
+All module's configuration is passed to L<Log::Dispatch>, so consult its docs
+for details. In addition, following keys can be configured which change how the
+module behaves:
 
 =head2 date_format
 
@@ -148,6 +150,10 @@ By default, value C<'%s - %s - %s'> is used.
 =head2 logger
 
 C<< $app->logger(info => 'message') >> is equivalent to C<< $app->info('message') >>.
+
+=head1 SEE ALSO
+
+L<Kelp::Module::Logger::Simple> - always dumps to standard output
 
 =cut
 
