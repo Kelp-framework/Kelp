@@ -271,7 +271,7 @@ sub build_pattern
 {
     my ($self, $args) = @_;
     my $package = $self->pattern_obj;
-    eval qq{require $package};
+    eval qq{require $package; 1} or die $@;
     return $package->new(%$args);
 }
 

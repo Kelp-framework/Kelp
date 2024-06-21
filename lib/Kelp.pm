@@ -160,7 +160,7 @@ sub build_request
 {
     my ($self, $env) = @_;
     my $package = $self->request_obj;
-    eval qq{require $package};
+    eval qq{require $package; 1} or die $@;
     return $package->new(app => $self, env => $env);
 }
 
@@ -169,7 +169,7 @@ sub build_response
 {
     my $self = shift;
     my $package = $self->response_obj;
-    eval qq{require $package};
+    eval qq{require $package; 1} or die $@;
     return $package->new(app => $self);
 }
 
