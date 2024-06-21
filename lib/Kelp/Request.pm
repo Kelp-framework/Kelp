@@ -4,8 +4,9 @@ use Kelp::Base 'Plack::Request';
 
 use Carp;
 use Try::Tiny;
-use Encode qw(encode decode);
+use Encode qw(decode);
 use Hash::MultiValue;
+use Kelp::Util;
 
 attr -app => sub { croak "app is required" };
 
@@ -14,6 +15,15 @@ attr stash => sub { {} };
 
 # The named hash contains the values of the named placeholders
 attr named => sub { {} };
+
+# charset which came with the request
+attr -charset => sub {
+    my $self = shift;
+
+    return undef unless $self->content_type;
+    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
+    return $1;
+};
 
 # The name of the matched route for this request
 attr route_name => sub { undef };
@@ -105,44 +115,13 @@ sub is_json
     return $self->content_type =~ m{^application/json}i;
 }
 
-sub charset
-{
-    my $self = shift;
-
-    return undef unless $self->content_type;
-    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
-    return $1;
-}
-
-sub effective_charset
-{
-    my $self = shift;
-
-    # charset must be supported by Encode
-    state $supported = {map { lc $_ => $_ } Encode->encodings(':all')};
-
-    # try to get the charset from the request
-    my $charset = $self->charset;
-    $charset = $supported->{lc $charset} if $charset;
-
-    # if no charset or unsupported, app's charset will be used
-    return $charset || $self->app->charset;
-}
-
-sub charset_encode
-{
-    my ($self, $string) = @_;
-
-    return encode $self->effective_charset, $string;
-    return $string unless $self->effective_charset;
-}
-
 sub charset_decode
 {
     my ($self, $string) = @_;
+    my $effective = Kelp::Util::effective_charset($self, $self->app);
 
-    return $string unless $self->effective_charset;
-    return decode $self->effective_charset, $string;
+    return $string unless $effective;
+    return decode $effective, $string;
 }
 
 sub _charset_decode_array
@@ -155,7 +134,12 @@ sub _charset_decode_array
 sub path
 {
     my $self = shift;
-    return $self->charset_decode($self->SUPER::path(@_));
+
+    # NOTE: no fancy decodings here. Path must be encoded in UTF-8. It won't
+    # break anything in case the path did not contain any fancy characters
+    # anyway
+    # See https://stackoverflow.com/a/6926026
+    return decode 'UTF-8', $self->SUPER::path(@_);
 }
 
 sub content
@@ -275,15 +259,14 @@ parameters.
 
 Headers (so cookies as well) are unaffected, as they aren't consistently
 supported outside of ASCII range. JSON now decodes request data into the proper
-charset instead of flat utf8 if so configured. Sessions are configured
-separately in middlewares, so they must themselves do the proper decoding.
+charset instead of flat utf8 regardless of configuration. Sessions are
+configured separately in middlewares, so they must themselves do the proper
+decoding.
 
 Following methods will return values decoded with charset either from
 C<Content-Type> header or the one specified in the app's configuration:
 
 =over
-
-=item * C<path>
 
 =item * C<param>
 
@@ -307,8 +290,6 @@ If you wish to get input in the original request encoding, use these instead
 (note: there is no C<raw_param>):
 
 =over
-
-=item * C<raw_path>
 
 =item * C<raw_parameters>
 
@@ -334,6 +315,10 @@ are configured to decode them:
 =item * C<session> - depends on session middleware
 
 =back
+
+In addition, C<path> is now always UTF-8 decoded and new C<raw_path> with
+encoded path is introduced. (Paths should always be in ascii-compilant
+encoding, UTF-8 is preferable).
 
 =head1 ATTRIBUTES
 
@@ -368,6 +353,11 @@ current route is processing.
 
 Contains a string name of the route matched for this request. Contains route pattern
 if the route was not named.
+
+=head2 charset
+
+Returns the charset from the C<Content-Type> HTTP header or C<undef> if there
+is none. Readonly.
 
 =head1 METHODS
 
@@ -477,7 +467,7 @@ json, there is no json decoder or an error occured.
 
 =head2 path
 
-Same as L<Plack::Request/path>, but the result is decoded.
+Same as L<Plack::Request/path>, but the result is UTF-8 decoded.
 
 =head2 raw_path
 
@@ -549,26 +539,9 @@ Returns true if the request was called with C<XMLHttpRequest>.
 
 Returns true if the request's content type was C<application/json>.
 
-=head2 charset
-
-Returns the charset from the C<Content-Type> HTTP header or C<undef> if there
-is none.
-
-=head2 effective_charset
-
-Like L</charset>, but also checks whether the charset is supported by Encode.
-If there is no charset in request or it isn't supported, L<Kelp/charset> will
-be returned.
-
 =head2 charset_decode
 
 Same as L<Kelp/charset_decode>, but will prefer using L</charset> to L<Kelp/charset>.
-
-=head2 charset_encode
-
-Encoding counterpart of L</charset_decode>. It's only useful in very narrow
-scenario, so avoid using it - usually you want to encode into response's
-charset, which will be an application charset.
 
 =cut
 

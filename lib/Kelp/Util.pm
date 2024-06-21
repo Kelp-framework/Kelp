@@ -3,6 +3,8 @@ package Kelp::Util;
 use Kelp::Base -strict;
 use Carp;
 use Scalar::Util qw(blessed);
+use Encode qw();
+use Encode::Alias qw();
 
 sub camelize
 {
@@ -47,6 +49,30 @@ sub extract_function
     return $string;
 }
 
+sub effective_charset
+{
+    my (@objects) = @_;
+
+    # charset must be supported by Encode
+    state $supported = {map { lc $_ => $_ } Encode->encodings(':all')};
+
+    my $charset;
+    foreach my $object (@objects) {
+        $charset = $object->charset;
+        next unless $charset;
+
+        # Encode->encodings does not find aliases, so we have to do that:
+        if (!exists $supported->{lc $charset}) {
+            $supported->{lc $charset} = Encode::Alias->find_alias($charset);
+        }
+
+        $charset = $supported->{lc $charset};
+        last if defined $charset;
+    }
+
+    return $charset;
+}
+
 sub adapt_psgi
 {
     my ($app) = @_;
@@ -56,7 +82,7 @@ sub adapt_psgi
 
     return sub {
         my $kelp = shift;
-        my $path = $kelp->req->charset_encode(pop() // '');
+        my $path = Encode::encode 'UTF-8', pop() // '';
         my $env = $kelp->req->env;
 
         # remember script and path
@@ -157,6 +183,12 @@ no class in the string or the class is C<main>.
 
 Extracts the function name from a string. If there is no class name, returns
 the entire string. Returns undef for empty strings.
+
+=head2 effective_charset
+
+Takes a list of objects to call C<charset> on and returns the first one to have
+a charset supported by Encode. If there is no charset in any of the objects or
+they aren't supported, undef will be returned.
 
 =head2 adapt_psgi
 

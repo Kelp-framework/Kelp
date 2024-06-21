@@ -120,8 +120,12 @@ $t->request(GET "/app3/x/y")
 
 # application unicode support should be distinct from Kelp. Kelp will just have
 # to pass everything to the app through psgi env undecoded. App result should
-# not be encoded either, it should do its own encoding and decoding.
+# not be encoded either, it should do its own encoding and decoding. Paths are
+# always in UTF-8 or ASCII, so Kelp should handle that as well.
 subtest 'testing unicode' => sub {
+    $t->charset('UTF-8');
+    $app->charset('UTF-16');
+
     $app->add_route(
         '/zażółć/>part' => {
             to => $psgi_dumper,
@@ -129,10 +133,11 @@ subtest 'testing unicode' => sub {
         }
     );
 
-    my $script = uri_escape encode('UTF-8', 'zażółć');
-    my @path = map { uri_escape encode('UTF-8', $_) } 'gęślą', 'jaźń';
+    my $script = uri_escape_utf8 'zażółć';
+    my @path = map { uri_escape_utf8 $_ } 'gęślą', 'jaźń';
     $t->request(GET '/' . (join '/', $script, @path))
         ->code_is(200)
+        ->full_content_type_is('text/plain')
         ->content_like(qr{^script: /zażółć$}m)
         ->content_like(qr{^path: /gęślą/jaźń$}m);
 };

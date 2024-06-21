@@ -24,7 +24,9 @@ subtest 'path encoding no charset ok' => sub {
 };
 
 subtest 'path encoding cp1250 ok' => sub {
-    my $string = uri_escape encode 'cp1250', $test_string;
+
+    # NOTE: path must be in utf8
+    my $string = uri_escape_utf8 $test_string;
 
     _t(
         "/path_echo/$string", 'application/x-www-form-urlencoded; charset=cp1250',

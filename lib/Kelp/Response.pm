@@ -6,8 +6,11 @@ use Carp;
 use Try::Tiny;
 use Scalar::Util qw(blessed);
 use HTTP::Status qw(status_message);
+use Encode qw(encode);
+use Kelp::Util;
 
 attr -app => sub { croak "app is required" };
+attr charset => undef;
 attr rendered => 0;
 attr partial => 0;
 
@@ -26,31 +29,46 @@ sub set_content_type
     return $self;
 }
 
-sub set_charset
+sub charset_encode
 {
-    my ($self, $charset) = @_;
-    $charset //= $self->app->charset;
+    my ($self, $string) = @_;
+    my $effective = Kelp::Util::effective_charset($self, $self->app);
+
+    return $string unless $effective;
+    return encode $effective, $string;
+}
+
+sub _apply_charset
+{
+    my ($self) = @_;
+    my $charset = $self->charset;
+    return unless $charset;
 
     my $ct = $self->content_type;
 
-    croak 'Cannot set_charset in response before content_type is set'
+    croak 'Cannot apply charset to response without content_type'
         unless $ct;
 
-    $ct =~ s{;\s*charset=[^;\$]+}{}i;
-    $self->set_content_type("$ct; charset=" . $charset);
-    return $self;
+    # content_type is actually an array, getting it in scalar context only
+    # yields the actual type without charset. It will be split after setting it
+    # like this
+    $self->content_type("$ct; charset=$charset");
 }
 
 sub text
 {
     my $self = shift;
-    return $self->set_content_type('text/plain')->set_charset;
+    $self->set_content_type('text/plain');
+    $self->charset($self->app->charset) unless $self->charset;
+    return $self;
 }
 
 sub html
 {
     my $self = shift;
-    return $self->set_content_type('text/html')->set_charset;
+    $self->set_content_type('text/html');
+    $self->charset($self->app->charset) unless $self->charset;
+    return $self;
 }
 
 sub json
@@ -68,6 +86,8 @@ sub xml
 sub finalize
 {
     my $self = shift;
+
+    $self->_apply_charset;
 
     my $arr = $self->SUPER::finalize(@_);
     pop @$arr if $self->partial;
@@ -118,7 +138,7 @@ sub render
         croak "Don't know how to handle non-json reference in response (forgot to serialize?)";
     }
 
-    $self->body($self->app->charset_encode($body));
+    $self->body($self->charset_encode($body));
     $self->rendered(1);
     return $self;
 }
@@ -293,6 +313,15 @@ which makes them easy to chain.
 
 =head1 ATTRIBUTES
 
+=head2 charset
+
+The charset to be used in response. Will be glued to C<Content-Type> header
+just before the response is finalized.
+
+NOTE: charset will be glued regardless of it having any sense with a given
+C<Content-Type>, and will override any charset set explicitly through
+L</set_content_type> - use with caution.
+
 =head2 rendered
 
 Tells if the response has been rendered. This attribute is used internally and
@@ -355,7 +384,8 @@ C<application/json>, otherwise it will be set to C<text/html>.
 
 =item
 
-Last, the data will be encoded with the charset specified by the app.
+Last, the data will be encoded with the charset from L</charset> or the one
+specified by the app.
 
 =back
 
@@ -365,19 +395,6 @@ Sets the content type of the response and returns C<$self>.
 
     # Inside a route definition
     $self->res->set_content_type('image/png');
-
-=head2 set_charset
-
-    $self->res->json->set_charset;
-    $self->res->text->set_charset('UTF-16');
-
-Sets the charset inside the content type header to a given value. If the value
-is not given, sets it to application's charset.
-
-Returns C<$self>.
-
-B<WARNING>: setting a custom charset means you will have to use L</render_binary>, as
-using L</render> will still encode to application's charset.
 
 =head2 text, html, json, xml
 
@@ -389,7 +406,8 @@ chained.
     $self->res->html->render("<p>word</p>");
     $self->res->json->render({ word => \1 });
 
-NOTE: C<text> and C<html> will also call L</set_charset>.
+NOTE: C<text> and C<html> will also call L</charset> and set it to
+application's charset (unless it was previously set).
 
 =head2 set_header
 
@@ -416,7 +434,7 @@ Set the response code.
 =head2 render_binary
 
 Render binary data such as byte streams, files, images, etc. You must
-explicitly set the content_type before that.
+explicitly set the content_type before that. Will not encode the content.
 
     use Kelp::Less;
 
@@ -494,6 +512,10 @@ module.
         my $self = shift;
         $self->res->template('home.tt', { login => 'user' });
     }
+
+=head2 charset_encode
+
+Same as L<Kelp/charset_encode>, but will prefer using L</charset> to L<Kelp/charset>.
 
 =cut
 

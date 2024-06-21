@@ -8,6 +8,7 @@ use Test::Deep;
 use Kelp::Test::CookieJar;
 use Carp;
 use Try::Tiny;
+use Encode qw(decode);
 
 BEGIN {
     $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
@@ -33,10 +34,18 @@ attr -app => sub {
         ? Plack::Util::load_psgi($self->psgi)
         : die "'app' or 'psgi' parameter is required";
 };
+attr charset => undef;
 
 attr res => sub { die "res is not initialized" };
 
 attr cookies => sub { Kelp::Test::CookieJar->new };
+
+sub _decode
+{
+    my ($self, $string) = @_;
+    return $self->app->charset_decode($string) unless $self->charset;
+    return decode $self->charset, $string;
+}
 
 sub request
 {
@@ -108,7 +117,7 @@ sub content_is
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is '$value'";
-    is $self->app->charset_decode($self->res->content), $value,
+    is $self->_decode($self->res->content), $value,
         $test_name;
     return $self;
 }
@@ -119,7 +128,7 @@ sub content_isnt
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content is not '$value'";
-    isnt $self->app->charset_decode($self->res->content), $value,
+    isnt $self->_decode($self->res->content), $value,
         $test_name;
     return $self;
 }
@@ -130,7 +139,7 @@ sub content_like
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content matches $regexp";
-    like $self->app->charset_decode($self->res->content), $regexp,
+    like $self->_decode($self->res->content), $regexp,
         $test_name;
     return $self;
 }
@@ -141,7 +150,7 @@ sub content_unlike
     local $Test::Builder::Level = $Test::Builder::Level + 1;
 
     $test_name ||= "Content does not match $regexp";
-    unlike $self->app->charset_decode($self->res->content), $regexp,
+    unlike $self->_decode($self->res->content), $regexp,
         $test_name;
     return $self;
 }
@@ -153,6 +162,16 @@ sub content_type_is
 
     $test_name ||= "Content-Type is '$value'";
     is $self->res->content_type, $value, $test_name;
+    return $self;
+}
+
+sub full_content_type_is
+{
+    my ($self, $value, $test_name) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    $test_name ||= "Full Content-Type is '$value'";
+    is join('; ', $self->res->content_type), $value, $test_name;
     return $self;
 }
 
@@ -315,6 +334,12 @@ is a reference to a Kelp based web app.
 
 From this point on, all requests run with C<$t-E<gt>request> will be sent to C<$app>.
 
+=head2 charset
+
+The charset to use for decoding the response. By default, application's charset
+will be used. Use it if some responses are in a different charset. Can be
+cleared by setting it back to undef.
+
 =head2 res
 
 Each time C<$t-E<gt>request> is used to send a request, an HTTP::Response object is
@@ -414,6 +439,10 @@ An optional name of the test can be added as a second parameter.
 
     $t->request( GET '/path' )->content_type_is("text/plain");
     $t->request( GET '/path' )->content_type_isnt("text/html");
+
+=head2 full_content_type_is
+
+Like L</content_type_is>, but checks the full content type (with charset).
 
 =head2 header_is, header_isnt
 
