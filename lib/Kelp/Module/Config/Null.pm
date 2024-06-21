@@ -24,7 +24,5 @@ will be completely empty and can be only set by hand in code.
 
 L<Kelp::Module::Config>
 
-L<Kelp::Module::Config::Least>
-
 =cut
 

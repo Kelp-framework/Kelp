@@ -32,7 +32,5 @@ defaults and used by L<Kelp::Less>.
 
 L<Kelp::Module::Config>
 
-L<Kelp::Module::Config::Least>
-
 =cut
 

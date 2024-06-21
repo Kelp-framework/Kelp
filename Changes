@@ -11,7 +11,6 @@
             - Added log_format, date_format configuration values to Kelp::Module::Logger
             - Added 'default_modes' attribute and an optional argument for 'get' which will be the default value returned to Kelp::Module::Config
             - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
-            - Added Kelp::Module::Config::Least, which has no defaults at all
 
             [Changes]
             - Response 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
@@ -28,9 +27,6 @@
             - Kelp attribute 'charset' is now read/write (was documented as rw, but was readonly)
             - Repeatedly fetching parameters from json request with the param method is now much faster
             - Documentation improvements
-            - Kelp::Module::Null now really does nothing
-            - Kelp::Module::Template::Null now really renders nothing
-            - Kelp::Module::Config::Null now really has no configuration
 
             [Bug fixes]
             - Route destination will no longer be executed if a response was already rendered by a previous one
@@ -41,6 +37,7 @@
             - A template named '0' will now be properly rendered
             - An 'app' object available in Kelp::Response template is now a properly reblessed controller
             - Kelp::Module::Config::Less no longer uses the same reference for middleware and modules
+            - Modules ending with Null now no longer contain testing behavior and really do nothing
 
             [Deprecations]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
