@@ -1,6 +1,11 @@
 package [% name %];
 use Kelp::Base 'Kelp';
 
+# you probably want the strings in this file to be automatically utf8-decoded.
+# Kelp will handle request and response encoding for you, so you should use
+# wide characters unless you configure its charset to undefined
+use utf8;
+
 sub before_dispatch {
     # overriding this method disables access logs
 }
