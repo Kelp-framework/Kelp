@@ -537,11 +537,13 @@ can be converted to JSON.
 
 With Kelp, you don't have to worry about the encoding of the response - most of
 the methods will automatically encode the response into configured
-application's charset. Plaintext and HTML content types will by default have
+application's charset. Text and application content types will by default have
 C<charset> part added. To make it all work flawlessly, remember to C<use utf8;>
 at the top of your files.
 
-If you'd like to instead take charset into your own hands, you will have to use
+If you'd like to instead take charset into your own hands, you can configure
+L<Kelp/charset> and L<Kelp/request_charset> to undefined values. Alternatively,
+you can use C<raw_> methods in L<Kelp::Request> and
 L<Kelp::Response/render_binary> and manually set content types and charsets.
 
 =head3 Rendering text
@@ -583,6 +585,14 @@ C<set_content_type> or any of its aliases:
     sub hello_txt {
         my ( $self, $name ) = @_;
         $self->res->text->template( 'hello_txt.tt', { name => $name } );
+    }
+
+You can also simply get template string and return it, which will work the same:
+
+    sub hello {
+        my ( $self, $name ) = @_;
+        # NOTE: it's template method from $self, not from $self->res
+        return $self->template( 'hello.tt', { name => $name } );
     }
 
 =head3 Headers
@@ -693,6 +703,24 @@ configuration. The default configuration already loads these modules:
 C<Template>, C<Logger> and C<JSON>. Your configuration can remove some and/or
 add others. The configuration key C<modules_init> may contain hashes with
 initialization arguments. See L<Kelp::Module> for configuration examples.
+
+=head3 Encoder modules
+
+Some encoder modules like L<Kelp::Module::JSON> can register themselves as
+encoders for the application, letting you have encoder factories:
+
+    $self->get_encoder($type, $name);
+    my $json_1 = $self->get_encoder('json'); # the default encoder
+    my $json_2 = $self->get_encoder(json => 'another_one'); # a completely new encoder
+
+Encoders of given type and name can be configured to have different options.
+See L<Kelp/get_encoder> for details.
+
+=head3 Inspecting loaded modules
+
+All modules loaded can be inspected by taking a peek at L<Kelp/loaded_modules>,
+which is an array of built module objects. While usually there's no need to do
+that, it may come in handy when debugging.
 
 =head3 Creating your own module
 

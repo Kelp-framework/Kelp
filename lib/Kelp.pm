@@ -819,6 +819,16 @@ It will get extra config (if available) from C<encoders.TYPE.NAME>
 configuration hash. Will instantiate the encoder just once and then reuse it.
 Croaks when there is no such encoder type.
 
+Example new JSON encoder type defined in config:
+
+    encoders => {
+        json => {
+            not_very_pretty => {
+                pretty => 0,
+            },
+        },
+    },
+
 =head1 AUTHOR
 
 Stefan Geneshky - minimal <at> cpan.org

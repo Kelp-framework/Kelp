@@ -948,7 +948,8 @@ Override this method to change the way a Plack/PSGI application is extracted fro
 
 This is the default router class for each new Kelp application, but it doesn't
 have to be. You can create your own subclass that better suits your needs. It's
-generally enough to override the L</dispatch> or L</format_to> method.
+generally enough to override the L</dispatch>, L</format_to> or
+L</load_destination> methods.
 
 =head1 ACKNOWLEDGEMENTS
 

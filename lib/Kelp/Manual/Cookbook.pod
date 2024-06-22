@@ -251,6 +251,23 @@ Note that you pretty much need to choose a C<store> right away, as otherwise it
 will store data in memory, which is both volatile and does not work with
 multi-process servers.
 
+=head2 Responding in the same charset as request
+
+Kelp usually uses its own L<Kelp/charset> as response encoding, but makes it
+easy to use the same charset in response as the one you got in request:
+
+    use utf8;
+
+    $self->add_route('/copy_charset' => sub {
+        my $self = shift;
+
+        $self->res->charset($self->req->charset);
+        return 'et voilà!';
+    });
+
+Note that request charset is only getting used if the C<Content-Type> of the
+request is either C<text/*> or C<application/*>.
+
 =head1 SEE ALSO
 
 L<Kelp::Manual>
