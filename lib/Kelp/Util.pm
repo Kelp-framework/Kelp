@@ -217,8 +217,9 @@ varying request path).
 
 =head2 load_and_instantiate
 
-Takes a name of a class and a list arguments. Efficiently loads the class name
-and calls C<new> on it with the argument list. Only loads the class once.
+Takes a name of a class and a list of arguments. Efficiently loads the class
+name and calls C<new> on it with the argument list. Only tries to load the
+class once.
 
 =cut
 

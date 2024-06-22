@@ -136,8 +136,12 @@ answer is that the Kelp web framework needs lazy attributes, but the
 author wanted to keep the code light and object manager agnostic.
 This allows the users of the framework to choose an object manager to
 their liking.
+
 There is nothing more annoying than a module that forces you to use L<Moose> when you
 are perfectly fine with L<Moo> or L<Mo>, for example.
+
+As a nice addition, our getters and constructors are quite a bit faster than
+any non-XS variant of L<Moose>.
 
 =head1 USAGE
 

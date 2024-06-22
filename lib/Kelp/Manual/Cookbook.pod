@@ -1,5 +1,7 @@
 =pod
 
+=encoding utf8
+
 =head1 NAME
 
 Kelp::Manual::Cookbook - Recipes for Kelp dishes
