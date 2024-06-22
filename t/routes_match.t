@@ -99,6 +99,18 @@ my $r = Kelp::Routes->new;
     is_deeply $n, $r->cache->get('/a/b/c:');
 }
 
+# Regex in routes is forbidden
+{
+    $r->clear;
+    $r->add('/a.html', 'a#b');
+
+    is_deeply _d($r->match('/a.html'), 'to'), [{to => 'A::b'}];
+    is_deeply _d($r->match('/aahtml'), 'to'), [];
+
+    $r->add('/b+', 'a#b');
+    is_deeply _d($r->match('/bbbbbb'), 'to'), [];
+}
+
 done_testing;
 
 sub _d

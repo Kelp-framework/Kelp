@@ -60,6 +60,7 @@ sub _fix_pattern
 sub _rep_regex
 {
     my ($self, $char, $switch, $token) = @_;
+    my $qchar = quotemeta $char;
     my $re;
 
     my $optional = sub {
@@ -75,22 +76,23 @@ sub _rep_regex
         return $char . $switch
             unless __matchall($switch);
 
-        $re = $char . '(.+)';
+        $re = $qchar . '(.+)';
     }
     else {
         push @{$self->{_tokens}}, $token;
 
         my ($prefix, $suffix) = ("(?<$token>", ')');
         if (__noslash($switch)) {
-            $re = $char . $prefix . ($self->check->{$token} // '[^\/]+') . $suffix;
+            $re = $qchar . $prefix . ($self->check->{$token} // '[^\/]+') . $suffix;
         }
         elsif (__matchall($switch)) {
-            $re = $char . $prefix . ($self->check->{$token} // '.+') . $suffix;
+            $re = $qchar . $prefix . ($self->check->{$token} // '.+') . $suffix;
         }
     }
 
     $optional->();
-    return $re;
+    push @{$self->{_rep_regex_parts}}, $re;
+    return '{}';
 }
 
 sub _build_regex
@@ -100,7 +102,11 @@ sub _build_regex
 
     return $self->pattern if ref $self->pattern eq 'Regexp';
 
-    my $PAT = '(.?)([:*?>])(\w+)?';
+    my $placeholder_pattern = qr{
+        ( [^\0]? ) # preceding char, may change behavior of some placeholders
+        ( [:*?>] ) # placeholder sigil
+        ( \w+ )?   # placeholder label
+    }x;
     my $pattern = $self->pattern;
 
     # Curly braces and brackets are only used for separation.
@@ -108,9 +114,35 @@ sub _build_regex
     # into a regular expression. This way if the regular expression
     # contains curlies, they won't be removed.
     $pattern =~ s/[{}]/\0/g;
-    $pattern =~ s{$PAT}{$self->_rep_regex($1, $2, $3)}eg;
+
+    $self->{_rep_regex_parts} = [];
+    $pattern =~ s{$placeholder_pattern}{$self->_rep_regex($1, $2, $3)}eg;
+
+    # Now remove all curlies remembered as \0 - We will use curlies again for
+    # special behavior in a moment
     $pattern =~ s/\0//g;
-    $pattern .= '/?' unless $pattern =~ m{/$};
+
+    # remember if the pattern has a trailing slash before we quote it
+    my $trailing_slash = $pattern =~ m{/$};
+
+    # _rep_regex reused curies for {} placeholders, so we want to split the
+    # string by that (and include them in the result by capturing the
+    # separator)
+    my @parts = split /(\Q{}\E)/, $pattern, -1;
+
+    # If we have a placeholder, replace it with next part. If not, quote it to
+    # avoid misusing regex in patterns.
+    foreach my $part (@parts) {
+        if ($part eq '{}') {
+            $part = shift @{$self->{_rep_regex_parts}};
+        }
+        else {
+            $part = quotemeta $part;
+        }
+    }
+
+    $pattern = join '', @parts;
+    $pattern .= quotemeta('/') . '?' unless $trailing_slash;
     $pattern .= '$' unless $self->bridge;
 
     return qr{^$pattern};
@@ -148,8 +180,14 @@ sub build
         return;
     }
 
-    my $PAT = '([:*?>])(\w+)?';
-    $pattern =~ s/{?$PAT}?/$self->_rep_build($1, $2, %args)/eg;
+    my $placeholder_pattern = qr{
+        \{?            # may be embraced in curlies
+            ( [:*?>] ) # placeholder sigil
+            ( \w+ )?   # placeholder label
+        \}?
+    }x;
+
+    $pattern =~ s/$placeholder_pattern/$self->_rep_build($1, $2, %args)/eg;
     if ($pattern =~ /{([!?])(\w+|[*>])}/) {
         carp $1 eq '!'
             ? "Field $2 doesn't match checks"

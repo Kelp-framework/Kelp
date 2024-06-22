@@ -66,6 +66,10 @@
 
             [Backward-Incompatible Changes]
             - Application now tries to decode request data - see [Encoding]
+            - Routes no longer allow regex unless the pattern is a Regexp object (qr//)
+              * This was a result of a bug - they were never documented to support regex and would not build correctly with it
+              * Any non-placeholder regex syntax is now correctly quoted and matched as text
+              * This fix helps to avoid bugs which may cause serious issues, like pattern '/index.html' matching '/index/html'
             - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
               * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
               * Log will happen at 'error' level, while regular errors are going to 'critical'
