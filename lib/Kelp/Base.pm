@@ -4,7 +4,23 @@ use strict ();
 use warnings ();
 use feature ();
 use Carp;
+use Data::Dumper ();
 use namespace::autoclean ();
+
+sub _DEBUG
+{
+    my ($stage, @messages) = @_;
+    my $env = $ENV{KELP_DEBUG};
+    return if !$env;
+    return if !grep { lc $env eq $_ } '1', 'all', lc $stage;
+
+    local $Data::Dumper::Sortkeys = 1;
+    my $message = join ' ', map {
+        ref $_ ? Data::Dumper::Dumper($_) : $_
+    } @messages;
+
+    print "DEBUG: $message\n";
+}
 
 sub import
 {

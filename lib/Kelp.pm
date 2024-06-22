@@ -51,14 +51,20 @@ sub new
 {
     my $self = shift->SUPER::new(@_);
 
+    Kelp::Base::_DEBUG(1 => 'Loading essential modules...');
+
     # Always load these modules, but allow client to override
     $self->_load_config();
     $self->_load_routes();
+
+    Kelp::Base::_DEBUG(1 => 'Loading modules from config...');
 
     # Load the modules from the config
     if (defined(my $modules = $self->config('modules'))) {
         $self->load_module($_) for (@$modules);
     }
+
+    Kelp::Base::_DEBUG(1 => 'Calling build method...');
 
     $self->build();
     return $self;
@@ -104,6 +110,8 @@ sub _load_config
 {
     my $self = shift;
     $self->load_module($self->config_module, extra => $self->__config);
+
+    Kelp::Base::_DEBUG(config => 'Merged configuration: ', $self->config_hash);
 }
 
 sub _load_routes
@@ -145,6 +153,8 @@ sub load_module
     if ($self->can('config')) {
         $args_from_config = $self->config("modules_init.$name") // {};
     }
+
+    Kelp::Base::_DEBUG(modules => "Loading $class module with args: ", {%$args_from_config, %args});
 
     $module->build(%$args_from_config, %args);
     return $module;
@@ -205,6 +215,8 @@ sub run
     my $self = shift;
     my $app = sub { $self->psgi(@_) };
 
+    Kelp::Base::_DEBUG(1 => 'Running the application...');
+
     # Add middleware
     if (defined(my $middleware = $self->config('middleware'))) {
         for my $class (@$middleware) {
@@ -216,6 +228,9 @@ sub run
 
             my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
             my $args = $self->config("middleware_init.$class") // {};
+
+            Kelp::Base::_DEBUG(modules => "Wrapping app in $mw middleware with args: ", $args);
+
             $app = $mw->wrap($app, %$args);
         }
     }

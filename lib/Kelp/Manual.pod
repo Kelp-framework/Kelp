@@ -856,6 +856,33 @@ You no longer have to prefix destinations with the base controller class name.
 
 =head1 NEXT STEPS
 
+=head2 Debugging
+
+Kelp's configuration and building process can be easily debugged by setting
+C<KELP_DEBUG> environmental variable. These debug messages all go to C<STDOUT>.
+
+=over
+
+=item
+
+If you set it to C<modules>, Kelp will print a message on every module load and every
+middleware load.
+
+=item
+
+If you set it to C<config>, Kelp will print its full configuration.
+
+=item
+
+If you set it to C<routes>, Kelp router will print every route which is being added to the system.
+
+=item
+
+You can also set it to C<1> or C<all>, which will print all of the above plus some
+messages notifying the current state application building process.
+
+=back
+
 =head2 Testing
 
 Kelp provides a test class called C<Kelp::Test>. It is object oriented, and all
