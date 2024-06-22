@@ -6,7 +6,6 @@ use Carp;
 use Try::Tiny;
 use Scalar::Util qw(blessed);
 use HTTP::Status qw(status_message);
-use Encode qw(encode);
 use Kelp::Util;
 
 attr -app => sub { croak "app is required" };
@@ -32,10 +31,10 @@ sub set_content_type
 sub charset_encode
 {
     my ($self, $string) = @_;
-    my $effective = Kelp::Util::effective_charset($self, $self->app);
-
-    return $string unless $effective;
-    return encode $effective, $string;
+    return Kelp::Util::charset_encode(
+        Kelp::Util::effective_charset($self) // $self->app->charset,
+        $string,
+    );
 }
 
 sub _apply_charset
@@ -74,13 +73,17 @@ sub html
 sub json
 {
     my $self = shift;
-    return $self->set_content_type('application/json');
+    $self->set_content_type('application/json');
+    $self->charset($self->app->charset) unless $self->charset;
+    return $self;
 }
 
 sub xml
 {
     my $self = shift;
-    return $self->set_content_type('application/xml');
+    $self->set_content_type('application/xml');
+    $self->charset($self->app->charset) unless $self->charset;
+    return $self;
 }
 
 sub finalize
@@ -375,8 +378,8 @@ If the response code was not previously set, this method will set it to 200.
 
 =item
 
-If no content-type is previously set, C<render> will set is based on the type of
-the data rendered. If it's a reference, then the content-type will be set to
+If no content-type is previously set, C<render> will set is based on the type
+of the data rendered. If it's a reference, then the content-type will be set to
 C<application/json>, otherwise it will be set to C<text/html>.
 
     # Will set the content-type to json
@@ -385,7 +388,8 @@ C<application/json>, otherwise it will be set to C<text/html>.
 =item
 
 Last, the data will be encoded with the charset from L</charset> or the one
-specified by the app.
+specified by the app - see L<Kelp/charset>. Any string you pass here should not
+already be encoded, unless your application has its charset set to undef.
 
 =back
 
@@ -406,7 +410,7 @@ chained.
     $self->res->html->render("<p>word</p>");
     $self->res->json->render({ word => \1 });
 
-NOTE: C<text> and C<html> will also call L</charset> and set it to
+NOTE: These methods will also call L</charset> and set it to
 application's charset (unless it was previously set).
 
 =head2 set_header
@@ -434,7 +438,8 @@ Set the response code.
 =head2 render_binary
 
 Render binary data such as byte streams, files, images, etc. You must
-explicitly set the content_type before that. Will not encode the content.
+explicitly set the content_type before that. Will not encode the content into
+any charset.
 
     use Kelp::Less;
 
@@ -515,7 +520,7 @@ module.
 
 =head2 charset_encode
 
-Same as L<Kelp/charset_encode>, but will prefer using L</charset> to L<Kelp/charset>.
+Shortcut method, which encodes a string using the L</charset> or L<Kelp/charset>.
 
 =cut
 

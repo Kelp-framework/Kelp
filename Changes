@@ -1,69 +1,82 @@
 2024-06-15: Version 2.01
-            [New Features]
+            [New Interface]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
             - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
-            - Methods with prefix 'raw_' were added to Kelp::Request, returning encoded request data (see "Bug fixes" below)
-            - Added charset_encode, charset_decode, is_production, get_encoder methods to Kelp
+            - Added is_production, get_encoder methods and request_charset attribute to Kelp
             - Added charset, charset_decode methods to Kelp::Request
-            - Added charset, charset_decode methods to Kelp::Response
-            - Added Kelp::Util::adapt_psgi function (used by the new 'psgi' route flag)
-            - Added Kelp::Util::effective_charset function, which tries to determine which charset from objects to use
+            - Added charset, charset_encode methods to Kelp::Response
+            - Added adapt_psgi, effective_charset, charset_encode, charset_decode functions to Kelp::Util
             - Added Kelp::Module::Encoder, a base class for encoders (like JSON, to be used by the new get_encoder method)
-            - Added log_format, date_format configuration values to Kelp::Module::Logger
-            - Added default_modes attribute and an optional argument for 'get' which will be the default value returned to Kelp::Module::Config
-            - Added charset attribute and full_content_type_is method to Kelp::Test
-            - Module::Template now inserts an 'app' parameter to render variables unless 'app' is already provided
 
-            [Changes]
-            - Response' 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
-            - Kelp::Test no longer uses HTTP::Cookies, implements a much slimmer cookie jar with the same interface
-              * The new cookie jar only stores key/value pairs without any special data for cookies like domains, paths or expiration dates
-            - Framework now internally uses a utf8-disabled JSON encoder
-              * The extra encoder will be created with the same options as the normal one, but without utf8
-              * It will no longer react to runtime changes in config of the main encoder
-              * Application will now encode the JSON response manually using proper charset
-            - Kelp::Test now has a new import flag: '-utf8'
-              * Importing with this flag will automatically set Test::More to encode wide characters on output
-            - Kelp::Module::Config method 'get' never croaks if the config value was not set at all
-            - Kelp::Module::Logger now sorts keys in Data::Dumper output
-            - Kelp attribute 'charset' is now read/write (was documented as rw, but was readonly)
-            - Repeatedly fetching parameters from json request with the param method is now much faster
-            - Documentation improvements
-
-            [Bug fixes]
-            - Route destination will no longer be executed if a response was already rendered by a previous one
+            [General]
+            - Fixed Route destination getting executed if a response was already rendered by a previous one
               * Rendering a response in a bridge will work the same as if the bridge returned a false value
               * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
               * Delayed responses will no longer override a previously rendered normal response
               * The destination will still be run if the render happened inside 'before_dispatch' hook
-            - A template named '0' will now be properly rendered
-            - An 'app' object available in Kelp::Response template is now a properly reblessed controller
-            - Kelp::Module::Config::Less no longer uses the same reference for middleware and modules
-            - Modules ending with Null now no longer contain testing behavior and really do nothing
+            - Response' 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
+              * The json string will still get its charset encoded, so it should not be encoded
+            - Fixed Kelp attribute 'charset' being readonly (was documented as read/write)
+            - Fixed templates named '0' not getting rendered
+            - Fixed template correctly providing an 'app' object by default:
+              * This object was available in Kelp::Response template but was not getting properly reblessed
+              * Kelp template now also inserts this parameter to render variables unless it is already provided
+            - Fixed ::Null modules containing testing behavior - now they really do nothing
+            - Repeatedly fetching parameters from json request with the param method is now much faster
+            - Kelp::Module::Logger now sorts keys in Data::Dumper output
+            - Documentation was vastly improved
+
+            [Encoding]
+            - Request data will now be properly decoded using either charset from Content-Type or request_charset
+              * Request body parameters and content are automatically decoded
+              * Path and query is automatically decoded, but always uses request_charset
+              * Headers, cookies and sessions are unaffected (session encoding must be configured at the middleware level)
+              * Explicitly setting request_charset to undef will disable all automatic decoding
+              * Please use methods with prefix 'raw_' from Kelp::Request to access undecoded request data if needed
+              * Not decoding input was a bug which needed to be fixed (the response was already being encoded correctly, so double encoding could happen)
+            - Calling json and xml from Kelp::Response now also sets the charset in Content-Type header
+            - Framework now internally uses a UTF8-disabled JSON encoder
+              * The extra encoder will be created with the same options as the normal one, but without utf8
+              * It will no longer react to runtime changes in config of the main encoder
+              * Application will now encode the JSON response manually using proper charset
+            - Methods with prefix 'raw_' were added to Kelp::Request, returning undecoded request data (see "Bug fixes" below)
+
+            [Configuration]
+            - Added log_format, date_format configuration values to Kelp::Module::Logger
+            - Added stdout configuration value to Kelp::Module::Logger::Simple
+            - Added default_modes attribute and an optional argument for 'get' which will be the default value returned to Module::Config
+            - Kelp::Module::Config method 'get' never croaks if the config value was not set at all
+            - Application can be now configured to do no encoding of responses by setting 'charset' to undef
+            - Application now has a second charset configuration used for requests: request_charset
+            - Fixed Kelp::Module::Config::Less using the same reference for middleware and modules
+
+            [Testing]
+            - Kelp::Test no longer uses HTTP::Cookies, implements a much slimmer cookie jar with the same interface
+              * The new cookie jar only stores key/value pairs without any special data for cookies like domains, paths or expiration dates
+            - Kelp::Test now has a new import flag: '-utf8'
+              * Importing with this flag will automatically set Test::More to encode wide characters on output
+            - Added charset attribute to Kelp::Test
+            - Added full_content_type_is and content_bytes_are methods to Kelp::Test
 
             [Deprecations]
             - Scalar context behavior of the param method called without arguments on json request is now deprecated
-              * this is done in effort to make param method easier to use and harder to misuse
+              * This is done in effort to make param method easier to use and harder to misuse
 
             [Backward-Incompatible Changes]
-            - Request data will now be properly decoded using either charset from Content-Type or application charset
-              * Request query parameters and body parameters are automatically decoded
-              * Path is automatically decoded, but always uses UTF-8
-              * Headers, cookies and sessions are unaffected (session encoding must be configured at the middleware level)
-              * Please use methods with prefix 'raw_' from Kelp::Request to access encoded request data if needed
-              * Not decoding input was a bug which needed to be fixed, but the application was already encoding the response correctly
+            - Application now tries to decode request data - see [Encoding]
             - Kelp::Exception no longer renders its body attribute, but instead logs it if it is present
               * Throwing Kelp::Exception now produces error template or plaintext response with proper HTTP status string
               * Log will happen at 'error' level, while regular errors are going to 'critical'
               * Status 500 exceptions will behave the same as errors - print their body on non-production
+              * Rendering the body was dangerous as it could leak internal data if misused
             - Application main handler now clears all headers when an error or exception is caught
               * This fixes a class of bugs where content encoding of the error page was mismatching the rendered error
 
             [Tweaks]
             - 'kelp' template has been adjusted to match framework looks
             - Added a homepage on GitHub
-            - Kelp now has a logo and is developed by the Kelp-framework organization on GitHub
-
+            - Kelp now has a logo
+            - Kelp is now developed by the Kelp-framework organization on GitHub
 
 2024-06-10: Version 2.00
             [New Features]

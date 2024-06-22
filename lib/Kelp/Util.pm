@@ -4,7 +4,6 @@ use Kelp::Base -strict;
 use Carp;
 use Scalar::Util qw(blessed);
 use Encode qw();
-use Encode::Alias qw();
 
 sub camelize
 {
@@ -53,24 +52,29 @@ sub effective_charset
 {
     my (@objects) = @_;
 
-    # charset must be supported by Encode
-    state $supported = {map { lc $_ => $_ } Encode->encodings(':all')};
-
     my $charset;
     foreach my $object (@objects) {
-        $charset = $object->charset;
-        next unless $charset;
-
-        # Encode->encodings does not find aliases, so we have to do that:
-        if (!exists $supported->{lc $charset}) {
-            $supported->{lc $charset} = Encode::Alias->find_alias($charset);
-        }
-
-        $charset = $supported->{lc $charset};
-        last if defined $charset;
+        $charset = Encode::find_encoding(ref $object ? $object->charset : $object);
+        last if $charset;
     }
 
     return $charset;
+}
+
+sub charset_encode
+{
+    my ($charset, $string) = @_;
+
+    return $string unless $charset;
+    return Encode::encode $charset, $string;
+}
+
+sub charset_decode
+{
+    my ($charset, $string) = @_;
+
+    return $string unless $charset;
+    return Encode::decode $charset, $string;
 }
 
 sub adapt_psgi
@@ -82,7 +86,7 @@ sub adapt_psgi
 
     return sub {
         my $kelp = shift;
-        my $path = Encode::encode 'UTF-8', pop() // '';
+        my $path = charset_encode($kelp->request_charset, pop() // '');
         my $env = $kelp->req->env;
 
         # remember script and path
@@ -188,7 +192,8 @@ the entire string. Returns undef for empty strings.
 
 Takes a list of objects to call C<charset> on and returns the first one to have
 a charset supported by Encode. If there is no charset in any of the objects or
-they aren't supported, undef will be returned.
+they aren't supported, undef will be returned. Can also be passed plain strings
+with the charset names (instead of objects implementing C<charset> method).
 
 =head2 adapt_psgi
 

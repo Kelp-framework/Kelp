@@ -35,6 +35,7 @@ attr data => sub {
 
         # Default charset is UTF-8
         charset => 'UTF-8',
+        request_charset => 'UTF-8',
 
         app_url => 'http://localhost:5000',
 
@@ -532,9 +533,21 @@ short version:
 
 =head2 charset
 
-C<UTF-8>
+Application's charset, which it will by default use to encode the body of the
+response (unless charset is set manually for a response). Any encoding
+supported by L<Encode> is fine. It should probably stay as default C<UTF-8>
+unless you're doing something non-standard.
+
+=head2 request_charset
+
+Default incoming charset, which will be used to decode requests (unless the
+request contains its own). It will always be used to decode URI elements of the
+request. It is strongly recommended this stays as default C<UTF-8>, but can
+also be set to other one-byte encodings if needed.
 
 =head2 app_url
+
+Abosulte URL under which the application is available.
 
 C<http://localhost:5000>
 

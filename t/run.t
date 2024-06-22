@@ -28,7 +28,7 @@ $app->add_route(
     }
 );
 for my $a (qw{boo дума 123}) {
-    my $encoded = uri_escape $app->charset_encode($a);
+    my $encoded = uri_escape_utf8($a);
     $t->request(GET "/named/$encoded")
         ->code_is(200)
         ->content_is("Got: $a");
@@ -92,7 +92,7 @@ $app->add_route(
     }
 );
 for my $a (qw{boo дума 123}) {
-    my $encoded = uri_escape $app->charset_encode($a);
+    my $encoded = uri_escape_utf8($a);
     $t->request(GET "/array/one/$encoded")
         ->code_is(200)
         ->content_is("Got: one and $a");
@@ -107,7 +107,7 @@ $app->add_route(
     }
 );
 for my $word ('word', 'дума', 'كلمة', 'բառ', 'sözcük') {
-    my $encoded = uri_escape $app->charset_encode($word);
+    my $encoded = uri_escape_utf8($word);
     $t->request(GET "/param?word=$encoded")
         ->code_is(200)
         ->content_like(qr{$word});

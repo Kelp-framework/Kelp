@@ -4,7 +4,6 @@ use Kelp::Base 'Plack::Request';
 
 use Carp;
 use Try::Tiny;
-use Encode qw(decode);
 use Hash::MultiValue;
 use Kelp::Util;
 
@@ -21,7 +20,13 @@ attr -charset => sub {
     my $self = shift;
 
     return undef unless $self->content_type;
-    return undef unless $self->content_type =~ m{;\s*charset=([^;\$]+)}i;
+    return undef unless $self->content_type =~ m{
+        ^(?:                  # only on some content-types
+            text/ | application/
+        )
+        .+
+        ;\s*charset=([^;\$]+) # get the charset
+    }xi;
     return $1;
 };
 
@@ -32,25 +37,25 @@ attr query_parameters => sub {
     my $self = shift;
 
     $self->SUPER::query_parameters;
-    my $raw = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'});
-    return Hash::MultiValue->new(@{$raw});
+    my $decoded = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'}, 1);
+    return Hash::MultiValue->new(@{$decoded});
 };
 
 attr body_parameters => sub {
     my $self = shift;
 
     $self->SUPER::body_parameters;
-    my $raw = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
-    return Hash::MultiValue->new(@{$raw});
+    my $decoded = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
+    return Hash::MultiValue->new(@{$decoded});
 };
 
 attr parameters => sub {
     my $self = shift;
 
     $self->SUPER::parameters;
-    my $raw_query = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'});
-    my $raw_body = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
-    return Hash::MultiValue->new(@{$raw_query}, @{$raw_body});
+    my $decoded_query = $self->_charset_decode_array($self->env->{'plack.request.query_parameters'}, 1);
+    my $decoded_body = $self->_charset_decode_array($self->env->{'plack.request.body_parameters'});
+    return Hash::MultiValue->new(@{$decoded_query}, @{$decoded_body});
 };
 
 # Raw methods - methods in Plack::Request (without decoding)
@@ -117,29 +122,28 @@ sub is_json
 
 sub charset_decode
 {
-    my ($self, $string) = @_;
-    my $effective = Kelp::Util::effective_charset($self, $self->app);
+    my ($self, $string, $configured_only) = @_;
+    my $req_charset = $self->app->request_charset;
 
-    return $string unless $effective;
-    return decode $effective, $string;
+    # do not decode at all if the application is set no not decode
+    return $string unless $req_charset;
+    return Kelp::Util::charset_decode(
+        (!$configured_only && Kelp::Util::effective_charset($self)) || $req_charset,
+        $string,
+    );
 }
 
 sub _charset_decode_array
 {
-    my ($self, $arr) = @_;
+    my ($self, $arr, $configured_only) = @_;
 
-    return [map { $self->charset_decode($_) } @$arr];
+    return [map { $self->charset_decode($_, $configured_only) } @$arr];
 }
 
 sub path
 {
     my $self = shift;
-
-    # NOTE: no fancy decodings here. Path must be encoded in UTF-8. It won't
-    # break anything in case the path did not contain any fancy characters
-    # anyway
-    # See https://stackoverflow.com/a/6926026
-    return decode 'UTF-8', $self->SUPER::path(@_);
+    return Kelp::Util::charset_decode($self->app->request_charset, $self->SUPER::path(@_));
 }
 
 sub content
@@ -254,8 +258,7 @@ it to add several convenience methods and support for application encoding.
 =head1 ENCODING
 
 Starting with version 2.01, Kelp::Request simplifies input handling and
-improves correctness by automatically decoding path, query parameters and body
-parameters.
+improves correctness by automatically decoding path, query parameters and content.
 
 Headers (so cookies as well) are unaffected, as they aren't consistently
 supported outside of ASCII range. JSON now decodes request data into the proper
@@ -264,7 +267,8 @@ configured separately in middlewares, so they must themselves do the proper
 decoding.
 
 Following methods will return values decoded with charset either from
-C<Content-Type> header or the one specified in the app's configuration:
+C<Content-Type> header or the one specified in the app's configuration
+(L<Kelp/request_charset>):
 
 =over
 
@@ -272,17 +276,35 @@ C<Content-Type> header or the one specified in the app's configuration:
 
 =item * C<cgi_param>
 
-=item * C<query_param>
-
 =item * C<body_param>
 
-=item * C<parameters>
+=item * C<json_param>
 
-=item * C<query_parameters>
+=item * C<parameters>
 
 =item * C<body_parameters>
 
 =item * C<content>
+
+=item * C<json_content>
+
+=back
+
+Following methods will always decode to L<Kelp/request_charset> because they
+are not the part of message's content (URIs should always be in ASCII-compilant
+encoding, UTF-8 is preferable):
+
+=over
+
+=item * C<path>
+
+=item * C<param> (from query)
+
+=item * C<cgi_param> (from query)
+
+=item * C<parameters> (from query)
+
+=item * C<query_parameters>
 
 =back
 
@@ -290,6 +312,8 @@ If you wish to get input in the original request encoding, use these instead
 (note: there is no C<raw_param>):
 
 =over
+
+=item * C<raw_path>
 
 =item * C<raw_parameters>
 
@@ -306,19 +330,25 @@ are configured to decode them:
 
 =over
 
-=item * C<param> - depends on JSON module (on JSON requests)
-
-=item * C<json_param> - depends on JSON module
-
-=item * C<json_content> - depends on JSON module
-
 =item * C<session> - depends on session middleware
 
 =back
 
-In addition, C<path> is now always UTF-8 decoded and new C<raw_path> with
-encoded path is introduced. (Paths should always be in ascii-compilant
-encoding, UTF-8 is preferable).
+B<Some caveats> about the automatic decoding and L<Kelp/request_charset>
+configuration parameter:
+
+As always, UTF-8 (the default) works best - don't change to avoid issues. Other
+ASCII-compilant encodings should work well. L</content> will always be decoded
+properly, but C<application/x-www-form-urlencoded> and C<multipart/form-data>
+will have issues with non-ASCII-compilant encodings. Especially the latter,
+because the information about C<Content-Type> of a single part is lost on Plack
+level and it is not properly decoded using that encoding. In such corner cases,
+you should probably get the full undecoded body using L</raw_body> and parse it
+yourself.
+
+If you wish to disable automatic decoding, you can set L<Kelp/request_charset>
+to undef - it will then ignore any charset which came with the message and let
+you do your own decoding.
 
 =head1 ATTRIBUTES
 
@@ -357,7 +387,8 @@ if the route was not named.
 =head2 charset
 
 Returns the charset from the C<Content-Type> HTTP header or C<undef> if there
-is none. Readonly.
+is none. Will ignore the charset unless C<Content-Type> is C<text/*> or
+C<application/*>. Readonly.
 
 =head1 METHODS
 
@@ -467,7 +498,7 @@ json, there is no json decoder or an error occured.
 
 =head2 path
 
-Same as L<Plack::Request/path>, but the result is UTF-8 decoded.
+Same as L<Plack::Request/path>, but the result is decoded.
 
 =head2 raw_path
 
@@ -541,7 +572,11 @@ Returns true if the request's content type was C<application/json>.
 
 =head2 charset_decode
 
-Same as L<Kelp/charset_decode>, but will prefer using L</charset> to L<Kelp/charset>.
+Shortcut method, which decodes a string using L</charset> or
+L<Kelp/request_charset>. A second optional parameter can be passed, and if true
+will cause the method to ignore charset passed in the C<Content-Type> header.
+
+It does noting if L<Kelp/request_charset> is undef or false.
 
 =cut
 

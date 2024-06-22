@@ -10,7 +10,6 @@ use Plack::Util;
 use Class::Inspector;
 use List::Util qw(any);
 use Scalar::Util qw(blessed);
-use Encode qw(encode decode);
 
 our $VERSION = '2.01';
 
@@ -28,6 +27,7 @@ attr long_error => $ENV{KELP_LONG_ERROR} // 0;
 # The charset is set to UTF-8 by default in config module.
 # No default here because we want to support 'undef' charset
 attr charset => sub { $_[0]->config('charset') };
+attr request_charset => sub { $_[0]->config('request_charset') };
 
 # Name the config module
 attr config_module => 'Config';
@@ -380,20 +380,6 @@ sub abs_url
     return URI->new_abs($url, $self->config('app_url'))->as_string;
 }
 
-sub charset_encode
-{
-    my ($self, $string) = @_;
-    return $string unless $self->charset;
-    return encode $self->charset, $string;
-}
-
-sub charset_decode
-{
-    my ($self, $string) = @_;
-    return $string unless $self->charset;
-    return decode $self->charset, $string;
-}
-
 sub get_encoder
 {
     my ($self, $type, $name) = @_;
@@ -576,12 +562,23 @@ class will be used.
 
 =head2 charset
 
-Gets or sets the encoding charset of the app. It will be C<UTF-8>, if not set
-to anything else. The charset can also changed in the config files.
+Gets or sets the output encoding charset of the app. It will be C<UTF-8>, if
+not set to anything else. The charset can also changed in the config files.
 
 If the charset is explicitly configured to be C<undef> or false, the
-application won't do any automatic encoding of responses or decoding of
-requests (unless a request defines its own charset).
+application won't do any automatic encoding of responses, unless you set it by
+explicitly calling L<Kelp::Response/charset>.
+
+=head2 request_charset
+
+Same as L</charset>, but only applies to the input. Request data will be
+decoded using this charset or charset which came with the request.
+
+If the request charset is explicitly configured to be C<undef> or false, the
+application won't do any automatic decoding of requests, B<even if message came
+with a charset>.
+
+For details, see L<Kelp::Request/ENCODING>.
 
 =head2 long_error
 
@@ -798,12 +795,6 @@ arguments.
 
 Same as L</url_for>, but returns the full absolute URI for the current
 application (based on configuration).
-
-=head2 charset_encode
-
-=head2 charset_decode
-
-Shortcut methods, which encode or decode a string using the application's current L</charset>.
 
 =head2 is_production
 

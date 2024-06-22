@@ -8,7 +8,7 @@ use Test::Deep;
 use Kelp::Test::CookieJar;
 use Carp;
 use Try::Tiny;
-use Encode qw(decode);
+use Kelp::Util;
 
 BEGIN {
     $ENV{KELP_TESTING} = 1;    # Set the ENV for testing
@@ -43,8 +43,7 @@ attr cookies => sub { Kelp::Test::CookieJar->new };
 sub _decode
 {
     my ($self, $string) = @_;
-    return $self->app->charset_decode($string) unless $self->charset;
-    return decode $self->charset, $string;
+    return Kelp::Util::charset_decode($self->charset // $self->app->charset, $string);
 }
 
 sub request
@@ -119,6 +118,18 @@ sub content_is
     $test_name ||= "Content is '$value'";
     is $self->_decode($self->res->content), $value,
         $test_name;
+    return $self;
+}
+
+sub content_bytes_are
+{
+    my ($self, $value, $test_name) = @_;
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
+
+    $test_name ||= "Content is '$value'";
+    my $got = unpack 'H*', $self->res->content;
+    my $expected = unpack 'H*', $value;
+    is $got, $expected, $test_name;
     return $self;
 }
 
@@ -419,6 +430,11 @@ An optional name of the test can be added as a second parameter.
 
     $t->request( GET '/path' )->content_is("Ok.");
     $t->request( GET '/path' )->content_isnt("Fail.");
+
+=head2 content_bytes_are
+
+Same as C<content_is>, but the result is not decoded and the values are
+compared byte by byte as hex-encoded string.
 
 =head2 content_like, content_unlike
 
