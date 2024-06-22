@@ -158,19 +158,20 @@ sub build
 # Override to use a custom request object
 sub build_request
 {
-    my ($self, $env) = @_;
-    my $package = $self->request_obj;
-    eval qq{require $package; 1} or die $@;
-    return $package->new(app => $self, env => $env);
+    return Kelp::Util::load_and_instantiate(
+        $_[0]->request_obj,
+        app => $_[0],
+        env => $_[1],
+    );
 }
 
 # Override to use a custom response object
 sub build_response
 {
-    my $self = shift;
-    my $package = $self->response_obj;
-    eval qq{require $package; 1} or die $@;
-    return $package->new(app => $self);
+    return Kelp::Util::load_and_instantiate(
+        $_[0]->response_obj,
+        app => $_[0],
+    );
 }
 
 # Override to change what happens before the route is handled

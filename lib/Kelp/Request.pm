@@ -128,7 +128,7 @@ sub charset_decode
     # do not decode at all if the application is set no not decode
     return $string unless $req_charset;
     return Kelp::Util::charset_decode(
-        (!$configured_only && Kelp::Util::effective_charset($self)) || $req_charset,
+        (!$configured_only && Kelp::Util::effective_charset($self->charset)) || $req_charset,
         $string,
     );
 }

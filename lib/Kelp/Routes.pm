@@ -269,10 +269,10 @@ sub wrap_psgi
 # Override to use a custom pattern object
 sub build_pattern
 {
-    my ($self, $args) = @_;
-    my $package = $self->pattern_obj;
-    eval qq{require $package; 1} or die $@;
-    return $package->new(%$args);
+    return Kelp::Util::load_and_instantiate(
+        $_[0]->pattern_obj,
+        %{$_[1]}
+    );
 }
 
 sub match

@@ -39,7 +39,8 @@ sub import
 
 sub new
 {
-    bless {@_[1 .. $#_]}, $_[0];
+    my $self = shift;
+    return bless {@_}, $self;
 }
 
 sub attr
@@ -50,22 +51,22 @@ sub attr
         croak "Default value for '$name' can not be a reference.";
     }
 
-    no strict 'refs';
-    no warnings 'redefine';
-
     # Readonly attributes are marked with '-'
     my $readonly = $name =~ s/^\-//;
 
-    *{"${class}::$name"} = sub {
-        if (@_ > 1 && !$readonly) {
-            $_[0]->{$name} = $_[1];
-        }
-        return $_[0]->{$name} if exists $_[0]->{$name};
-        return $_[0]->{$name} =
-            ref $default eq 'CODE'
-            ? $default->($_[0])
-            : $default;
-    };
+    # Remember if default is a function
+    my $default_sub = ref $default eq 'CODE';
+
+    {
+        no strict 'refs';
+        no warnings 'redefine';
+
+        *{"${class}::$name"} = sub {
+            return $_[0]->{$name} = $_[1] if @_ > 1 && !$readonly;
+            return $_[0]->{$name} if exists $_[0]->{$name};
+            return $_[0]->{$name} = $default_sub ? $default->($_[0]) : $default;
+        };
+    }
 }
 
 1;
@@ -155,3 +156,4 @@ name with a dash.
 L<Kelp>, L<Moose>, L<Moo>, L<Mo>, L<Any::Moose>
 
 =cut
+

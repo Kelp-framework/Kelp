@@ -50,15 +50,8 @@ sub extract_function
 
 sub effective_charset
 {
-    my (@objects) = @_;
-
-    my $charset;
-    foreach my $object (@objects) {
-        $charset = Encode::find_encoding(ref $object ? $object->charset : $object);
-        last if $charset;
-    }
-
-    return $charset;
+    my $this_charset = shift;
+    return Encode::find_encoding($this_charset) ? $this_charset : undef;
 }
 
 sub charset_encode
@@ -129,6 +122,20 @@ sub adapt_psgi
     };
 }
 
+sub load_and_instantiate
+{
+    my $package = shift;
+    state $loaded = {};
+
+    # only string eval once for a given class name
+    return (
+        $loaded->{$package} //= do {
+            eval qq{require $package; 1} or die $@;
+            $package;
+        }
+    )->new(@_);
+}
+
 1;
 
 __END__
@@ -190,10 +197,8 @@ the entire string. Returns undef for empty strings.
 
 =head2 effective_charset
 
-Takes a list of objects to call C<charset> on and returns the first one to have
-a charset supported by Encode. If there is no charset in any of the objects or
-they aren't supported, undef will be returned. Can also be passed plain strings
-with the charset names (instead of objects implementing C<charset> method).
+Takes a charset name and returns it back if it is supported by Encode.
+If there is no charset or it isn't supported, undef will be returned.
 
 =head2 adapt_psgi
 
@@ -209,6 +214,11 @@ was after C</app> in the URL (trailing slashes included).
 NOTE: having more than one placeholder in the pattern is mostly wasteful, as
 their matched values will not be handled in any way (other than allowing a
 varying request path).
+
+=head2 load_and_instantiate
+
+Takes a name of a class and a list arguments. Efficiently loads the class name
+and calls C<new> on it with the argument list. Only loads the class once.
 
 =cut
 

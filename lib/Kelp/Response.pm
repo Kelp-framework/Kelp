@@ -32,7 +32,7 @@ sub charset_encode
 {
     my ($self, $string) = @_;
     return Kelp::Util::charset_encode(
-        Kelp::Util::effective_charset($self) // $self->app->charset,
+        Kelp::Util::effective_charset($self->charset) // $self->app->charset,
         $string,
     );
 }

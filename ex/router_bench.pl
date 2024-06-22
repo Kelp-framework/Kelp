@@ -1,4 +1,5 @@
 use Kelp::Base -strict;
+use Kelp::Util;
 use Benchmark qw(cmpthese);
 
 # the depth of the path, but the number of bridges will be +1
@@ -36,8 +37,7 @@ my @classes = @ARGV;
 
 my %cases;
 foreach my $class (@classes) {
-    eval "use $class; 1" or die $@;
-    my $r = $class->new(base => 'TestApp');
+    my $r = Kelp::Util::load_and_instantiate($class, base => 'TestApp');
 
     my $tree_base = my $tree = [];
 
