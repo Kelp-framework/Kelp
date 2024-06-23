@@ -4,6 +4,15 @@ use Kelp::Base -strict;
 use Carp;
 use Encode qw();
 
+# improve error locations of croak
+our @CARP_NOT = (
+    qw(
+        Kelp
+        Kelp::Routes
+        Kelp::Context
+    )
+);
+
 sub camelize
 {
     my ($string, $base, $class_only) = @_;
@@ -140,7 +149,7 @@ sub load_package
 
     # only string eval once for a given class name
     return $loaded->{$package} //= do {
-        eval qq{require $package; 1} or die $@;
+        eval qq{require $package; 1} or croak $@;
         $package;
     };
 }
