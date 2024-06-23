@@ -37,7 +37,7 @@ my @classes = @ARGV;
 
 my %cases;
 foreach my $class (@classes) {
-    my $r = Kelp::Util::load_and_instantiate($class, base => 'TestApp');
+    my $r = Kelp::Util::load_package($class)->new(base => 'TestApp');
 
     my $tree_base = my $tree = [];
 
