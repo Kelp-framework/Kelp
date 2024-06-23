@@ -267,7 +267,7 @@ easy to use the same charset in response as the one you got in request:
         return 'et voilà!';
     });
 
-Note that request charset is only getting used if the C<Content-Type> of the
+Note that request charset is only actually used if the C<Content-Type> of the
 request is either C<text/*> or C<application/*>.
 
 =head1 SEE ALSO

@@ -416,7 +416,7 @@ This module registers the following methods into the underlying app:
 
 =head2 config
 
-A wrapper for the C</get> method.
+A wrapper for the L</get> method.
 
     # Somewhere in the app
     my $pos = $self->config('row.col.position');
@@ -433,7 +433,7 @@ A reference to the entire configuration hash.
 
     my $pos = $self->config_hash->{row}->{col}->{position};
 
-Using this or C<config> is entirely up to the application developer.
+Using this or L</config> is entirely up to the application developer.
 
 =head3 _cfg
 
@@ -538,12 +538,16 @@ response (unless charset is set manually for a response). Any encoding
 supported by L<Encode> is fine. It should probably stay as default C<UTF-8>
 unless you're doing something non-standard.
 
+Can be set to undef to disable response encoding.
+
 =head2 request_charset
 
 Default incoming charset, which will be used to decode requests (unless the
 request contains its own). It will always be used to decode URI elements of the
-request. It is strongly recommended this stays as default C<UTF-8>, but can
+request. It is B<strongly recommended> this stays as default C<UTF-8>, but can
 also be set to other one-byte encodings if needed.
+
+Can be set to undef to disable request decoding entirely.
 
 =head2 app_url
 

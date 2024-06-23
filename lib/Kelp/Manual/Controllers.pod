@@ -23,7 +23,7 @@ be subclasses of L<Kelp>.
 
 Reblessing will happen after request is matched to a route. Route handler has
 to be specified as class and method string, and class must be a subclass of class
-configured for C<Kelp::Routes/base>. C<Kelp::Routes/rebless> must albo be
+configured for L<Kelp::Routes/base>. L<Kelp::Routes/rebless> must albo be
 enabled for that to occur.
 
 The default value of C<base> field is the application class, so your
@@ -117,11 +117,11 @@ You no longer have to prefix destinations with the base controller class name.
 =head1 CAVEATS
 
 There are some controller gotchas which come from a fact that they are not
-contructed like a regular object:
+constructed like a regular object:
 
 =head2 Controller's constructor is never called
 
-Controllers are also never actually constructed, but instead the main app
+Controllers are never actually constructed, but instead the main app
 object is cloned and reblessed into the correct class. Don't expect your
 override of C<new> or C<build> to work.
 

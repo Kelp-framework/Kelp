@@ -62,21 +62,6 @@ omitted adding certain components. This is where Kelp gets to shine. It provides
 a layer on top of Plack and puts everything together into a complete web
 framework.
 
-=head2 New Kelp versions and backward compatibility
-
-Versions 2 and 2.10 of Kelp introduced some breaking changes, especially when
-it comes to how requests are decoded and how the errors are rendered. If you
-are affected and don't want to modify your code, you are welcome to use a fixed
-version C<2.00> (with less incompatibilities) or C<1.07> (without
-incompatibilities). You will be missing on a lot of improvements though - most
-of these changes were bugfixes or security fixes.
-
-Kelp values backward compatibility, but at the same time it will not be
-hesitant to fix bugs, security issues or major inconveniences where it sees
-necessary. From 2.10 forward, non-bugfix breaking changes will only be
-introduced after a 6-month deprecation period. Changelog will list them under
-C<[Deprecations]> section.
-
 =head1 CREATING A NEW WEB APP
 
 =head2 Quick development using Kelp::Less
@@ -171,7 +156,7 @@ This is where the C<Template> module will look for template files.
 
 =item B</log>
 
-This is where the C<Logger> module will create C<error.log>, C<debug.log> and
+This is where the C<Logger> module will create C<error.log> and
 any other log files that were defined in the configuration.
 
 =item B</t>
@@ -725,10 +710,9 @@ that, it may come in handy when debugging.
 
 =head3 Creating your own module
 
-Each new module must be a
-subclass of the C<Kelp::Module> class. Modules' job is to initialize and
-register new methods into the web application class. Here is a simple module
-which initializes an extremely simple cache:
+Each new module must be a subclass of the C<Kelp::Module> class. Modules' job
+is to initialize and register new methods into the web application class. Here
+is a module which initializes an extremely simple cache:
 
     package Kelp::Module::ExampleCache;
 
@@ -876,6 +860,21 @@ Run the rest as usual, using C<prove>:
     > prove -l t/test.t
 
 Take a look at the L<Kelp::Test> for details and more examples.
+
+=head2 Future compatibility
+
+Versions C<2.00> and C<2.10> of Kelp introduced some breaking changes,
+especially when it comes to how requests are decoded and how the errors are
+rendered. If you are affected and don't want to modify your code, you are
+welcome to use a fixed version C<2.00> (with less incompatibilities) or C<1.07>
+(without incompatibilities). You will be missing on a lot of improvements
+though - most of these changes were bugfixes or security fixes.
+
+Kelp values backward compatibility, but at the same time it will not be
+hesitant to fix bugs, security issues or major inconveniences where it sees
+necessary. From C<2.10> forward, non-bugfix breaking changes will only be
+introduced after a 6-month deprecation period. Changelog will list
+them under C<[Deprecations]> section.
 
 =head2 Other documentation
 

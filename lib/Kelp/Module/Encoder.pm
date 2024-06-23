@@ -88,7 +88,7 @@ Kelp::Module::Encoder - Base class for encoder modules
 =head1 DESCRIPTION
 
 This is a base class for encoders which want to be compilant with the new
-L<Kelp/get_encoder> method. L</Kelp::Module::JSON> is one of such modules.
+L<Kelp/get_encoder> method. L<Kelp::Module::JSON> is one of such modules.
 
 This allows to have all encoders in one easy to reach spot rather than a bunch
 of unrelated methods attached to the main class. It also allows to configure a
