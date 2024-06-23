@@ -6,7 +6,8 @@
             - Added charset, charset_encode methods to Kelp::Response
             - Added is_production, get_encoder methods and request_charset, encoder_modules, context attributes to Kelp
             - Added Kelp::Module::Encoder, a base class for encoders (like JSON, to be used by the new get_encoder method)
-            - Added adapt_psgi, effective_charset, charset_encode, charset_decode, load_and_instantiate functions to Kelp::Util
+            - Added adapt_psgi, effective_charset, charset_encode, charset_decode, load_package functions to Kelp::Util
+            - Added a third, optional argument to camelize in Kelp::Util
 
             [General]
             - Fixed Route destination getting executed if a response was already rendered by a previous one
@@ -16,7 +17,7 @@
               * The destination will still be run if the render happened inside 'before_dispatch' hook
             - Response 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
               * The json string will still get its charset encoded, so the encoder should be utf8-disabled
-            - Kelp now tracks the context it's in via 'context' attribute
+            - Kelp now tracks its context via 'context' attribute
               * App will now rememeber if it was reblessed and will only rebless once into given controller per request
               * This fixes before_finalize not working when reimplemented inside a controller
               * This also improves performance if a lot of bridges are defined as methods inside a controller

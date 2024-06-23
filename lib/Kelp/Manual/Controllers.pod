@@ -1,0 +1,199 @@
+=pod
+
+=encoding utf8
+
+=head1 NAME
+
+Kelp::Manual::Controllers - Making your app use controllers
+
+=head1 DESCRIPTION
+
+This document describes the technical aspect of implementing controllers in
+your app. By default, Kelp has no controllers - it resolves all your routes in
+the context of the main app. In other words, all routes take a instance of the
+web application as a first parameter - even if those routes live in another
+class.
+
+Controllers lets you separate some of the route handling logic to other classes
+and have your subs take the object of the correct class as the first argument.
+In Kelp, there is no special base class for controllers - all controllers must
+be subclasses of L<Kelp>.
+
+=head2 Reblessing details
+
+Reblessing will happen after request is matched to a route. Route handler has
+to be specified as class and method string, and class must be a subclass of class
+configured for C<Kelp::Routes/base>. C<Kelp::Routes/rebless> must albo be
+enabled for that to occur.
+
+The default value of C<base> field is the application class, so your
+application class is by default your main controller class. All other
+controllers must (directly or indirectly) inherit from your application class.
+
+These methods will be automatically run on your controller object for each request:
+
+=over
+
+=item * route handler method
+
+=item * C<before_dispatch>
+
+=item * C<before_finalize>
+
+=back
+
+No other methods will be called from your controller unless you call them
+explicitly yourself. Application will be reblessed into a given controller only
+once per request. If a bridge route exists which uses the same controller as
+the regular route, the regular route will reuse the controller reblessed for
+the bridge. After the request ends, the reblessed controllers will be cleared.
+
+=head2 Configuring controllers
+
+=head3 Step 1: Configure the controller
+
+It is a good practice to set up a different C<base>, so that you separate general
+app code from request-handling code.
+
+    # config.pl
+    {
+        modules_init => {
+            Routes => {
+                rebless => 1, # the app instance will be reblessed
+                base => 'MyApp::Controller',
+            }
+        }
+    }
+
+=head3 Step 2: Create a main controller class
+
+This step is only required if you've changed the C<base>.
+
+    # lib/MyApp/Controller.pm
+    package MyApp::Controller;
+    use Kelp::Base 'MyApp';
+
+    # Now $self is an instance of 'MyApp::Controller';
+    sub service_method {
+        my $self = shift;
+        ...;
+    }
+
+    1;
+
+=head3 Step 3: Create any number of controller classes
+
+They all must inherit from your main controller class.
+
+    # lib/MyApp/Controller/Users.pm
+    package MyApp::Controller::Users;
+    use Kelp::Base 'MyApp::Controller';
+
+    # Now $self is an instance of 'MyApp::Controller::Users'
+    sub authenticate {
+        my $self = shift;
+        ...;
+    }
+
+    1;
+
+=head3 Step 4: Add routes with shorter class names
+
+You no longer have to prefix destinations with the base controller class name.
+
+    # lib/MyApp.pm
+
+    ...
+
+    sub build {
+        my $self = shift;
+
+        # if 'base' was not changed, this would have to be written as:
+        # => 'Controller::Users::authenticate'
+        $self->add_route('/login' => 'Users::authenticate');
+
+    }
+
+=head1 CAVEATS
+
+There are some controller gotchas which come from a fact that they are not
+contructed like a regular object:
+
+=head2 Controller's constructor is never called
+
+Controllers are also never actually constructed, but instead the main app
+object is cloned and reblessed into the correct class. Don't expect your
+override of C<new> or C<build> to work.
+
+=head2 Main application object is shallow-cloned before rebless
+
+Reblessed controllers are only temporary. Setting top-level attributes in a
+controller, for example L<Kelp/charset>, will work until the request is fully
+handled. After that, the controller copy will be destroyed and the changes will
+not propagate back to main application.
+
+=head2 Getting a controller copy in C<build>
+
+No automatic controller initialization happens in Kelp. If you'd like to access
+a controller in other context than route handling - for example in C<build>
+method, allowing you to move route definitions to the controller - you may use
+C<context> tracking object:
+
+    # in MyApp.pm
+    sub build {
+        my $self = shift;
+
+        # get a temporary rebless of the app and call its bulid method
+        # will return MyApp::Controller::Special, if route base is MyApp::Controller
+        my $controller_special = $self->context->controller('special');
+        $controller_special->build;
+
+        # will return the main controller (MyApp::Controller)
+        my $controller = $self->context->controller;
+        $controller->build;
+
+    }
+
+Note that you will still have to use the controller name in routes even though
+they live in the same class:
+
+    # in MyApp/Controller/Special.pm
+    sub build {
+        my $self = shift;
+
+        # need to add special, even though this is controller special
+        $self->add_route('/my_route' => 'special#handler');
+    }
+
+    sub handler { ... }
+
+NOTE: Take extra care not to call C<build> again if it wasn't overridden in a
+controller, as the controller will try to re-initialize the app, which will
+surely B<result in a loop>! In addition, B<make sure to never call> C<<
+$self->SUPER::build >> in a controller.
+
+=head2 Getting a main application object in a controller
+
+This may be done by similarly using C<context>:
+
+    sub handler {
+        my $controller = shift;
+
+        # this will always be the main app object
+        my $app = $controller->context->app;
+    }
+
+=head1 SEE ALSO
+
+L<Kelp::Manual>
+
+=head1 SUPPORT
+
+=over
+
+=item * GitHub: L<https://github.com/Kelp-framework/Kelp>
+
+=item * Mailing list: L<https://groups.google.com/g/perl-kelp>
+
+=back
+

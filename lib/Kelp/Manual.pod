@@ -778,88 +778,6 @@ to use in the main application class.
 
 See more examples and POD at L<Kelp::Module>.
 
-
-=head2 Reblessing into controller classes
-
-All of the examples here show routes which take a instance of the web
-application as a first parameter. This is true even if those routes live in
-another class.
-
-To rebless the app instance into the controller class instance, the controller
-class must extend the class specified in C<base> configuration field. The
-default value of that field is the application class, so your application class
-is by default your main controller class. All other controllers must (directly
-or indirectly) inherit from your application class.
-
-Application will be reblessed into a given controller only once per request. If
-a bridge route exists which uses the same controller as the regular route, the
-regular route will reuse the controller reblessed for the bridge. After the
-request ends, the reblessed controllers will be cleared.
-
-=head3 Step 1: Configure the controller
-
-It is a good practice to set up a different C<base>, so that you separate general
-app code from request-handling code.
-
-    # config.pl
-    {
-        modules_init => {
-            Routes => {
-                rebless => 1, # the app instance will be reblessed
-                base => 'MyApp::Controller',
-            }
-        }
-    }
-
-=head3 Step 2: Create a main controller class
-
-This step is only required if you've changed the C<base>.
-
-    # lib/MyApp/Controller.pm
-    package MyApp::Controller;
-    use Kelp::Base 'MyApp';
-
-    # Now $self is an instance of 'MyApp::Controller';
-    sub service_method {
-        my $self = shift;
-        ...;
-    }
-
-    1;
-
-=head3 Step 3: Create any number of controller classes
-
-They all must inherit from your main controller class.
-
-    # lib/MyApp/Controller/Users.pm
-    package MyApp::Controller::Users;
-    use Kelp::Base 'MyApp::Controller';
-
-    # Now $self is an instance of 'MyApp::Controller::Users'
-    sub authenticate {
-        my $self = shift;
-        ...;
-    }
-
-    1;
-
-=head3 Step 4: Add routes with shorter class names
-
-You no longer have to prefix destinations with the base controller class name.
-
-    # lib/MyApp.pm
-
-    ...
-
-    sub build {
-        my $self = shift;
-
-        # if 'base' was not changed, this would have to be written as:
-        # => 'Controller::Users::authenticate'
-        $self->add_route('/login' => 'Users::authenticate');
-
-    }
-
 =head1 NEXT STEPS
 
 =head2 Debugging
@@ -959,9 +877,15 @@ Run the rest as usual, using C<prove>:
 
 Take a look at the L<Kelp::Test> for details and more examples.
 
-=head2 Common problems and solutions
+=head2 Other documentation
 
-You may want to take a look at our L<Kelp::Manual::Cookbook>.
+You may want to take a look at our L<Kelp::Manual::Cookbook> for common
+problems and solutions.
+
+Details of controllers can be found in L<Kelp::Manual::Controllers>.
+
+Specific packages contain documentation about the interface of each part of the
+system.
 
 =head1 SUPPORT
 

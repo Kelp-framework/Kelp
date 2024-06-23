@@ -2,26 +2,37 @@ package Kelp::Util;
 
 use Kelp::Base -strict;
 use Carp;
-use Scalar::Util qw(blessed);
 use Encode qw();
 
 sub camelize
 {
-    my ($string, $base) = @_;
+    my ($string, $base, $class_only) = @_;
     return $string unless $string;
 
     my $sigil = defined $string && $string =~ s/^(\+)// ? $1 : undef;
     $base = undef if $sigil;
 
-    my @parts = split(/\#/, $string);
-    my $sub = pop @parts;
+    my @parts;
+    if ($string =~ /::/) {
+        @parts = ($string);
+    }
+    else {
+        @parts = split /\#/, $string;
+        my $sub = pop @parts;
 
-    @parts = map {
-        join '', map { ucfirst lc } split /\_/
-    } @parts;
+        push @parts, $sub
+            if $class_only;
+
+        @parts = map {
+            join '', map { ucfirst lc } split /\_/
+        } @parts;
+
+        push @parts, $sub
+            if !$class_only;
+    }
+
     unshift @parts, $base if $base;
-
-    return join('::', @parts, $sub);
+    return join('::', @parts);
 }
 
 sub extract_class
@@ -122,18 +133,16 @@ sub adapt_psgi
     };
 }
 
-sub load_and_instantiate
+sub load_package
 {
     my $package = shift;
     state $loaded = {};
 
     # only string eval once for a given class name
-    return (
-        $loaded->{$package} //= do {
-            eval qq{require $package; 1} or die $@;
-            $package;
-        }
-    )->new(@_);
+    return $loaded->{$package} //= do {
+        eval qq{require $package; 1} or die $@;
+        $package;
+    };
 }
 
 1;
@@ -183,7 +192,8 @@ This function accepts a string and a base class. Does three things:
 =back
 
 The returned string will have leading C<+> removed and will be prepended with
-the second argument if there was no C<+>.
+the second argument if there was no C<+>. An optional third argument can also
+be passed to treat the entire string as a class name.
 
 =head2 extract_class
 
@@ -215,11 +225,9 @@ NOTE: having more than one placeholder in the pattern is mostly wasteful, as
 their matched values will not be handled in any way (other than allowing a
 varying request path).
 
-=head2 load_and_instantiate
+=head2 load_package
 
-Takes a name of a class and a list of arguments. Efficiently loads the class
-name and calls C<new> on it with the argument list. Only tries to load the
-class once.
+Takes a name of a package and efficiently loads it.
 
 =cut
 

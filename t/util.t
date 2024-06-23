@@ -31,6 +31,32 @@ subtest 'testing camelize' => sub {
     is(Kelp::Util::camelize('', 'Boo'), '', 'empty with class ok');
 };
 
+subtest 'testing camelize (class only)' => sub {
+    my %h = (
+        'a#b' => 'A::B',
+        'bar#foo' => 'Bar::Foo',
+        'bar_foo#baz' => 'BarFoo::Baz',
+        'bar_foo#baz_bat' => 'BarFoo::BazBat',
+        'BarFoo#baz' => 'Barfoo::Baz',
+        'barfoo#BAZ' => 'Barfoo::Baz',
+        'bar_foo_baz_bat#moo_moo' => 'BarFooBazBat::MooMoo',
+        'a' => 'A',
+        'M::D::f' => 'M::D::f',
+        'R_E_S_T#asured' => 'REST::Asured',
+        'REST::Assured::ok' => 'REST::Assured::ok',
+        'REST' => 'Rest',
+    );
+
+    for my $k (keys %h) {
+        is(Kelp::Util::camelize($k, undef, 1), $h{$k}, "base $k");
+        is(Kelp::Util::camelize($k, 'Boo', 1), 'Boo::' . $h{$k}, "$k with namespace");
+        is(Kelp::Util::camelize($k, '', 1), $h{$k}, "$k with empty namespace");
+    }
+
+    is(Kelp::Util::camelize('', undef, 1), '', 'empty ok');
+    is(Kelp::Util::camelize('', 'Boo', 1), '', 'empty with class ok');
+};
+
 subtest 'testing extract_class' => sub {
     my %h = (
         'A::b' => 'A',

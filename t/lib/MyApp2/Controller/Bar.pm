@@ -21,5 +21,14 @@ sub before_finalize
     $self->res->header('X-Controller' => 'Bar');
 }
 
+sub build
+{
+    my $self = shift;
+    my $r = $self->routes;
+
+    $r->add("/blessed_bar", "Bar::blessed");
+    $r->add("/blessed_bar2", "bar#blessed");
+}
+
 1;
 

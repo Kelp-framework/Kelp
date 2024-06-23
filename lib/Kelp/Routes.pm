@@ -273,8 +273,7 @@ sub wrap_psgi
 # Override to use a custom pattern object
 sub build_pattern
 {
-    return Kelp::Util::load_and_instantiate(
-        $_[0]->pattern_obj,
+    return Kelp::Util::load_package($_[0]->pattern_obj)->new(
         %{$_[1]}
     );
 }

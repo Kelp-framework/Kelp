@@ -1,28 +1,50 @@
 package Kelp::Context;
 
 use Kelp::Base;
+use Kelp::Util;
 use Carp;
 
 attr -app => sub { croak 'app is required' };
-attr -controllers => sub { {} };
+attr -_controllers => sub { {} };
 attr current => sub { shift->app };
 
+# loads the class, reblesses and returns - can be used to get controller on
+# demand with partial or unloaded class name
+sub controller
+{
+    my ($self, $controller) = @_;
+    my $base = $self->app->routes->base;
+    $controller = '+' . $base
+        if !defined $controller;
+
+    $controller = Kelp::Util::camelize($controller, $base, 1);
+    Kelp::Util::load_package($controller);
+
+    croak "Invalid controller, not subclassing $base"
+        unless $controller->isa($base);
+
+    return $self->app->_clone($controller);
+}
+
+# reblesses, remembers and sets the current controller - used internally
 sub set_controller
 {
     my ($self, $controller) = @_;
 
-    my $current = $self->controllers->{$controller} //=
+    # the controller class should already be loaded by the router
+    my $current = $self->_controllers->{$controller} //=
         $self->app->_clone($controller);
 
     $self->current($current);
     return $current;
 }
 
+# clears the object for the next route - used internally
 sub clear
 {
     my $self = shift;
 
-    %{$self->controllers} = ();
+    %{$self->_controllers} = ();
     $self->current($self->app);
 }
 

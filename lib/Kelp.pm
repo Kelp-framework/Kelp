@@ -169,8 +169,7 @@ sub build
 # Override to use a custom request object
 sub build_request
 {
-    return Kelp::Util::load_and_instantiate(
-        $_[0]->request_obj,
+    return Kelp::Util::load_package($_[0]->request_obj)->new(
         app => $_[0],
         env => $_[1],
     );
@@ -179,8 +178,7 @@ sub build_request
 # Override to use a custom response object
 sub build_response
 {
-    return Kelp::Util::load_and_instantiate(
-        $_[0]->response_obj,
+    return Kelp::Util::load_package($_[0]->response_obj)->new(
         app => $_[0],
     );
 }

@@ -96,19 +96,10 @@ prefix it with a plus sign.
 
     router => '+My::Special::Router
 
-See L<Kelp::Routes::Controller> for a router class that reblesses the
-application instance.
+=head3 configuration of the router
 
-=head3 base
-
-Specifies the base class of each route. This saves a lot of typing when writing
-the routes definitions.
-
-    base => 'MyApp'
-
-Now when defining a route you can only type C<myroute> to denote
-C<MyApp::myroute>.
-
+All other configuration is passed to the router. For the configuration of the
+default router, see L<Kelp::Routes/ATTRIBUTES>.
 
 =cut
 
