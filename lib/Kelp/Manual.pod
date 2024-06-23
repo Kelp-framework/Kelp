@@ -64,16 +64,17 @@ framework.
 
 =head2 New Kelp versions and backward compatibility
 
-Major version 2 of Kelp introduced some breaking changes, especially when it
-comes to how requests are decoded and how the errors are rendered. If you are
-affected and don't want to modify your code, you are welcome to use a fixed
-version C<1.07> (before the big changes). You will be missing on a lot of
-improvements though.
+Versions 2 and 2.10 of Kelp introduced some breaking changes, especially when
+it comes to how requests are decoded and how the errors are rendered. If you
+are affected and don't want to modify your code, you are welcome to use a fixed
+version C<2.00> (with less incompatibilities) or C<1.07> (without
+incompatibilities). You will be missing on a lot of improvements though - most
+of these changes were bugfixes or security fixes.
 
 Kelp values backward compatibility, but at the same time it will not be
 hesitant to fix bugs, security issues or major inconveniences where it sees
-necessary. From 2.01 forward, non-bugfix breaking changes will only be
-introduced after a 3-month deprecation period. Changelog will list them under
+necessary. From 2.10 forward, non-bugfix breaking changes will only be
+introduced after a 6-month deprecation period. Changelog will list them under
 C<[Deprecations]> section.
 
 =head1 CREATING A NEW WEB APP

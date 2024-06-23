@@ -257,7 +257,7 @@ it to add several convenience methods and support for application encoding.
 
 =head1 ENCODING
 
-Starting with version 2.01, Kelp::Request simplifies input handling and
+Starting with version 2.10, Kelp::Request simplifies input handling and
 improves correctness by automatically decoding path, query parameters and content.
 
 Headers (so cookies as well) are unaffected, as they aren't consistently
