@@ -4,6 +4,7 @@ use Kelp::Base -strict;
 use Getopt::Long;
 use Kelp::Generator;
 use Path::Tiny;
+use Pod::Usage;
 
 my $path = '.';
 my $verbose = 1;
@@ -21,15 +22,15 @@ GetOptions(
     "help"     => \$help
 );
 
-my $name = $ARGV[0] || do { $help = 1; '' };
+my $name = $ARGV[0];
 my $generator = Kelp::Generator->new;
 
-if ( $help ) {
-    my @usage = <DATA>;
-    say @usage;
+if ( !$name || $help ) {
+    say 'Error - no application name.' unless $help;
+    pod2usage(-verbose => 1, -exitval => 'NOEXIT');
     say 'Available application types:';
     say for map { ' ' x 4 . $_ } $generator->list_templates;
-    exit;
+    exit ($help ? 0 : 1);
 }
 
 # Remove the slash at the end
@@ -74,14 +75,50 @@ sub _say {
     }
 }
 
-__DATA__
-Usage: Kelp [options] <name>
+__END__
 
-Options:
-    --path=s        Path where to create the files
-    --type=s        Type of application to create (default: kelp)
-    --types         List available application types
-    --(no)verbose   Display information
-    --force         Force overwriting existing files
-    --tabs          Use tabs for indentation instead of spaces
-    --help          This help screen
+=pod
+
+=head1 NAME
+
+kelp-generator - Generate Kelp applications
+
+=head1 SYNOPSIS
+
+    kelp-generator [options] <application-name>
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<--path=s>
+
+Path where to create the files
+
+=item B<--type=s>
+
+Type of application to create (default: kelp)
+
+=item B<--(no)verbose>
+
+Display more or less information
+
+=item B<--force>
+
+Force overwriting existing files
+
+=item B<--tabs>
+
+Use tabs for indentation instead of spaces
+
+=item B<--help>
+
+This help screen
+
+=back
+
+=head1 DESCRIPTION
+
+B<This program> will generate a Kelp project from one of the registered
+templates. C<< <application-name> >> will be used as the name of the package.
+

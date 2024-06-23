@@ -104,8 +104,8 @@ Kelp::Generator - Generation templates
 This is a class for discovery and parsing of generation templates for Kelp. A
 generation template is a set of files that can be parsed using
 L<Template::Tiny> and inserted into a given directory. This class only handles
-the discovery and parsing of these templates. The Kelp script or custom script
-should handle saving them in a destination directory.
+the discovery and parsing of these templates. The C<kelp-generator> script or
+custom script should handle saving them in a destination directory.
 
 =head1 TEMPLATE CREATION
 
@@ -118,7 +118,7 @@ This means that CPAN modules can add templates to L<Kelp/templates> and they
 will be discovered as long as they have been installed in the same root
 directory as Kelp without changing the contents of the package variable. Any
 template that can be discovered in the default directory will be usable in the
-Kelp script.
+C<kelp-generator> script.
 
 =head2 Contents
 

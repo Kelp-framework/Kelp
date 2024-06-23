@@ -103,28 +103,28 @@ here is a quick one:
 
     run;
 
-=head2 Using the C<Kelp> script
+=head2 Using the C<kelp-generator> script
 
 The easiest way to create the directory structure and a general application
-skeleton is by using the C<Kelp> script, which comes with this package.
+skeleton is by using the C<kelp-generator> script, which comes with this package.
 
-    > Kelp MyApp
+    > kelp-generator MyApp
 
 This will create C<lib/MyApp.pm>, C<app.psgi> and some other files (explained
 below).
 
 To create a L<Kelp::Less> app file, use:
 
-    > Kelp --type=less MyApp
+    > kelp-generator --type=less MyApp
 
 Get help by typing:
 
-    > Kelp --help
+    > kelp-generator --help
 
 =head2 Directory structure
 
 Before you begin writing the internals of your app, you need to create the
-directory structure either by hand, or by using the above described C<Kelp>
+directory structure either by hand, or by using the above described C<kelp-generator>
 utility script.
 
      .
