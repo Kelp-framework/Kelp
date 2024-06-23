@@ -10,6 +10,7 @@ use Plack::Util;
 use Class::Inspector;
 use List::Util qw(any);
 use Scalar::Util qw(blessed);
+use Kelp::Context;
 
 our $VERSION = '2.01';
 
@@ -38,8 +39,8 @@ attr __config => undef;
 
 attr -loaded_modules => sub { {} };
 
-# Each route's request an response objects will
-# be put here:
+# Data for handling routes
+attr context => sub { Kelp::Context->new(app => $_[0]) };
 attr req => undef;
 attr res => undef;
 
@@ -242,14 +243,15 @@ sub psgi
 {
     my ($self, $env) = @_;
 
-    # Create the request and response objects
+    # Initialize the app object state
+    $self->context->clear;
     my $req = $self->req($self->build_request($env));
     my $res = $self->res($self->build_response);
 
     # Get route matches
     my $match = $self->routes->match($req->path, $req->method);
 
-    # None found? Show 404 ...
+    # None found? Short-circuit and show 404
     if (!@$match) {
         $res->render_404;
         return $self->finalize;
@@ -341,8 +343,12 @@ sub psgi
 sub finalize
 {
     my $self = shift;
-    $self->before_finalize;
-    $self->res->finalize;
+
+    # call it with current context, so that it will get controller's hook if
+    # possible
+    $self->context->current->before_finalize;
+
+    return $self->res->finalize;
 }
 
 #----------------------------------------------------------------
@@ -623,6 +629,19 @@ contain a reference to the current L<Kelp::Response> instance.
     sub some_route {
         my $self = shift;
         $self->res->json->render( { success => 1 } );
+    }
+
+=head2 context
+
+This holds application's context. Its usage is advanced and only useful for
+controller logic, but may allow for some introspection into Kelp.
+
+For example, if you have a route in a controller and need to get the original
+Kelp app object, you may call this:
+
+    sub some_route {
+        my $controller = shift;
+        my $app = $controller->context->app;
     }
 
 =head2 encoder_modules

@@ -256,7 +256,8 @@ sub template
     croak "No template module loaded"
         unless $self->app->can('template');
 
-    my $output = $self->app->template($template, $vars, @rest);
+    # run template in current controller context
+    my $output = $self->app->context->current->template($template, $vars, @rest);
     $self->render($output);
 }
 
@@ -315,6 +316,11 @@ need to write graceful PSGI compliant responses. Some methods return C<$self>,
 which makes them easy to chain.
 
 =head1 ATTRIBUTES
+
+=head2 app
+
+A reference to the Kelp application. This will always be the real application,
+not the reblessed controller.
 
 =head2 charset
 

@@ -2,11 +2,11 @@
             [New Interface]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
             - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
-            - Added is_production, get_encoder methods and request_charset attribute to Kelp
             - Added charset, charset_decode methods to Kelp::Request
             - Added charset, charset_encode methods to Kelp::Response
-            - Added adapt_psgi, effective_charset, charset_encode, charset_decode, load_and_instantiate functions to Kelp::Util
+            - Added is_production, get_encoder methods and request_charset, encoder_modules, context attributes to Kelp
             - Added Kelp::Module::Encoder, a base class for encoders (like JSON, to be used by the new get_encoder method)
+            - Added adapt_psgi, effective_charset, charset_encode, charset_decode, load_and_instantiate functions to Kelp::Util
 
             [General]
             - Fixed Route destination getting executed if a response was already rendered by a previous one
@@ -14,12 +14,16 @@
               * If more than one normal routes were matched, they will be run until one of them renders or returns a defined value
               * Delayed responses will no longer override a previously rendered normal response
               * The destination will still be run if the render happened inside 'before_dispatch' hook
-            - Response' 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
-              * The json string will still get its charset encoded, so it should not be encoded
+            - Response 'render' method will now assume you passed a json-encoded string if content type is json and body is not a reference
+              * The json string will still get its charset encoded, so the encoder should be utf8-disabled
+            - Kelp now tracks the context it's in via 'context' attribute
+              * App will now rememeber if it was reblessed and will only rebless once into given controller per request
+              * This fixes before_finalize not working when reimplemented inside a controller
+              * This also improves performance if a lot of bridges are defined as methods inside a controller
             - Fixed Kelp attribute 'charset' being readonly (was documented as read/write)
             - Fixed templates named '0' not getting rendered
             - Fixed template correctly providing an 'app' object by default:
-              * This object was available in Kelp::Response template but was not getting properly reblessed
+              * This object was available in Kelp::Response template but was not getting properly reblessed (see 'context' above)
               * Kelp template now also inserts this parameter to render variables unless it is already provided
             - Fixed ::Null modules containing testing behavior - now they really do nothing
             - Repeatedly fetching parameters from json request with the param method is now much faster

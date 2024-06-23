@@ -354,7 +354,8 @@ you do your own decoding.
 
 =head2 app
 
-A reference to the Kelp application.
+A reference to the Kelp application. This will always be the real application,
+not the reblessed controller.
 
 =head2 stash
 

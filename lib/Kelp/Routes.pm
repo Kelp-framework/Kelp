@@ -8,6 +8,7 @@ use Kelp::Util;
 use Kelp::Routes::Location;
 use Try::Tiny;
 use Class::Inspector;
+use Scalar::Util qw(weaken);
 
 attr base => '';    # the default is set by config module
 attr rebless => 0;    # do not rebless app by default
@@ -327,7 +328,7 @@ sub dispatch
         unless $dest;
 
     my ($to, $controller, $action) = ($route->to, @{$dest});
-    $app = $app->_clone($controller) if $controller;
+    $app = $app->context->set_controller($controller) if $controller;
 
     $app->before_dispatch($to);
     return $action->($app, @{$route->param});

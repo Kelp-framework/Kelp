@@ -10,5 +10,16 @@ sub test_template
     return $_[0]->template('0');
 }
 
+sub test_res_template
+{
+    $_[0]->res->template('0');
+}
+
+sub before_finalize
+{
+    my $self = shift;
+    $self->res->header('X-Controller' => 'Bar');
+}
+
 1;
 

@@ -790,6 +790,11 @@ default value of that field is the application class, so your application class
 is by default your main controller class. All other controllers must (directly
 or indirectly) inherit from your application class.
 
+Application will be reblessed into a given controller only once per request. If
+a bridge route exists which uses the same controller as the regular route, the
+regular route will reuse the controller reblessed for the bridge. After the
+request ends, the reblessed controllers will be cleared.
+
 =head3 Step 1: Configure the controller
 
 It is a good practice to set up a different C<base>, so that you separate general

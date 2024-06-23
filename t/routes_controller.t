@@ -41,6 +41,11 @@ $t->request_ok(GET '/test_module')
     ->content_is('UTF-8');
 
 $t->request_ok(GET '/test_template')
+    ->header_is('X-Controller' => 'Bar')
+    ->content_like(qr/confession: I control the Bar/);
+
+$t->request_ok(GET '/test_res_template')
+    ->header_is('X-Controller' => 'Bar')
     ->content_like(qr/confession: I control the Bar/);
 
 done_testing;
