@@ -1,4 +1,4 @@
-2024-06-15: Version 2.10
+2024-06-24: Version 2.10
             [New Interface]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
             - Added a bunch of new methods with suffix '_param' to Kelp::Request, which work like 'param' but fetch from specific place
