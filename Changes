@@ -22,10 +22,10 @@
               * This fixes before_finalize not working when reimplemented inside a controller
               * This also improves performance if a lot of bridges are defined as methods inside a controller
             - Fixed Kelp attribute 'charset' being readonly (was documented as read/write)
-            - Fixed templates named '0' not getting rendered
-            - Fixed template correctly providing an 'app' object by default:
-              * This object was available in Kelp::Response template but was not getting properly reblessed (see 'context' above)
-              * Generation template now also inserts this parameter to render variables unless it is already provided
+            - Fixed template bugs:
+              * templates named '0' are now getting properly rendered
+              * template is now correctly providing an 'app' object by default, with the correct rebless context
+              * template now correctly rewinds a filehandle after reading from it, allowing reuse
             - Fixed ::Null modules containing testing behavior - now they really do nothing
             - Repeatedly fetching parameters from json request with the param method is now much faster
             - Kelp::Module::Logger now sorts keys in Data::Dumper output

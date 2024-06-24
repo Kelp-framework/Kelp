@@ -48,10 +48,20 @@ sub find_template
 sub _read_file
 {
     my ($self, $file) = @_;
+    my $text;
 
-    my $text = ref $file ? <$file> : path($file)->slurp(
-        {binmode => ':encoding(' . $self->encoding . ')'}
-    );
+    if (ref $file) {
+
+        # make sure to properly rewind the handle after we read from it
+        my $pos = tell $file;
+        $text = readline $file;
+        seek $file, $pos, 0;
+    }
+    else {
+        $text = path($file)->slurp(
+            {binmode => ':encoding(' . $self->encoding . ')'}
+        );
+    }
 
     return \$text;
 }

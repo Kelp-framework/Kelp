@@ -581,6 +581,19 @@ You can also simply get template string and return it, which will work the same:
         return $self->template( 'hello.tt', { name => $name } );
     }
 
+=head3 Rendering DATA
+
+Kelp templates can easily render from C<DATA> or other filehandle:
+
+    sub hello {
+        my ( $self, $name ) = @_;
+
+        return $self->template( \*DATA, { name => $name } );
+    }
+
+    __DATA__
+    Hello, [% name %]!
+
 =head3 Headers
 
     $self->set_header( "X-Framework", "Kelp" )->render( { success => \1 } );
