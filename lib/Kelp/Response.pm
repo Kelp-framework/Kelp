@@ -23,8 +23,9 @@ sub new
 
 sub set_content_type
 {
-    my ($self, $type) = @_;
+    my ($self, $type, $charset) = @_;
     $self->content_type($type);
+    $self->charset($charset) if $charset;
     return $self;
 }
 
@@ -57,32 +58,28 @@ sub _apply_charset
 sub text
 {
     my $self = shift;
-    $self->set_content_type('text/plain');
-    $self->charset($self->app->charset) unless $self->charset;
+    $self->set_content_type('text/plain', $self->charset || $self->app->charset);
     return $self;
 }
 
 sub html
 {
     my $self = shift;
-    $self->set_content_type('text/html');
-    $self->charset($self->app->charset) unless $self->charset;
+    $self->set_content_type('text/html', $self->charset || $self->app->charset);
     return $self;
 }
 
 sub json
 {
     my $self = shift;
-    $self->set_content_type('application/json');
-    $self->charset($self->app->charset) unless $self->charset;
+    $self->set_content_type('application/json', $self->charset || $self->app->charset);
     return $self;
 }
 
 sub xml
 {
     my $self = shift;
-    $self->set_content_type('application/xml');
-    $self->charset($self->app->charset) unless $self->charset;
+    $self->set_content_type('application/xml', $self->charset || $self->app->charset);
     return $self;
 }
 
@@ -418,6 +415,9 @@ Sets the content type of the response and returns C<$self>.
 
     # Inside a route definition
     $self->res->set_content_type('image/png');
+
+An optional second argument can be passed, which will be used for C<charset>
+part of C<Content-Type> (will set L</charset> field).
 
 =head2 text, html, json, xml
 

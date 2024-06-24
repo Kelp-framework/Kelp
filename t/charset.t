@@ -62,5 +62,27 @@ subtest 'should copy charset from request to response' => sub {
 
 };
 
+subtest 'should set but not not override charset' => sub {
+    $t->charset('UTF-16');    # set charset for tests
+    $app->charset('UTF-8');
+
+    my $text = "Lepszy wróbel w garści, niż gołąb na dachu.";
+    $app->add_route(
+        '/respect' => sub {
+            my $self = shift;
+            $self->res->charset('UTF-16');
+            $self->res->html;
+            $self->res->json;
+            $self->res->xml;
+            $self->res->text;
+            return $text;
+        }
+    );
+
+    $t->request(GET '/respect', 'Content-Type' => 'text/plain')
+        ->full_content_type_is('text/plain; charset=UTF-16')
+        ->content_is($text);
+};
+
 done_testing;
 

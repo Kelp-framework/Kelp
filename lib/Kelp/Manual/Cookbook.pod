@@ -306,8 +306,7 @@ L<Kelp::Module::YAML>):
 
     sub yaml {
         my $self = shift;
-        $self->set_content_type('text/yaml');
-        $self->charset($self->app->charset) unless $self->charset;
+        $self->set_content_type('text/yaml', $self->charset || $self->app->charset);
         return $self;
     }
 
