@@ -5,7 +5,7 @@ use Test::Exception;
 use IO::File;
 use utf8;
 
-my $text = "Hello, world! ☃\n";
+my $text = "Hello, world! ☃\nLine Two\n\n";
 
 my $t = Kelp::Template->new(paths => ['views', 't/views']);
 is $t->process(\$text), $text, "Render SCALAR";
@@ -25,4 +25,5 @@ done_testing;
 
 __DATA__
 Hello, world! ☃
+Line Two
 

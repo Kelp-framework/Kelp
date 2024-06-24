@@ -52,6 +52,9 @@ sub _read_file
 
     if (ref $file) {
 
+        # read the entire file
+        local $/ = undef;
+
         # make sure to properly rewind the handle after we read from it
         my $pos = tell $file;
         $text = readline $file;
