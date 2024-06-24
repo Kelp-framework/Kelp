@@ -123,27 +123,40 @@ sub set_code
 sub render
 {
     my ($self, $body) = @_;
-    my $ct = $self->content_type;
-    my $ref = ref $body;
+
+    my $method = ref $body ? '_render_ref' : '_render_nonref';
+    $body = $self->$method($body);
 
     # Set code 200 if the code has not been set
     $self->set_code(200) unless $self->code;
 
-    # If the content has been determined as JSON, then encode it
-    if ($ref && (!$ct || $ct =~ m{^application/json}i)) {
-        $body = $self->app->get_encoder(json => 'internal')->encode($body);
-        $self->json if !$ct;
-    }
-    elsif (!$ref) {
-        $self->html if !$ct;
-    }
-    else {
-        croak "Don't know how to handle non-json reference in response (forgot to serialize?)";
-    }
-
     $self->body($self->charset_encode($body));
     $self->rendered(1);
     return $self;
+}
+
+# override to change how references are serialized
+sub _render_ref
+{
+    my ($self, $body) = @_;
+    my $ct = $self->content_type;
+
+    if (!$ct || $ct =~ m{^application/json}i) {
+        $self->json if !$ct;
+        return $self->app->get_encoder(json => 'internal')->encode($body);
+    }
+    else {
+        croak "Don't know how to handle reference for $ct in response (forgot to serialize?)";
+    }
+}
+
+# override to change how non-references are handled
+sub _render_nonref
+{
+    my ($self, $body) = @_;
+    $self->html if !$self->content_type;
+
+    return $body;
 }
 
 sub render_binary

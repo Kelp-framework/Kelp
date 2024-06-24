@@ -270,6 +270,83 @@ easy to use the same charset in response as the one you got in request:
 Note that request charset is only actually used if the C<Content-Type> of the
 request is either C<text/*> or C<application/*>.
 
+=head2 Custom encodings in requests and responses
+
+It is trivial to extend L<Kelp::Request> and L<Kelp::Response> to make it
+seamlessly handle other serialization schemes, for example YAML (through
+L<Kelp::Module::YAML>):
+
+=head3 Extending Request
+
+    package My::Request;
+    use Kelp::Base 'Kelp::Request';
+
+    sub is_yaml {
+        my $self = shift;
+        return 0 unless $self->content_type;
+        return $self->content_type =~ m{^text/yaml}i;
+    }
+
+    sub yaml_content {
+        my $self = shift;
+        return undef unless $self->is_yaml;
+
+        return try {
+            $self->app->get_encoder(yaml => 'internal')->decode($self->content);
+        }
+        catch {
+            undef;
+        };
+    }
+
+=head3 Extending Response
+
+    package My::Response;
+    use Kelp::Base 'Kelp::Response';
+
+    sub yaml {
+        my $self = shift;
+        $self->set_content_type('text/yaml');
+        $self->charset($self->app->charset) unless $self->charset;
+        return $self;
+    }
+
+    sub _render_ref
+    {
+        my ($self, $body) = @_;
+
+        if ($self->content_type =~ m{^text/yaml}i) {
+            return $self->app->get_encoder(yaml => 'internal')->encode($body);
+        }
+        else {
+            return $self->SUPER::_render_ref($body);
+        }
+    }
+
+=head3 Using it in an app
+
+    sub build {
+        my $self = shift;
+
+        $self->request_obj('My::Request');
+        $self->response_obj('My::Response');
+
+        $self->add_route('/yaml' => 'handler');
+    }
+
+    sub handler {
+        my $self = shift;
+        my $yaml_document = $self->req->yaml_content;
+
+        Kelp::Exception->throw(400)
+            unless defined $yaml_document;
+
+        # ... do something with $yaml_document
+
+        $self->res->yaml;
+        return $yaml_document;
+    }
+
 =head1 SEE ALSO
 
 L<Kelp::Manual>
