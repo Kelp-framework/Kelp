@@ -1,3 +1,13 @@
+2024-06-25: Version 2.11
+            [New Interface]
+            - Added a second optional argument to set_content_type in Response, which sets charset
+
+            [Changes]
+            - Fixed incorrect reading of filehandles passed to template
+            - Fixed load_package from Kelp::Util failing if package is loaded and not in a file matching its name
+            - It is now easier to customize Kelp::Response render behavior
+            - Added a cookbook example of extending request and response to automatically handle YAML
+
 2024-06-24: Version 2.10
             [New Interface]
             - PSGI-compatible applications can now be mounted directly by using 'psgi' route flag
