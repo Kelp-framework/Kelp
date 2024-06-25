@@ -3,6 +3,8 @@ package Kelp::Util;
 use Kelp::Base -strict;
 use Carp;
 use Encode qw();
+use Class::Inspector;
+use Plack::Util;
 
 # improve error locations of croak
 our @CARP_NOT = (
@@ -147,9 +149,10 @@ sub load_package
     my $package = shift;
     state $loaded = {};
 
-    # only string eval once for a given class name
+    # only load package once for a given class name
     return $loaded->{$package} //= do {
-        eval qq{require $package; 1} or croak $@;
+        Plack::Util::load_class($package)
+            unless Class::Inspector->loaded($package);
         $package;
     };
 }
@@ -236,7 +239,7 @@ varying request path).
 
 =head2 load_package
 
-Takes a name of a package and efficiently loads it.
+Takes a name of a package and loads it efficiently.
 
 =cut
 

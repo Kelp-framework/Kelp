@@ -3,6 +3,7 @@ use strict;
 use warnings;
 
 use Test::More;
+use Test::Exception;
 use Kelp::Util;
 
 subtest 'testing camelize' => sub {
@@ -98,6 +99,17 @@ subtest 'testing extract_function' => sub {
             ok !defined Kelp::Util::extract_function($k), $k;
         }
     }
+};
+
+subtest 'testing load_package' => sub {
+    Kelp::Util::load_package('Kelp::Module::Logger::Simple');
+    can_ok 'Kelp::Module::Logger::Simple', 'build';
+
+    throws_ok {
+        Kelp::Util::load_package('This::Package::Does::Not::Exist');
+    } qr/This::Package::Does::Not::Exist/i;
+
+    note $@;
 };
 
 done_testing;

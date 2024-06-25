@@ -7,8 +7,6 @@ use Plack::Util;
 use Kelp::Util;
 use Kelp::Routes::Location;
 use Try::Tiny;
-use Class::Inspector;
-use Scalar::Util qw(weaken);
 
 attr base => '';    # the default is set by config module
 attr rebless => 0;    # do not rebless app by default
@@ -229,8 +227,7 @@ sub load_destination
         if (my $class = Kelp::Util::extract_class($to)) {
             my $method = Kelp::Util::extract_function($to);
 
-            Plack::Util::load_class($class)
-                unless Class::Inspector->loaded($class);
+            Kelp::Util::load_package($class);
 
             my $method_code = $class->can($method);
             croak "method '$method' does not exist in class '$class'"
