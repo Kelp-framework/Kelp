@@ -107,7 +107,7 @@ subtest 'testing load_package' => sub {
 
     throws_ok {
         Kelp::Util::load_package('This::Package::Does::Not::Exist');
-    } qr/This::Package::Does::Not::Exist/i;
+    } qr{This/Package/Does/Not/Exist.pm};
 
     note $@;
 };
