@@ -1,5 +1,9 @@
 Revision history for Kelp
 
+{NEXT}
+            [Changes]
+            - Kelp::Exception->throw now also works on objects (rethrows an exception)
+
 2.11 - 2024-06-25
             [New Interface]
             - Added a second optional argument to set_content_type in Response, which sets charset

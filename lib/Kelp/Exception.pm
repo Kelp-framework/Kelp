@@ -21,9 +21,12 @@ sub new
 
 sub throw
 {
-    my $class = shift;
-    my $ex = $class->new(@_);
-    die $ex;
+    my $self = shift;
+    if (!ref $self) {
+        $self = $self->new(@_);
+    }
+
+    die $self;
 }
 
 1;

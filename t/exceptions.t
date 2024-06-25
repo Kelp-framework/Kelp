@@ -96,5 +96,17 @@ subtest 'testing deployment' => sub {
         ->content_type_is('text/html');
 };
 
+subtest 'should be able to rethrow an exception' => sub {
+    my $ex = Kelp::Exception->new(501);
+
+    my $caught = do {
+        local $@;
+        eval { $ex->throw };
+        $@;
+    };
+
+    is $ex, $caught, 'caught object ok';
+};
+
 done_testing;
 
