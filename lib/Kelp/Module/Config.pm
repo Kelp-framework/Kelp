@@ -217,8 +217,8 @@ sub build
 
         # A wrapper arount the get method
         config => sub {
-            my ($app, $path) = @_;
-            return $self->get($path);
+            my $app = shift;
+            return $self->get(@_);
         }
     );
 }

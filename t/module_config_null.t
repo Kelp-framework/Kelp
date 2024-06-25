@@ -17,6 +17,11 @@ subtest 'testing null config' => sub {
     is_deeply $app->config_hash, {}, 'null module ok';
 };
 
+subtest 'default on config should work' => sub {
+    my $app = Kelp->new(config_module => 'Config::Null');
+    is $app->config('nothing', 'def'), 'def';
+};
+
 subtest 'testing injected config' => sub {
     my $app = Kelp->new(config_module => 'Config::Injected');
     is $app->config("injected"), 1;
