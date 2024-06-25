@@ -278,8 +278,9 @@ L<Kelp::Module::YAML>):
 
 =head3 Extending Request
 
-    package My::Request;
+    package YAML::Request;
     use Kelp::Base 'Kelp::Request';
+    use Try::Tiny;
 
     sub is_yaml {
         my $self = shift;
@@ -301,7 +302,7 @@ L<Kelp::Module::YAML>):
 
 =head3 Extending Response
 
-    package My::Response;
+    package YAML::Response;
     use Kelp::Base 'Kelp::Response';
 
     sub yaml {
@@ -324,11 +325,14 @@ L<Kelp::Module::YAML>):
 
 =head3 Using it in an app
 
+    use Kelp::Exception;
+
     sub build {
         my $self = shift;
 
-        $self->request_obj('My::Request');
-        $self->response_obj('My::Response');
+        $self->load_module('YAML');
+        $self->request_obj('YAML::Request');
+        $self->response_obj('YAML::Response');
 
         $self->add_route('/yaml' => 'handler');
     }
