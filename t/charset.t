@@ -84,5 +84,21 @@ subtest 'should set but not not override charset' => sub {
         ->content_is($text);
 };
 
+subtest 'should json_cmp UTF16 without problems with disabled utf8' => sub {
+    $t->charset('UTF-8');    # set charset for tests
+
+    $app->json->utf8(0);
+    $app->add_route(
+        '/false' => sub {
+            my $self = shift;
+            $self->res->charset('UTF-8');
+            return {false => 'fałsz'};
+        }
+    );
+
+    $t->request(GET '/false')
+        ->json_cmp({false => 'fałsz'});
+};
+
 done_testing;
 

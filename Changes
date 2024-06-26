@@ -4,6 +4,7 @@ Revision history for Kelp
             [Changes]
             - Kelp::Exception->throw now also works on objects (rethrows an exception)
             - Fixed installed config method not returning the default value
+            - Fixed Kelp::Test being sensitive to utf8 configuration of the JSON encoder
             - Config module now allows overriding of the config merging routine
 
 2.11 - 2024-06-25

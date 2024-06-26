@@ -246,7 +246,9 @@ sub json_content
     fail "No JSON decoder" unless $self->app->can('json');
     my $result;
     try {
-        $result = $self->app->json->decode($self->res->content);
+        $result = $self->app->get_encoder(json => 'internal')->decode(
+            $self->_decode($self->res->content)
+        );
     }
     catch {
         fail("Poorly formatted JSON");
