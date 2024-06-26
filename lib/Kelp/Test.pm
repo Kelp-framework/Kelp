@@ -243,10 +243,10 @@ sub header_unlike
 sub json_content
 {
     my $self = shift;
-    fail "No JSON decoder" unless $self->app->can('json');
     my $result;
+    my $decoder = $self->app->get_encoder(json => 'internal');
     try {
-        $result = $self->app->get_encoder(json => 'internal')->decode(
+        $result = $decoder->decode(
             $self->_decode($self->res->content)
         );
     }
