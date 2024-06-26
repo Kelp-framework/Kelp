@@ -276,6 +276,11 @@ It is trivial to extend L<Kelp::Request> and L<Kelp::Response> to make it
 seamlessly handle other serialization schemes, for example YAML (through
 L<Kelp::Module::YAML>):
 
+(Note that there is C<kelp_extensions> flag in
+L<Kelp::Module::YAML/CONFIGURATION>, which will install this logic
+automatically right into base Kelp packages, so this is just an example for
+custom encodings)
+
 =head3 Extending Request
 
     package YAML::Request;
@@ -311,8 +316,7 @@ L<Kelp::Module::YAML>):
         return $self;
     }
 
-    sub _render_ref
-    {
+    sub _render_ref {
         my ($self, $body) = @_;
 
         if ($self->content_type =~ m{^text/yaml}i) {
