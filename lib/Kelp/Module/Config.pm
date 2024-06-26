@@ -173,7 +173,7 @@ sub process_mode
     catch {
         die "Parsing $filename died with error: '${_}'";
     };
-    $self->data(_merge($self->data, $parsed));
+    $self->data($self->merge($self->data, $parsed));
 }
 
 sub build
@@ -194,7 +194,7 @@ sub build
     # at any point in the life of the app.
     #
     if (my $extra = delete $args{extra}) {
-        $self->data(_merge($self->data, $extra)) if ref($extra) eq 'HASH';
+        $self->data($self->merge($self->data, $extra)) if ref($extra) eq 'HASH';
         $self->register(
 
             # A tiny object containing only merge, clear and set. Very useful when
@@ -202,7 +202,7 @@ sub build
             # entire config hash to a new value, or clear it completely.
             _cfg => Plack::Util::inline_object(
                 merge => sub {
-                    $self->data(_merge($self->data, $_[0]));
+                    $self->data($self->merge($self->data, $_[0]));
                 },
                 clear => sub { $self->data({}) },
                 set => sub { $self->data($_[0]) }
@@ -221,6 +221,13 @@ sub build
             return $self->get(@_);
         }
     );
+}
+
+sub merge
+{
+    my ($self, @args) = @_;
+
+    return _merge(@args);
 }
 
 sub _merge
