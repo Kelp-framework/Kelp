@@ -1,6 +1,6 @@
 Revision history for Kelp
 
-{NEXT}
+2.12 - 2024-06-26
             [Changes]
             - Kelp::Exception->throw now also works on objects (rethrows an exception)
             - Fixed installed config method not returning the default value
