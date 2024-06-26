@@ -34,7 +34,7 @@ sub add
 
     my $route = $self->_parse_route($parent, $pattern, $descr);
 
-    Kelp::Base::_DEBUG(routes => 'Added route: ', $route);
+    Kelp::Util::_DEBUG(routes => 'Added route: ', $route);
 
     return $self->_build_location($route);
 }
