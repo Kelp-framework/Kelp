@@ -5,7 +5,6 @@ use warnings;
 use feature ();
 use Carp;
 
-require Data::Dumper;
 require namespace::autoclean;
 require Kelp::Util;
 

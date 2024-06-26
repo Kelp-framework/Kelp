@@ -6,6 +6,7 @@ use strict;
 use warnings;
 
 use Carp;
+use Data::Dumper qw();
 use Encode qw();
 use Class::Inspector;
 use Plack::Util;
