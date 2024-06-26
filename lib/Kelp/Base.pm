@@ -1,12 +1,13 @@
 package Kelp::Base;
 
-use strict ();
-use warnings ();
+use strict;
+use warnings;
 use feature ();
 use Carp;
-use Data::Dumper ();
-use namespace::autoclean ();
 
+require Data::Dumper;
+require namespace::autoclean;
+require Kelp::Util;
 
 sub import
 {
@@ -22,12 +23,12 @@ sub import
         no strict 'refs';
         no warnings 'redefine';
 
-        my $file = $base;
-        $file =~ s/::|'/\//g;
-        require "$file.pm" unless $base->can('new');    # thanks sri
-
-        push @{"${caller}::ISA"}, $base;
         *{"${caller}::attr"} = sub { attr($caller, @_) };
+
+        if ($base ne '-attr') {
+            Kelp::Util::load_package($base);
+            push @{"${caller}::ISA"}, $base;
+        }
     }
 
     strict->import;

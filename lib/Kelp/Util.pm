@@ -1,6 +1,10 @@
 package Kelp::Util;
 
-use Kelp::Base -strict;
+# No Kelp::Base here, because Kelp::Base uses Kelp::Util;
+use v5.10;
+use strict;
+use warnings;
+
 use Carp;
 use Encode qw();
 use Class::Inspector;
@@ -10,6 +14,7 @@ use Plack::Util;
 our @CARP_NOT = (
     qw(
         Kelp
+        Kelp::Base
         Kelp::Routes
         Kelp::Context
     )
