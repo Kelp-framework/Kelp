@@ -1,5 +1,10 @@
 Revision history for Kelp
 
+{NEXT}
+            [New Interface]
+            - Kelp::Base no longer imports namespace::autoclean with -strict
+            - Kelp::Base can now be imported with -attr
+
 2.12 - 2024-06-26
             [Changes]
             - Kelp::Exception->throw now also works on objects (rethrows an exception)

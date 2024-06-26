@@ -22,21 +22,21 @@ sub import
         no strict 'refs';
         no warnings 'redefine';
 
-        *{"${caller}::attr"} = sub { attr($caller, @_) };
-
         if ($base ne '-attr') {
             Kelp::Util::load_package($base);
             push @{"${caller}::ISA"}, $base;
         }
+
+        *{"${caller}::attr"} = sub { attr($caller, @_) };
+
+        namespace::autoclean->import(
+            -cleanee => $caller
+        );
     }
 
     strict->import;
     warnings->import;
     feature->import(':5.10');
-
-    namespace::autoclean->import(
-        -cleanee => scalar(caller),
-    );
 }
 
 sub new
@@ -110,7 +110,6 @@ or
     use Kelp::Base -strict;    # Only use strict, warnings and v5.10
                                   # No magic
 
-
 =head1 DESCRIPTION
 
 This module provides simple lazy attributes.
@@ -118,16 +117,17 @@ This module provides simple lazy attributes.
 =head1 WHY?
 
 Some users will naturally want to ask F<"Why not use Moose/Mouse/Moo/Mo?">. The
-answer is that the Kelp web framework needs lazy attributes, but the
-author wanted to keep the code light and object manager agnostic.
-This allows the users of the framework to choose an object manager to
-their liking.
+answer is that the Kelp web framework needs lazy attributes, but the author
+wanted to keep the code light and object manager agnostic. This allows the
+users of the framework to choose an object manager to their liking. As a nice
+addition, our getters and constructors are quite a bit faster than any non-XS
+variant of L<Moose>, which makes the core code very fast.
 
-There is nothing more annoying than a module that forces you to use L<Moose> when you
-are perfectly fine with L<Moo> or L<Mo>, for example.
-
-As a nice addition, our getters and constructors are quite a bit faster than
-any non-XS variant of L<Moose>.
+There is nothing more annoying than a module that forces you to use L<Moose>
+when you are perfectly fine with L<Moo> or L<Mo>, for example. Since this
+module is so minimal, you should probably switch to a full-blown OO system of
+your choice when writing your application. Kelp::Base should be compatible with
+it as long as it uses blessed hashes under the hood.
 
 =head1 USAGE
 
@@ -156,6 +156,17 @@ name with a dash.
     # Later
     say $self->readonly;           # something
     $self->readonly("nothing");    # no change
+
+Kelp::Base can also be imported without turning an object into a class:
+
+    # imports strict, warnings and :5.10
+    use Kelp::Base -strict;
+
+    # imports all of the above plus attr
+    use Kelp::Base -attr;
+
+The former is useful for less boilerplate in scripts on older perls. The latter
+is useful when using C<attr> with L<Role::Tiny>.
 
 =head1 SEE ALSO
 
