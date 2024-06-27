@@ -41,11 +41,11 @@ subtest 'testing camelize (class only)' => sub {
         'BarFoo#baz' => 'Barfoo::Baz',
         'barfoo#BAZ' => 'Barfoo::Baz',
         'bar_foo_baz_bat#moo_moo' => 'BarFooBazBat::MooMoo',
-        'a' => 'A',
+        'a' => 'a',
         'M::D::f' => 'M::D::f',
         'R_E_S_T#asured' => 'REST::Asured',
         'REST::Assured::ok' => 'REST::Assured::ok',
-        'REST' => 'Rest',
+        'REST' => 'REST',
     );
 
     for my $k (keys %h) {

@@ -11,7 +11,7 @@ sub build
     $r->add("/test_res_template", "bar#test_res_template");
 
     $self->context->controller->build;
-    $self->context->controller('bar')->build;
+    $self->context->controller('Bar')->build;
 }
 
 1;

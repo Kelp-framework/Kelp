@@ -2,8 +2,11 @@ Revision history for Kelp
 
 {NEXT}
             [New Interface]
-            - Kelp::Base no longer imports namespace::autoclean with -strict
             - Kelp::Base can now be imported with -attr
+
+            [Changes]
+            - Kelp::Base no longer imports namespace::autoclean with -strict
+            - Fixed camelizing of controller names if they don't contain a hash sign
 
 2.12 - 2024-06-26
             [Changes]

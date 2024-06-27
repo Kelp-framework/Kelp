@@ -145,7 +145,7 @@ C<context> tracking object:
 
         # get a temporary rebless of the app and call its bulid method
         # will return MyApp::Controller::Special, if route base is MyApp::Controller
-        my $controller_special = $self->context->controller('special');
+        my $controller_special = $self->context->controller('Special');
         $controller_special->build;
 
         # will return the main controller (MyApp::Controller)

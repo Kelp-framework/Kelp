@@ -45,7 +45,9 @@ sub camelize
     $base = undef if $sigil;
 
     my @parts;
-    if ($string =~ /::/) {
+    if ($string !~ /#/) {
+
+        # do not camelize if it doesn't look like a camelize string
         @parts = ($string);
     }
     else {
@@ -227,6 +229,9 @@ This function accepts a string and a base class. Does three things:
 The returned string will have leading C<+> removed and will be prepended with
 the second argument if there was no C<+>. An optional third argument can also
 be passed to treat the entire string as a class name.
+
+Will not do the camelizing if there is no C<#> sign in the string, even if
+the third argument is present.
 
 =head2 extract_class
 
