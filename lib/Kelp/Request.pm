@@ -113,7 +113,7 @@ sub is_ajax
     return $with =~ m{XMLHttpRequest}i;
 }
 
-sub is_content_type
+sub content_type_is
 {
     my ($self, $type) = @_;
     return 0 unless $self->content_type;
@@ -122,22 +122,22 @@ sub is_content_type
 
 sub is_text
 {
-    return $_[0]->is_content_type('text/plain');
+    return $_[0]->content_type_is('text/plain');
 }
 
 sub is_html
 {
-    return $_[0]->is_content_type('text/html');
+    return $_[0]->content_type_is('text/html');
 }
 
 sub is_json
 {
-    return $_[0]->is_content_type('application/json');
+    return $_[0]->content_type_is('application/json');
 }
 
 sub is_xml
 {
-    return $_[0]->is_content_type('application/xml');
+    return $_[0]->content_type_is('application/xml');
 }
 
 sub charset_decode
@@ -587,9 +587,25 @@ Delete session value:
 
 Returns true if the request was called with C<XMLHttpRequest>.
 
+=head2 content_type_is
+
+Returns true if request has a C<Content-Type> header starting with a passed string.
+
+=head2 is_text
+
+Returns true if the request's content type was C<text/plain>.
+
+=head2 is_html
+
+Returns true if the request's content type was C<text/html>.
+
 =head2 is_json
 
 Returns true if the request's content type was C<application/json>.
+
+=head2 is_xml
+
+Returns true if the request's content type was C<application/xml>.
 
 =head2 charset_decode
 
