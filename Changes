@@ -6,10 +6,12 @@ Revision history for Kelp
             - Added content_type_is method to Kelp::Request
             - Added a couple of is_* methods to Kelp::Request to match Kelp::Response's interface
               * is_text, is_html and is_xml have been added
+            - Added merge to Kelp::Util, which implements the merge algorithm used by config
 
             [Changes]
             - Kelp::Base no longer imports namespace::autoclean with -strict
             - Fixed camelizing of controller names if they don't contain a hash sign
+            - Fixed config loading Test::Builder through Test::Deep - now uses Test::Deep::NoTest
 
 2.12 - 2024-06-26
             [Changes]

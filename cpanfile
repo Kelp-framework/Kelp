@@ -9,9 +9,9 @@ requires 'namespace::autoclean' => '0';
 requires 'URI' => '0';
 requires 'Hash::MultiValue' => '0';
 requires 'HTTP::Message' => '0';
+requires 'Test::Deep' => '0.091';
 
 on 'test' => sub {
-	requires 'Test::Deep' => '0';
 	requires 'Test::Exception' => '0';
 };
 

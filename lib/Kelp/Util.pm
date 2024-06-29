@@ -10,6 +10,8 @@ use Data::Dumper qw();
 use Encode qw();
 use Class::Inspector;
 use Plack::Util;
+use Test::Deep::NoTest qw(eq_deeply);
+use Scalar::Util qw(reftype);
 
 # improve error locations of croak
 our @CARP_NOT = (
@@ -180,6 +182,50 @@ sub load_package
     };
 }
 
+sub merge
+{
+    my ($a, $b, $allow_blessed, $sigil) = @_;
+    my $ref = $allow_blessed ? sub { reftype $_[0] // '' } : sub { ref $_[0] };
+
+    return $b
+        if !$ref->($a)
+        || !$ref->($b)
+        || $ref->($a) ne $ref->($b);
+
+    if ($ref->($a) eq 'ARRAY') {
+        return $b unless $sigil;
+        if ($sigil eq '+') {
+            for my $e (@$b) {
+                push @$a, $e unless grep { eq_deeply($_, $e) } @$a;
+            }
+        }
+        else {
+            $a = [
+                grep {
+                    my $e = $_;
+                    !grep { eq_deeply($_, $e) } @$b
+                } @$a
+            ];
+        }
+        return $a;
+    }
+    elsif ($ref->($a) eq 'HASH') {
+        for my $k (keys %$b) {
+
+            # If the key is an array then look for a merge sigil
+            my $s = $ref->($b->{$k}) eq 'ARRAY' && $k =~ s/^(\+|\-)// ? $1 : '';
+
+            $a->{$k} =
+                exists $a->{$k}
+                ? merge($a->{$k}, $b->{"$s$k"}, $allow_blessed, $s)
+                : $b->{$k};
+        }
+
+        return $a;
+    }
+    return $b;
+}
+
 1;
 
 __END__
@@ -266,6 +312,14 @@ varying request path).
 =head2 load_package
 
 Takes a name of a package and loads it efficiently.
+
+=head2 merge
+
+    my $merged = Kelp::Util::merge($val1, $val2, $allow_blessed);
+
+Merges two structures. Used by config module to merge configuration files.
+Optionally, a third argument can be passed to allow merging values of blessed
+references as well.
 
 =cut
 

@@ -3,8 +3,8 @@ package Kelp::Module::Config;
 use Kelp::Base 'Kelp::Module';
 use Carp;
 use Try::Tiny;
-use Test::Deep;
 use Path::Tiny;
+use Kelp::Util;
 
 # Extension to look for
 attr ext => 'pl';
@@ -230,47 +230,10 @@ sub merge
     return _merge(@args);
 }
 
+# backcompat
 sub _merge
 {
-    my ($a, $b, $sigil) = @_;
-
-    return $b
-        if !ref($a)
-        || !ref($b)
-        || ref($a) ne ref($b);
-
-    if (ref $a eq 'ARRAY') {
-        return $b unless $sigil;
-        if ($sigil eq '+') {
-            for my $e (@$b) {
-                push @$a, $e unless grep { eq_deeply($_, $e) } @$a;
-            }
-        }
-        else {
-            $a = [
-                grep {
-                    my $e = $_;
-                    !grep { eq_deeply($_, $e) } @$b
-                } @$a
-            ];
-        }
-        return $a;
-    }
-    elsif (ref $a eq 'HASH') {
-        for my $k (keys %$b) {
-
-            # If the key is an array then look for a merge sigil
-            my $s = ref($b->{$k}) eq 'ARRAY' && $k =~ s/^(\+|\-)// ? $1 : '';
-
-            $a->{$k} =
-                exists $a->{$k}
-                ? _merge($a->{$k}, $b->{"$s$k"}, $s)
-                : $b->{$k};
-        }
-
-        return $a;
-    }
-    return $b;
+    goto \&Kelp::Util::merge;
 }
 
 1;
