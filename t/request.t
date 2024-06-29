@@ -11,9 +11,10 @@ my $t = Kelp::Test->new(app => $app);
 
 # is_json
 $app->add_route(
-    '/json',
+    '/req_method',
     sub {
-        return $_[0]->req->is_json ? "ok" : "fail";
+        my $method = $_[0]->req->query_param('m');
+        return $_[0]->req->$method ? "ok" : "fail";
     }
 );
 for my $ct (
@@ -23,21 +24,42 @@ for my $ct (
     'APPLICATION/JSON; somethin=blah'
     )
 {
-    $t->request(GET '/json', Content_Type => $ct)
+    $t->request(GET '/req_method?m=is_json', Content_Type => $ct)
         ->code_is(200)
         ->content_is('ok');
 }
 
-# is_ajax
-$app->add_route(
-    '/ajax',
-    sub {
-        return $_[0]->req->is_ajax ? "ok" : "fail";
-    }
-);
-$t->request(GET '/ajax', 'X-Requested-With' => 'XMLHttpRequest')
+$t->request(GET '/req_method?m=is_ajax', 'X-Requested-With' => 'XMLHttpRequest')
     ->code_is(200)
     ->content_is('ok');
+
+$t->request(GET '/req_method?m=is_ajax')
+    ->code_is(200)
+    ->content_is('fail');
+
+$t->request(GET '/req_method?m=is_text', Content_Type => 'text/plain')
+    ->code_is(200)
+    ->content_is('ok');
+
+$t->request(GET '/req_method?m=is_text', Content_Type => 'text/html')
+    ->code_is(200)
+    ->content_is('fail');
+
+$t->request(GET '/req_method?m=is_html', Content_Type => 'text/html')
+    ->code_is(200)
+    ->content_is('ok');
+
+$t->request(GET '/req_method?m=is_html', Content_Type => 'text/plain')
+    ->code_is(200)
+    ->content_is('fail');
+
+$t->request(GET '/req_method?m=is_xml', Content_Type => 'application/xml')
+    ->code_is(200)
+    ->content_is('ok');
+
+$t->request(GET '/req_method?m=is_xml', Content_Type => 'application/json')
+    ->code_is(200)
+    ->content_is('fail');
 
 # param
 $app->add_route(

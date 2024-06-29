@@ -3,6 +3,9 @@ Revision history for Kelp
 {NEXT}
             [New Interface]
             - Kelp::Base can now be imported with -attr
+            - Added is_content_type method to Kelp::Request
+            - Added a couple of is_* methods to Kelp::Request to match Kelp::Response's interface
+              * is_text, is_html and is_xml have been added
 
             [Changes]
             - Kelp::Base no longer imports namespace::autoclean with -strict

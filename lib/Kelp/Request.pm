@@ -113,11 +113,31 @@ sub is_ajax
     return $with =~ m{XMLHttpRequest}i;
 }
 
+sub is_content_type
+{
+    my ($self, $type) = @_;
+    return 0 unless $self->content_type;
+    return $self->content_type =~ m{^\Q$type\E}i;
+}
+
+sub is_text
+{
+    return $_[0]->is_content_type('text/plain');
+}
+
+sub is_html
+{
+    return $_[0]->is_content_type('text/html');
+}
+
 sub is_json
 {
-    my $self = shift;
-    return 0 unless $self->content_type;
-    return $self->content_type =~ m{^application/json}i;
+    return $_[0]->is_content_type('application/json');
+}
+
+sub is_xml
+{
+    return $_[0]->is_content_type('application/xml');
 }
 
 sub charset_decode
