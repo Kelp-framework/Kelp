@@ -111,7 +111,7 @@ sub load
     # Open and read file
     my $text;
     try {
-        $text = path($filename)->slurp_utf8;
+        $text = path($filename)->slurp({binmode => ':encoding(UTF-8)'});
     };
 
     if (!defined $text) {

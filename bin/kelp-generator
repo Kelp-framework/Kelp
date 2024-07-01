@@ -65,7 +65,7 @@ for my $filedata (@$files) {
     }
 
     _say("Writing file: $filename");
-    $file->spew($contents);
+    $file->spew({binmode => ':encoding(UTF-8)'}, $contents);
 }
 
 sub _say {

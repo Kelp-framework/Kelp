@@ -64,7 +64,7 @@ sub get_template
         $dest_file =~ s/DOT/./g;
 
         # process the template, if it is .gen (generated)
-        my $contents = $file->slurp;
+        my $contents = $file->slurp({binmode => ':encoding(UTF-8)'});
         if ($dest_file =~ /\.gen$/) {
             $dest_file =~ s/\.gen$//;
             $contents = $tt->process(\$contents, $vars);
