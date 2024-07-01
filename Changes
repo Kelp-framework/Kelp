@@ -1,6 +1,6 @@
 Revision history for Kelp
 
-{NEXT}
+2.13 - 2024-07-01
             [New Interface]
             - Kelp::Base can now be imported with -attr
             - Added content_type_is method to Kelp::Request
