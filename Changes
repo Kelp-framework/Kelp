@@ -1,6 +1,6 @@
 Revision history for Kelp
 
-{NEXT}
+2.14 - 2024-07-02
             [Changes]
             - Fixed config files having incorrect line endings on Windows due to raw slurp
             - Fixed generation templates not handling UTF8 correctly
