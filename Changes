@@ -1,8 +1,8 @@
 Revision history for Kelp
 
-{NEXT}
+2.15 - 2024-07-03
             [Changes]
-            - Kelp's req and res were moved to Context and are now just facades
+            - Kelp's req and res attributes were moved to Context and are now just facade methods
             - Added persistent_controllers config, which makes the system keep the reblessed instances
 
             [Deprecations]

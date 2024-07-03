@@ -12,7 +12,7 @@ use List::Util qw(any);
 use Scalar::Util qw(blessed);
 use Kelp::Context;
 
-our $VERSION = '2.14';
+our $VERSION = '2.15';
 
 # Basic attributes
 attr -host => hostname;
