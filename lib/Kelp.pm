@@ -673,6 +673,10 @@ A standard constructor. B<Cannot> be called multiple times: see L</new_anon>.
     my $kelp1 = KelpApp->new_anon(config => 'conf1');
     my $kelp2 = KelpApp->new_anon(config => 'conf2');
 
+B<Deprecated>. This only solves the problem in non-controller scenario and will
+completely break with reblessing. It's usually better to treat every Kelp app
+more or less like a singleton.
+
 A constructor that can be called repeatedly. Cannot be mixed with L</new>.
 
 It works by creating a new anonymous class extending the class of your
