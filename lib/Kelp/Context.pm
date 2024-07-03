@@ -4,8 +4,12 @@ use Kelp::Base;
 use Kelp::Util;
 use Carp;
 
+attr req => undef;
+attr res => undef;
+
 attr -app => sub { croak 'app is required' };
 attr -_controllers => sub { {} };
+attr persistent_controllers => sub { $_[0]->app->config('persistent_controllers') };
 attr current => sub { shift->app };
 
 # loads the class, reblesses and returns - can be used to get controller on
@@ -23,7 +27,8 @@ sub controller
     croak "Invalid controller, not subclassing $base"
         unless $controller->isa($base);
 
-    return $self->app->_clone($controller);
+    return $self->_controllers->{$controller} //=
+        $self->app->_clone($controller);
 }
 
 # reblesses, remembers and sets the current controller - used internally
@@ -44,7 +49,8 @@ sub clear
 {
     my $self = shift;
 
-    %{$self->_controllers} = ();
+    %{$self->_controllers} = ()
+        unless $self->persistent_controllers;
     $self->current($self->app);
 }
 

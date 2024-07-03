@@ -12,6 +12,7 @@ sub build
     my $r = $self->routes;
 
     $r->add("/blessed", "blessed");
+    $r->add("/persistence", "bar#test_persistence");
 }
 
 1;

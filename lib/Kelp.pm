@@ -39,10 +39,8 @@ attr __config => undef;
 
 attr -loaded_modules => sub { {} };
 
-# Data for handling routes
+# Current context data of the application
 attr context => sub { Kelp::Context->new(app => $_[0]) };
-attr req => undef;
-attr res => undef;
 
 # registered application encoder modules
 attr encoder_modules => sub { {} };
@@ -175,12 +173,24 @@ sub build_request
     );
 }
 
+sub req
+{
+    my $self = shift;
+    return $self->context->req(@_);
+}
+
 # Override to use a custom response object
 sub build_response
 {
     return Kelp::Util::load_package($_[0]->response_obj)->new(
         app => $_[0],
     );
+}
+
+sub res
+{
+    my $self = shift;
+    return $self->context->res(@_);
 }
 
 # Override to change what happens before the route is handled
@@ -618,6 +628,7 @@ contain a reference to the current L<Kelp::Request> instance.
         }
     }
 
+This attribute is a proxy to the same attribute in L</context>.
 
 =head2 res
 
@@ -628,6 +639,8 @@ contain a reference to the current L<Kelp::Response> instance.
         my $self = shift;
         $self->res->json->render( { success => 1 } );
     }
+
+This attribute is a proxy to the same attribute in L</context>.
 
 =head2 context
 

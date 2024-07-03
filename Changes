@@ -1,5 +1,10 @@
 Revision history for Kelp
 
+{NEXT}
+            [Changes]
+            - Kelp's req and res were moved to Context and are now just facades
+            - Added persistent_controllers config, which makes the system keep the reblessed instances
+
 2.14 - 2024-07-02
             [Changes]
             - Fixed config files having incorrect line endings on Windows due to raw slurp

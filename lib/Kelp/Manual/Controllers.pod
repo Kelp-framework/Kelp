@@ -119,20 +119,27 @@ You no longer have to prefix destinations with the base controller class name.
 There are some controller gotchas which come from a fact that they are not
 constructed like a regular object:
 
-=head2 Controller's constructor is never called
-
-Controllers are never actually constructed, but instead the main app
-object is cloned and reblessed into the correct class. Don't expect your
-override of C<new> or C<build> to work.
-
 =head2 Main application object is shallow-cloned before rebless
 
 Reblessed controllers are only temporary. Setting top-level attributes in a
 controller, for example L<Kelp/charset>, will work until the request is fully
 handled. After that, the controller copy will be destroyed and the changes will
-not propagate back to main application.
+not propagate back to main application. Moreover, any extra fields you set in
+the controller will be lost when the request handling is over.
+
+A special configuration field C<persistent_controllers> can be added to combat
+this. If it is set to a true value, the app will be reblessed just once and
+then it will be reused as long as the application is running. This means no
+changes to the main app attributes will be visible in the controller, but the
+controller will be free to set and use all of its attributes at will. Make sure
+not to force the app to rebless before building is complete, or else your
+controllers' state will be incomplete.
 
 =head2 Getting a controller copy in C<build>
+
+Controllers are never actually constructed, but instead the main app object is
+cloned and reblessed into the correct class. Don't expect your override of
+C<new> or C<build> to work.
 
 No automatic controller initialization happens in Kelp. If you'd like to access
 a controller in other context than route handling - for example in C<build>
