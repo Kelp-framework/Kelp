@@ -324,7 +324,7 @@ sub dispatch
         unless $dest;
 
     my ($to, $controller, $action) = ($route->to, @{$dest});
-    $app = $app->context->set_controller($controller) if $controller;
+    $app = $app->context->set_controller($controller);
 
     $app->before_dispatch($to);
     return $action->($app, @{$route->param});

@@ -18,7 +18,21 @@ sub build
             bridge => 1,
         }
     );
+    $self->add_route(
+        '/a/b/d' => {
+            to => sub {
+                $self->res->text;
+                return ref $self;
+            },
+        }
+    );
     $self->context->controller()->build;
+}
+
+sub before_finalize
+{
+    my $self = shift;
+    $self->res->header('X-Final' => __PACKAGE__);
 }
 
 1;

@@ -14,7 +14,7 @@ sub before_dispatch
 sub before_finalize
 {
     my $self = shift;
-    $self->app->before_finalize(@_);
+    $self->app->res->header('X-Final' => __PACKAGE__);
 }
 
 sub build

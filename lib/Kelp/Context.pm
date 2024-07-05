@@ -41,6 +41,8 @@ sub controller
 sub set_controller
 {
     my ($self, $controller) = @_;
+    return $self->current($self->app)
+        unless $controller;
 
     # the controller class should already be loaded by the router
     my $current = $self->_controllers->{$controller} //=

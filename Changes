@@ -6,6 +6,9 @@ Revision history for Kelp
             - Added build_context method to Kelp
             - Added build_controller method to Kelp::Context
 
+            [Changes]
+            - Fixed incorrect before_finalize class if last handler to execute did not belong to a controller
+
             [New Documentation]
             - Kelp::Context package is now documented
             - Kelp::Manual::Controllers has a new section: 'Use different method than reblessing'
