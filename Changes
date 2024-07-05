@@ -1,20 +1,22 @@
 Revision history for Kelp
 
 {{$NEXT}}
+
+2.16 - 2024-07-05
             [New Interface]
             - Added context_obj attribute to Kelp
             - Added build_context method to Kelp
             - Added build_controller method to Kelp::Context
+
+            [New Documentation]
+            - Kelp::Context package is now documented
+            - Kelp::Manual::Controllers has a new section: 'Use different method than reblessing'
 
             [Changes]
             - Fixed incorrect before_finalize class if last handler to execute did not belong to a controller
 
             [Deprecations]
             - Clarify that new_anon will not be removed, but rather use different implementation method in the future
-
-            [New Documentation]
-            - Kelp::Context package is now documented
-            - Kelp::Manual::Controllers has a new section: 'Use different method than reblessing'
 
 2.15 - 2024-07-03
             [Changes]
