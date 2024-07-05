@@ -114,6 +114,78 @@ You no longer have to prefix destinations with the base controller class name.
 
     }
 
+=head2 Use different method than reblessing
+
+While reblessing is how core Kelp deals with controllers, it is entirely
+possible to introduce your own base controller classes. Most of the details
+remain the same, like setting C<rebless> and C<base> configuration, but your
+main controller class does not have to inherit from your app class:
+
+=head3 Step 1: Custom Context object
+
+Create a custom context object which will call C<new> on your controller
+classes instead of reblessing the main app. It is also a good idea in this case
+to enable C<persistent_controllers> regardless of configuration.
+
+    # lib/MyContext.pm
+    package MyContext;
+
+    use Kelp::Base 'Kelp::Context';
+
+    # make sure controller objects are never cleaned
+    attr persistent_controllers => !!1;
+
+    sub build_controller {
+        my ($self, $class) = @_;
+
+        return $class->new(app => $self->app);
+    }
+
+=head3 Step 2: Custom base controller
+
+A base controller class has to implement at least C<before_dispatch> and
+C<before_finalize> to be compatible with Kelp.
+
+    # lib/MyController.pm
+    package MyController;
+
+    use Kelp::Base;
+
+    attr -app => undef;
+
+    sub before_dispatch {
+        my $self = shift;
+        $self->app->before_dispatch(@_);
+    }
+
+    sub before_finalize {
+        my $self = shift;
+        $self->app->before_finalize(@_);
+    }
+
+    sub some_route {
+        my $self = shift;
+        $self->app->res->text->render('hello from controller');
+    }
+
+=head3 Step 3: setting the custom context in the app
+
+This can be done a couple different ways, but the easiest one is to change the
+default C<context_obj>, which is the class name of the context:
+
+    # lib/MyApp.pm
+    package MyApp;
+
+    use Kelp::Base 'Kelp';
+
+    attr context_obj => 'MyContext';
+
+    sub build {
+        my $self = shift;
+
+        $self->add_route('/' => 'some_route');
+    }
+
 =head1 CAVEATS
 
 There are some controller gotchas which come from a fact that they are not
@@ -121,19 +193,23 @@ constructed like a regular object:
 
 =head2 Main application object is shallow-cloned before rebless
 
-Reblessed controllers are only temporary. Setting top-level attributes in a
+By default, controllers are only temporary. Setting top-level attributes in a
 controller, for example L<Kelp/charset>, will work until the request is fully
 handled. After that, the controller copy will be destroyed and the changes will
 not propagate back to main application. Moreover, any extra fields you set in
 the controller will be lost when the request handling is over.
 
-A special configuration field C<persistent_controllers> can be added to combat
-this. If it is set to a true value, the app will be reblessed just once and
-then it will be reused as long as the application is running. This means no
-changes to the main app attributes will be visible in the controller, but the
-controller will be free to set and use all of its attributes at will. Make sure
-not to force the app to rebless before building is complete, or else your
-controllers' state will be incomplete.
+If your main app has no changing state, a special configuration field
+C<persistent_controllers> can be added to combat this. If it is set to a true
+value, the app will be reblessed just once per controller. This means no
+changes to the main app attributes will be visible in controllers, but the
+controller will be free to set and use all of its attributes at will. This way
+your controllers will be reused indefinetly and no changes in app's state will
+propagade to controllers.
+
+Note that by default, Kelp main class has no top-level state which may change
+between requests so it should be pretty safe to enable this configuration as
+long as you don't instantiate your controllers before app building is finished.
 
 =head2 Getting a controller copy in C<build>
 

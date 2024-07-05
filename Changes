@@ -8,6 +8,7 @@ Revision history for Kelp
 
             [New Documentation]
             - Kelp::Context package is now documented
+            - Kelp::Manual::Controllers has a new section: 'Use different method than reblessing'
 
 2.15 - 2024-07-03
             [Changes]

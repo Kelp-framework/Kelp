@@ -356,19 +356,7 @@ custom encodings)
 
 =head2 Controller fields disappearing after each request
 
-Kelp uses reblessing of the main app to implement controllers. The reblessing
-usually happens once per request, per controller. This way changes in the main
-app state are always propagating down to controllers.
-
-If your main app has no changing state and you'd like to just keep the
-controller's state between requests, you can set the configuration value
-C<persistent_controllers> to a true value. This way your controllers will be
-reblessed just once and then reused indefinetly and no changes in app's state will
-propagade to controllers.
-
-Note that by default, Kelp main class has no top-level state which may change
-between requests so it should be pretty safe to enable this configuration as
-long as you don't instantiate your controllers before app building is over.
+See L<Kelp::Manual::Controllers/Main application object is shallow-cloned before rebless>.
 
 =head1 SEE ALSO
 
