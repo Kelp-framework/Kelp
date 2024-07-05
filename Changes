@@ -9,6 +9,9 @@ Revision history for Kelp
             [Changes]
             - Fixed incorrect before_finalize class if last handler to execute did not belong to a controller
 
+            [Deprecations]
+            - Clarify that new_anon will not be removed, but rather use different implementation method in the future
+
             [New Documentation]
             - Kelp::Context package is now documented
             - Kelp::Manual::Controllers has a new section: 'Use different method than reblessing'
