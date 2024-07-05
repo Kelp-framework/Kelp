@@ -10,7 +10,6 @@ use Plack::Util;
 use Class::Inspector;
 use List::Util qw(any);
 use Scalar::Util qw(blessed);
-use Kelp::Context;
 
 our $VERSION = '2.15';
 
