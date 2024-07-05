@@ -21,6 +21,7 @@ attr -path => $FindBin::Bin;
 attr -name => sub { (ref($_[0]) =~ /(\w+)$/) ? $1 : 'Noname' };
 attr request_obj => 'Kelp::Request';
 attr response_obj => 'Kelp::Response';
+attr context_obj => 'Kelp::Context';
 
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
@@ -39,8 +40,9 @@ attr __config => undef;
 
 attr -loaded_modules => sub { {} };
 
-# Current context data of the application
-attr context => sub { Kelp::Context->new(app => $_[0]) };
+# Current context of the application - tracks the state application is in,
+# especially when it comes to managing controller instances.
+attr context => \&build_context;
 
 # registered application encoder modules
 attr encoder_modules => sub { {} };
@@ -162,6 +164,14 @@ sub load_module
 # Override this one to add custom initializations
 sub build
 {
+}
+
+# Override to use a custom context object
+sub build_context
+{
+    return Kelp::Util::load_package($_[0]->context_obj)->new(
+        app => $_[0],
+    );
 }
 
 # Override to use a custom request object
@@ -546,14 +556,19 @@ L<Kelp::Module::Config> for more information.
     # conf/config.pl and conf/development.pl are merged with priority
     # given to the second one.
 
+=head2 context_obj
+
+Provide a custom package name to define the ::Context object. Defaults to
+L<Kelp::Context>.
+
 =head2 request_obj
 
-Provide a custom package name to define the global ::Request object. Defaults to
+Provide a custom package name to define the ::Request object. Defaults to
 L<Kelp::Request>.
 
 =head2 response_obj
 
-Provide a custom package name to define the global ::Response object. Defaults to
+Provide a custom package name to define the ::Response object. Defaults to
 L<Kelp::Response>.
 
 =head2 config_module
@@ -711,8 +726,8 @@ initializations.
 
 C<load_module($name, %options)>
 
-Used to load a module. All modules must be under the C<Kelp::Module::>
-namespace.
+Used to load a module. All modules should be under the C<Kelp::Module::>
+namespace. If they are not, their class name must be prepended with C<+>.
 
     $self->load_module("Redis", server => '127.0.0.1');
     # Will look for and load Kelp::Module::Redis
@@ -721,6 +736,11 @@ Options for the module may be specified after its name, or in the
 C<modules_init> hash in the config. Precedence is given to the
 inline options.
 See L<Kelp::Module> for more information on making and using modules.
+
+=head2 build_context
+
+This method is used to build the context. By default, it's used lazily by
+L</context_obj> attribute. It can be overridden to modify how context is built.
 
 =head2 build_request
 
@@ -740,6 +760,14 @@ the class of the object used.
     }
 
     # Now each request will be handled by MyApp::Request
+
+=head2 build_response
+
+This method creates the response object, e.g. what an HTTP request will return.
+By default the object created is L<Kelp::Response> though this can be
+overwritten via the respone_obj attribute. Much like L</build_request>, the
+response can also be overridden to use a custom response object if you need
+something completely custom.
 
 =head2 before_dispatch
 
@@ -777,13 +805,6 @@ finalized.
 The above is an example of how to insert a custom header into the response of
 every route.
 
-=head2 build_response
-
-This method creates the response object, e.g. what an HTTP request will return.
-By default the object created is L<Kelp::Response> though this can be
-overwritten via the respone_obj attribute. Much like L</build_request>, the
-response can also be overridden to use a custom response object if you need
-something completely custom.
 
 =head2 run
 

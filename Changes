@@ -1,6 +1,13 @@
 Revision history for Kelp
 
 {{$NEXT}}
+            [New Interface]
+            - Added context_obj attribute to Kelp
+            - Added build_context method to Kelp
+            - Added build_controller method to Kelp::Context
+
+            [New Documentation]
+            - Kelp::Context package is now documented
 
 2.15 - 2024-07-03
             [Changes]
