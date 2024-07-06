@@ -21,5 +21,10 @@ $t->request_ok(GET '/a/b/d')
     ->header_is('X-Final', 'MyApp3')
     ->content_is('MyApp3');
 
+$t->request_ok(GET '/a/b/e')
+    ->content_type_is('text/plain')
+    ->header_is('X-Final', 'CustomContext::Controller')
+    ->content_is('PSGI OK');
+
 done_testing;
 

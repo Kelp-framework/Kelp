@@ -125,9 +125,9 @@ sub adapt_psgi
         unless ref $app eq 'CODE';
 
     return sub {
-        my $kelp = shift;
-        my $path = charset_encode($kelp->request_charset, pop() // '');
-        my $env = $kelp->req->env;
+        my $context = shift->context;
+        my $path = charset_encode($context->app->request_charset, pop() // '');
+        my $env = $context->req->env;
 
         # remember script and path
         my $orig_script = $env->{SCRIPT_NAME};
@@ -154,7 +154,7 @@ sub adapt_psgi
         if (ref $result eq 'ARRAY') {
             my ($status, $headers, $body) = @{$result};
 
-            my $res = $kelp->res;
+            my $res = $context->res;
             $res->status($status) if $status;
             $res->headers($headers) if $headers;
             $res->body($body) if $body;

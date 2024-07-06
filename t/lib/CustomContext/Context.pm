@@ -10,7 +10,7 @@ sub build_controller
     my ($self, $controller_class) = @_;
 
     $controller_class->new(
-        app => $self->app,
+        context => $self,
     );
 }
 

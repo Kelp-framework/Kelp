@@ -138,20 +138,38 @@ to enable C<persistent_controllers> regardless of configuration.
     sub build_controller {
         my ($self, $class) = @_;
 
-        return $class->new(app => $self->app);
+        return $class->new(context => $self);
     }
 
 =head3 Step 2: Custom base controller
 
-A base controller class has to implement at least C<before_dispatch> and
-C<before_finalize> to be compatible with Kelp.
+A base controller class has to implement at least C<context>,
+C<before_dispatch> and C<before_finalize> to be compatible with core Kelp. Some
+specific modules might assume it's a descendant of Kelp, which may require
+adding more methods to achieve compatibility. It may be also a good idea to
+implement C<req> and C<res> for easier access.
 
     # lib/MyController.pm
     package MyController;
 
     use Kelp::Base;
 
-    attr -app => undef;
+    attr -context => undef;
+
+    sub app {
+        my $self = shift;
+        return $self->context->app;
+    }
+
+    sub req {
+        my $self = shift;
+        return $self->context->req;
+    }
+
+    sub res {
+        my $self = shift;
+        return $self->context->res;
+    }
 
     sub before_dispatch {
         my $self = shift;
@@ -165,7 +183,7 @@ C<before_finalize> to be compatible with Kelp.
 
     sub some_route {
         my $self = shift;
-        $self->app->res->text->render('hello from controller');
+        $self->res->text->render('hello from controller');
     }
 
 =head3 Step 3: setting the custom context in the app

@@ -3,7 +3,22 @@ package CustomContext::Controller;
 use Kelp::Base;
 use Carp;
 
-attr -app => sub { croak 'app is required' };
+attr -context => sub { croak 'context is required' };
+
+sub app
+{
+    return $_[0]->context->app;
+}
+
+sub req
+{
+    return $_[0]->context->req;
+}
+
+sub res
+{
+    return $_[0]->context->res;
+}
 
 sub before_dispatch
 {
@@ -14,7 +29,7 @@ sub before_dispatch
 sub before_finalize
 {
     my $self = shift;
-    $self->app->res->header('X-Final' => __PACKAGE__);
+    $self->res->header('X-Final' => __PACKAGE__);
 }
 
 sub build
@@ -29,6 +44,10 @@ sub build
         }
     );
     $app->add_route('/a/b/c' => 'foo#test');
+    $app->add_route('/a/b/e' => {
+        to => 'foo#nested_psgi',
+        psgi => 1,
+    });
 }
 
 sub bridge
