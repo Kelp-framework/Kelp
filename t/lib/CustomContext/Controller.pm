@@ -44,10 +44,12 @@ sub build
         }
     );
     $app->add_route('/a/b/c' => 'foo#test');
-    $app->add_route('/a/b/e' => {
-        to => 'foo#nested_psgi',
-        psgi => 1,
-    });
+    $app->add_route(
+        '/a/b/e' => {
+            to => 'foo#nested_psgi',
+            psgi => 1,
+        }
+    );
 }
 
 sub bridge
