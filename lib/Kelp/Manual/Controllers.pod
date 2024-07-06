@@ -16,14 +16,15 @@ class.
 
 Controllers lets you separate some of the route handling logic to other classes
 and have your subs take the object of the correct class as the first argument.
-In Kelp, there is no special base class for controllers - all controllers must
-be subclasses of L<Kelp>.
+In Kelp, there is no special base class for controllers by default - all
+controllers must be subclasses of L<Kelp>, unless you want to develop your own
+base controller - see L</Use different method than reblessing>.
 
 =head2 Reblessing details
 
 Reblessing will happen after request is matched to a route. Route handler has
 to be specified as class and method string, and class must be a subclass of class
-configured for L<Kelp::Routes/base>. L<Kelp::Routes/rebless> must albo be
+configured for L<Kelp::Routes/base>. L<Kelp::Routes/rebless> must also be
 enabled for that to occur.
 
 The default value of C<base> field is the application class, so your
@@ -206,8 +207,8 @@ default C<context_obj>, which is the class name of the context:
 
 =head1 CAVEATS
 
-There are some controller gotchas which come from a fact that they are not
-constructed like a regular object:
+There are some controller gotchas which come from a fact that they are not by
+default constructed like a regular object:
 
 =head2 Main application object is shallow-cloned before rebless
 
@@ -233,12 +234,12 @@ long as you don't instantiate your controllers before app building is finished.
 
 Controllers are never actually constructed, but instead the main app object is
 cloned and reblessed into the correct class. Don't expect your override of
-C<new> or C<build> to work.
+C<new> or C<build> to ever be called. No automatic controller initialization
+happens in Kelp.
 
-No automatic controller initialization happens in Kelp. If you'd like to access
-a controller in other context than route handling - for example in C<build>
-method, allowing you to move route definitions to the controller - you may use
-C<context> tracking object:
+If you'd like to access a controller in other context than route handling - for
+example in C<build> method, allowing you to move route definitions to the
+controller - you may use C<context> tracking object:
 
     # in MyApp.pm
     sub build {

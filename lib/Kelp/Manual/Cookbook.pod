@@ -89,18 +89,9 @@ A slightly shorter version with state variables and no ping:
 
     # Use $self->dbh from here on ...
 
-    sub some_route {
-        my $self = shift;
-
-        $self->dbh->selectrow_array(q[
-            SELECT * FROM users
-            WHERE clue > 0
-        ]);
-    }
-
 Same methods can be used for accessing the schema of L<DBIx::Class>.
 
-=head2 Custom 404 and 500 error pages
+=head2 Custom error pages
 
 =head3 Error templates
 
@@ -112,47 +103,12 @@ C<< $self->res->render_error >>.
 
 =head3 Within the route
 
-You can set the response headers and content within the route:
+For one-off rendering of errors, you can alternatively set the response headers
+and content within the route:
 
     sub some_route {
         my $self = shift;
         $self->res->set_code(404)->template('my_404_template');
-    }
-
-=head3 By overriding the Kelp::Response class
-
-To make custom 500, 404 and other error pages, you will have to subclass the
-L<Kelp::Response> module and override the I<render_404> and I<render_500> subroutines.
-Let's say your app's name is Foo and its class is in I<lib/Foo.pm>. Now create a
-file I<lib/Foo/Response.pm>:
-
-    package Foo::Response;
-    use Kelp::Base 'Kelp::Response';
-
-    sub render_404 {
-        my $self = shift;
-        $self->template('my_custom_404');
-    }
-
-    sub render_500 {
-        my $self = shift;
-        $self->template('my_custom_500');
-    }
-
-Then, in I<lib/Foo.pm>, you have to tell Kelp to use your custom response class
-like this:
-
-    sub response {
-        my $self = shift;
-        return Foo::Response->new( app => $self );
-    }
-
-Don't forget you need to create I<views/my_custom_404.tt> and
-I<views/my_custom_500.tt>. You can add other error rendering subroutines too, for
-example:
-
-    sub render_401 {
-        # Render your custom 401 error here
     }
 
 =head2 Altering the behavior of a Kelp class method
@@ -228,9 +184,14 @@ use L<Plack::Middleware::ReverseProxy>.
 
 (REMOTE_ADDR is not set at all when using the proxy via filesocket).
 
-=head2 Changing the default access logging
+=head2 Changing the default logging
 
-Access logs reported by Kelp through C<logger> can be modified or disabled by
+Default log format can be modified by configuring the C<Logger> module. See
+L<Kelp::Module::Logger/date_format> and L<Kelp::Module::Logger/log_format>.
+Alternatively, L<Log::Dispatch> can be configured with its own callback to
+format the message to be logged.
+
+Access logs reported by Kelp through C<Logger> can be modified or disabled by
 writing your own customized L<Kelp/before_dispatch> method (not calling the
 parent version).
 

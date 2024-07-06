@@ -131,16 +131,20 @@ Returns a controller of a given name. The name will be mangled according to the
 base route class of the application. Contains extra checks to ensure the input
 is valid and loads the controller class if it wasn't loaded yet.
 
-If the controller name is undef, the base controller is returned.
+If the controller name is C<undef>, the base controller is returned.
 
 =head2 set_controller
 
-Like L</controller>, but does not have any special checks for correctness and
-only accepts a full class name. It also modifies the L</current> to the
-controller after constructing it. It's optimized for speed and used only
-internally.
+Similar to L</controller>, but does not have any special checks for correctness
+and only accepts a full class name. It also modifies the L</current> to the
+controller after constructing it. Passing a false value will result in
+reverting the current context back to the app object.
+
+It's optimized for speed and only used internally, so it's not recommended to
+use it unless you extend Kelp router itself.
 
 =head2 clear
 
-Clears context in anticipation of the next request.
+Clears context in anticipation of the next request. Called automatically at the
+start of every request.
 
