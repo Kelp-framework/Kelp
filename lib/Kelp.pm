@@ -11,7 +11,7 @@ use Class::Inspector;
 use List::Util qw(any);
 use Scalar::Util qw(blessed);
 
-our $VERSION = '2.16';
+our $VERSION = '2.17';
 
 # Basic attributes
 attr -host => hostname;

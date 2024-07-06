@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+
+2.17 - 2024-07-06
             [Changes]
             - Fixed psgi routes not working with custom controllers
             - Documentation improvements
