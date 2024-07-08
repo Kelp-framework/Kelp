@@ -120,7 +120,11 @@ You no longer have to prefix destinations with the base controller class name.
 While reblessing is how core Kelp deals with controllers, it is entirely
 possible to introduce your own base controller classes. Most of the details
 remain the same, like setting C<rebless> and C<base> configuration, but your
-main controller class does not have to inherit from your app class:
+main controller class does not have to inherit from your app class.
+
+Below is a guide on how to implement that from scratch. Alternatively,
+L<KelpX::Controller> module may be used, which comes with pre-implemented
+custom base controller and context classes.
 
 =head3 Step 1: Custom Context object
 
