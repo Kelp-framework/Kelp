@@ -21,4 +21,6 @@ allprove
 log
 !log/.gitkeep
 .tidyall.d
+/Kelp*
+*.tar.gz
 

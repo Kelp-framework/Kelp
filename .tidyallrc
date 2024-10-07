@@ -1,5 +1,6 @@
 [PerlTidy]
 select = **/*.{pl,pm,t}
+ignore = Kelp*/**/*.{pl,pm,t}
 ignore = .build/**/*
 ignore = conf/**/*
 ignore = t/conf/**/*
