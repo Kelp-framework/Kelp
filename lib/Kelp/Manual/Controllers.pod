@@ -37,9 +37,7 @@ These methods will be automatically run on your controller object for each reque
 
 =item * route handler method
 
-=item * C<before_dispatch>
-
-=item * C<before_finalize>
+=item * hooks (if available)
 
 =back
 
@@ -148,11 +146,10 @@ to enable C<persistent_controllers> regardless of configuration.
 
 =head3 Step 2: Custom base controller
 
-A base controller class has to implement at least C<context>,
-C<before_dispatch> and C<before_finalize> to be compatible with core Kelp. Some
-specific modules might assume it's a descendant of Kelp, which may require
-adding more methods to achieve compatibility. It may be also a good idea to
-implement C<req> and C<res> for easier access.
+A base controller class has to implement at least C<context> to be compatible
+with core Kelp. Some specific modules might assume it's a descendant of Kelp,
+which may require adding more methods to achieve compatibility. It may be also
+a good idea to implement C<req> and C<res> for easier access.
 
     # lib/MyController.pm
     package MyController;
@@ -174,16 +171,6 @@ implement C<req> and C<res> for easier access.
     sub res {
         my $self = shift;
         return $self->context->res;
-    }
-
-    sub before_dispatch {
-        my $self = shift;
-        $self->app->before_dispatch(@_);
-    }
-
-    sub before_finalize {
-        my $self = shift;
-        $self->app->before_finalize(@_);
     }
 
     sub some_route {
@@ -277,6 +264,17 @@ NOTE: Take extra care not to call C<build> again if it wasn't overridden in a
 controller, as the controller will try to re-initialize the app, which will
 surely B<result in a loop>! In addition, B<make sure to never call> C<<
 $self->SUPER::build >> in a controller.
+
+A little trick to make sure your build don't get called more than once is to
+start it with a guard:
+
+    sub build {
+        my $self = shift;
+        return unless ref $self eq __PACKAGE__;
+    }
+
+This way you don't have to worry about possibility of duplicated build calls
+as a result of inheritance.
 
 =head2 Getting a main application object in a controller
 

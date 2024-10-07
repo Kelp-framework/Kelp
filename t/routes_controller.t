@@ -48,5 +48,8 @@ $t->request_ok(GET '/test_res_template')
     ->header_is('X-Controller' => 'Bar')
     ->content_like(qr/confession: I control the Bar/);
 
+$t->request_ok(GET '/empty')
+    ->content_is('whoops');
+
 done_testing;
 

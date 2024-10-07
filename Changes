@@ -1,6 +1,11 @@
 Revision history for Kelp
 
 {{$NEXT}}
+            [New Interface]
+            - Added after_unrendered hook to Kelp
+
+            [Changes]
+            - Hooks are now run conditionally on controller objects and fall back to main app object
 
 2.17 - 2024-07-06
             [Changes]

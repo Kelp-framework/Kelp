@@ -3,6 +3,8 @@ use Kelp::Base 'MyApp2::Controller';
 
 attr last_value => 1;
 
+sub empty { }
+
 sub naughty_secret { "I control the Bar" }
 
 sub test_inherit { "OK" }
@@ -32,11 +34,19 @@ sub test_persistence
     return $last;
 }
 
+sub after_unrendered
+{
+    my ($self, $match) = @_;
+
+    $self->res->render('whoops');
+}
+
 sub build
 {
     my $self = shift;
     my $r = $self->routes;
 
+    $r->add("/empty", "Bar::empty");
     $r->add("/blessed_bar", "Bar::blessed");
     $r->add("/blessed_bar2", "bar#blessed");
 }

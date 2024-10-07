@@ -20,12 +20,6 @@ sub res
     return $_[0]->context->res;
 }
 
-sub before_dispatch
-{
-    my $self = shift;
-    $self->app->before_dispatch(@_);
-}
-
 sub before_finalize
 {
     my $self = shift;
@@ -35,6 +29,8 @@ sub before_finalize
 sub build
 {
     my $self = shift;
+    return unless ref $self eq __PACKAGE__;
+
     my $app = $self->app;
 
     $app->add_route(

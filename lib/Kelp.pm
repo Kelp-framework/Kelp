@@ -202,6 +202,20 @@ sub res
     return $self->context->res(@_);
 }
 
+sub _run_hook
+{
+    my $self = shift;
+    my $method = shift;
+    my $c = $self->context->current;
+
+    if ($c->can($method)) {
+        $c->$method(@_);
+    }
+    else {
+        $self->$method(@_);
+    }
+}
+
 # Override to change what happens before the route is handled
 sub before_dispatch
 {
@@ -217,6 +231,24 @@ sub before_dispatch
             $req->address, $req->method,
             $req->path, $destination
         );
+    }
+}
+
+# Override to change what happens when nothing gets rendered
+sub after_unrendered
+{
+    my ($self, $match) = @_;
+
+    # render 404 if only briges matched
+    if ($match->[-1]->bridge) {
+        $self->res->render_404;
+    }
+
+    # or die with error
+    else {
+        die $match->[-1]->to
+            . " did not render for method "
+            . $self->req->method;
     }
 }
 
@@ -310,18 +342,7 @@ sub psgi
 
         # If nothing got rendered
         if (!$res->rendered) {
-
-            # render 404 if only briges matched
-            if ($match->[-1]->bridge) {
-                $res->render_404;
-            }
-
-            # or die with error
-            else {
-                die $match->[-1]->to
-                    . " did not render for method "
-                    . $req->method;
-            }
+            my $c = $self->_run_hook(after_unrendered => ($match));
         }
 
         return $self->finalize;
@@ -363,7 +384,7 @@ sub finalize
 
     # call it with current context, so that it will get controller's hook if
     # possible
-    $self->context->current->before_finalize;
+    $self->_run_hook(before_finalize => ());
 
     return $self->res->finalize;
 }
@@ -790,6 +811,26 @@ default router will pass the unchanged L<Kelp::Routes::Pattern/to>. If
 possible, it will be run on the controller object (allowing overriding
 C<before_dispatch> on controller classes).
 
+=head2 after_unrendered
+
+Override this method to control what's going to happen when a route has been
+found but it did not render anything. The default behavior is to render page
+404 (if only bridges are found) or throw an error.
+
+This hook will get passed an array reference to all matched routes, so you can
+inspect them at will to decide what to do. It's strongly recommended to still
+render 404 if the last match is a bridge (as is default).
+
+    sub after_unrendered {
+        my ( $self, $matches ) = @_;
+
+        if ($matches->[-1]->bridge) {
+            $self->res->render_404;
+        }
+        else {
+            # do something custom
+        }
+    }
 
 =head2 before_finalize
 
