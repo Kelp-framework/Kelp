@@ -46,13 +46,13 @@ my $r = Kelp::Routes->new;
 # Similar routes with checks
 {
     $r->clear;
-    $r->add('/:a/:b' => 'a#b');
+    $r->add('/:a/:b' => {to => 'a#b', order => 10});
     $r->add('/:a/:b' => {to => 'a#c', check => {b => '\d+'}});
-    $r->add('/:a/:b' => {to => 'a#d', check => {a => '\d+'}});
+    $r->add('/:a/:b' => {to => 'a#d', check => {a => '\d+'}, order => -1});
     is_deeply _d($r->match('/aa/bb'), 'to'), [{to => 'A::b'}];
-    is_deeply _d($r->match('/aa/22'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
-    is_deeply _d($r->match('/11/bb'), 'to'), [{to => 'A::b'}, {to => 'A::d'}];
-    is_deeply _d($r->match('/11/22'), 'to'), [{to => 'A::b'}, {to => 'A::c'}, {to => 'A::d'}];
+    is_deeply _d($r->match('/aa/22'), 'to'), [{to => 'A::c'}, {to => 'A::b'}];
+    is_deeply _d($r->match('/11/bb'), 'to'), [{to => 'A::d'}, {to => 'A::b'}];
+    is_deeply _d($r->match('/11/22'), 'to'), [{to => 'A::d'}, {to => 'A::c'}, {to => 'A::b'}];
 }
 
 # Different routes (same beginning)

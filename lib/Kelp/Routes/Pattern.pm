@@ -12,6 +12,7 @@ attr name => sub { $_[0]->pattern };
 attr check => sub { {} };
 attr defaults => sub { {} };
 attr bridge => 0;
+attr order => 0;
 attr regex => sub { $_[0]->_build_regex };
 attr named => sub { {} };
 attr param => sub { [] };
@@ -226,6 +227,15 @@ sub match
     return 1;
 }
 
+sub compare
+{
+    my ($self, $other) = @_;
+
+    return $other->bridge <=> $self->bridge
+        || $self->order <=> $other->order
+        || $self->pattern cmp $other->pattern;
+}
+
 1;
 
 __END__
@@ -331,6 +341,11 @@ of them, it will be used in case the placeholder value is missing.
 A True/False value. Specifies if the route is a bridge. For more information
 about bridges, please see L<Kelp::Routes/BRIDGES>
 
+=head2 order
+
+A numeric order of this route. Default order is C<0>, so if you want some
+routes to take priority, you can use C<-1>. Lower is earlier.
+
 =head2 regex
 
 We recommend that you stick to using patterns, because they are simpler and
@@ -402,6 +417,12 @@ should be built like this:
 
 If the pattern contains more than one unnamed items, then you should
 probably give them some names.
+
+=head2 compare
+
+C<$compare( $other )>
+
+Compares two routes. Used for sorting matched routes in a router.
 
 =head1 ACKNOWLEDGEMENTS
 

@@ -296,7 +296,7 @@ sub match
         # chain. If the patterns are not the same, their order will be changed
         # by string sorting by patterns.
         @$routes =
-            sort { $b->bridge <=> $a->bridge || $a->pattern cmp $b->pattern }
+            sort { $a->compare($b) }
             grep { $_->match($path, $method) } @{$self->routes};
 
         $self->cache->set($key, $routes);

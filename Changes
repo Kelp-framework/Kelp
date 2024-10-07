@@ -3,6 +3,7 @@ Revision history for Kelp
 {{$NEXT}}
             [New Interface]
             - Added after_unrendered hook to Kelp
+            - Added order key to routes
 
             [Changes]
             - Hooks are now run conditionally on controller objects and fall back to main app object

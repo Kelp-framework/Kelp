@@ -402,6 +402,19 @@ route in line to be processed.
 
 See L<Kelp::Routes/BRIDGES> for more information.
 
+=head3 Route order
+
+Routes will be executed in order that will usually be the one you want. Bridges
+will execute before normal routes, and the routes will be sorted by patterns
+using Perl C<cmp>. However, you can sometimes run into trouble with their ordering.
+
+In that case, you can use special key C<order> to sort it out. All routes have
+default C<order> of C<0>. If you want some of them to execute earlier, reduce
+their order value. Late routes can be marked with positive order.
+
+Of course, even if you specify order, bridges will still always come before
+regular routes.
+
 =head3 URL building
 
 Each path can be given a name and later a URL can be built using that name and
