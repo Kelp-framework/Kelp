@@ -8,6 +8,8 @@ use Kelp::Util;
 use Kelp::Routes::Location;
 use Try::Tiny;
 
+our @CARP_NOT = qw(Kelp::Module::Routes);
+
 attr base => '';    # the default is set by config module
 attr rebless => 0;    # do not rebless app by default
 attr pattern_obj => 'Kelp::Routes::Pattern';

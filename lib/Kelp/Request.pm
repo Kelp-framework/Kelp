@@ -7,6 +7,8 @@ use Try::Tiny;
 use Hash::MultiValue;
 use Kelp::Util;
 
+our @CARP_NOT = qw(Kelp);
+
 attr -app => sub { croak "app is required" };
 
 # The stash is used to pass values from one route to another

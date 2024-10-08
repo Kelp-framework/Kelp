@@ -1,7 +1,10 @@
 package Kelp::Module::Routes;
 
+use Carp;
 use Kelp::Base 'Kelp::Module';
 use Plack::Util;
+
+our @CARP_NOT = qw(Kelp::Module Kelp);
 
 my $DEFAULT_ROUTER = 'Kelp::Routes';
 

@@ -8,6 +8,8 @@ use Scalar::Util qw(blessed);
 use HTTP::Status qw(status_message);
 use Kelp::Util;
 
+our @CARP_NOT = qw(Kelp);
+
 attr -app => sub { croak "app is required" };
 attr charset => undef;
 attr rendered => 0;

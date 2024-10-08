@@ -4,6 +4,8 @@ use Carp;
 
 use Kelp::Base;
 
+our @CARP_NOT = qw(Kelp::Routes);
+
 attr pattern => sub { die "pattern is required" };
 attr via => undef;
 attr method => sub { $_[0]->via };

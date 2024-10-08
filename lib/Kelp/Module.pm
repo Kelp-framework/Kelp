@@ -3,6 +3,8 @@ package Kelp::Module;
 use Kelp::Base;
 use Carp;
 
+our @CARP_NOT = qw(Kelp);
+
 attr -app => sub { die "app is required" };
 
 sub new
@@ -199,3 +201,4 @@ Registers one or many methods into the web application.
     );
 
 =cut
+
