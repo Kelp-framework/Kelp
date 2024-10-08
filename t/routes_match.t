@@ -81,6 +81,20 @@ my $r = Kelp::Routes->new;
     is_deeply _d($r->match('/a/b/c'), 'to'), [{to => 'A::b'}, {to => 'A::d'}];
 }
 
+# Bridges - no longer url parts than defined
+{
+    $r->clear;
+    $r->add('/test' => {to => 'a#b', bridge => 1});
+    $r->add('/test' => 'a#c');
+    $r->add('/test/a' => 'a#d');
+
+    is_deeply _d($r->match('/testing'), 'to'), [];
+    is_deeply _d($r->match('/test'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+    is_deeply _d($r->match('/test/'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+    is_deeply _d($r->match('/test/a'), 'to'), [{to => 'A::b'}, {to => 'A::d'}];
+    is_deeply _d($r->match('/test/aa'), 'to'), [{to => 'A::b'}];
+}
+
 # Cache
 {
     $r->clear;

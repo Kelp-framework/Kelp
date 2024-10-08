@@ -7,6 +7,8 @@ Revision history for Kelp
 
             [Changes]
             - Hooks are now run conditionally on controller objects and fall back to main app object
+            - Fixed bridge without trailing slash being used for longer routes on the same level
+                * bridge /admin will now work for /admin and /admin/x, but not for /admins
 
 2.17 - 2024-07-06
             [Changes]

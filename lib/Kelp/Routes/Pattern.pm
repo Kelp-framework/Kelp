@@ -143,8 +143,21 @@ sub _build_regex
     }
 
     $pattern = join '', @parts;
-    $pattern .= quotemeta('/') . '?' unless $trailing_slash;
-    $pattern .= '$' unless $self->bridge;
+    if ($self->bridge) {
+
+        # bridge must be followed by a slash or end of string, so that:
+        # - /test matches
+        # - /test/ matches
+        # - /test/something matches
+        # - /testsomething does not match
+        $pattern .= '(?:/|$)';
+    }
+    else {
+
+        # regular pattern must end immediately
+        $pattern .= quotemeta('/') . '?' unless $trailing_slash;
+        $pattern .= '$';
+    }
 
     return qr{^$pattern};
 }
