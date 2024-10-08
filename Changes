@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+
+2.18 - 2024-10-08
             [New Interface]
             - Added after_unrendered hook to Kelp
             - Added order attribute and compare method to routes
