@@ -3,7 +3,7 @@ Revision history for Kelp
 {{$NEXT}}
             [New Interface]
             - Added after_unrendered hook to Kelp
-            - Added order key to routes
+            - Added order attribute and compare method to routes
 
             [Changes]
             - Fixed bridge without trailing slash being used for longer routes on the same level

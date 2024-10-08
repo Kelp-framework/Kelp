@@ -289,14 +289,13 @@ sub match
     my $routes = $self->cache->get($key);
     if (!defined $routes) {
 
-        # Look through all routes, grep the ones that match and sort them by
-        # 'bridge' and 'pattern'. Perl sort function is stable, meaning it will
+        # Look through all routes, grep the ones that match and sort them with
+        # the compare method. Perl sort function is stable, meaning it will
         # preserve the initial order of records it considers equal. This means
         # that the order of registering routes is crucial when a couple of
         # routes are registered with the same pattern: routes defined earlier
         # will be run first and the first one to render will end the execution
-        # chain. If the patterns are not the same, their order will be changed
-        # by string sorting by patterns.
+        # chain.
         @$routes =
             sort { $a->compare($b) }
             grep { $_->match($path, $method) } @{$self->routes};
