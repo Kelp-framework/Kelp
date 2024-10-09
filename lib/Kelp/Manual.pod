@@ -650,15 +650,15 @@ information and examples.
 
 =head2 Adding middleware
 
-Kelp, being Plack-centric, will let you easily add middleware. There are four
-possible ways to add middleware to your application, and all three ways can be
-used separately or together.
+Kelp, being Plack-centric, will let you easily add middleware. There are many
+ways to do this, but we recommend one of the methods described below.
 
 =head3 Using the configuration
 
-Adding middleware in your configuration is probably the easiest and best way for
-you. This way you can load different middleware for each running mode, e.g.
-C<Debug> in development only.
+Adding middleware in your configuration is probably the easiest and best way
+for you. This way you can load different middleware for each running mode, e.g.
+C<Debug> in development only. All middleware loaded this way is global for your
+application.
 
 Add middleware names to the C<middleware> array in your configuration file and
 the corresponding initializing arguments in the C<middleware_init> hash:
@@ -672,18 +672,40 @@ the corresponding initializing arguments in the C<middleware_init> hash:
     }
 
 The middleware will be added in the order you specify in the C<middleware>
-array. See L<Kelp::Middleware/Advanced> for details.
+array.
+
+=head3 Middleware in routes
+
+You can use Kelp's powerful router to find more middleware for your
+application. This is done with C<psgi_middleware> field when adding a route:
+
+    use Plack::Builder;
+
+    $r->add('/checksummed' => {
+        to => 'get_content',
+        psgi_middleware => builder {
+            enable 'ContentMD5';
+            Kelp->NEXT_APP;
+        },
+    });
+
+Now exact path C</checksummed> (and no other path) will have that PSGI
+middleware assigned to it. You need to wrap special L<Kelp/NEXT_APP> for this
+to work.
+
+See L<Kelp::Routes/PLACK MIDDLEWARES> for details.
 
 =head3 By subclassing L<Kelp::Middleware>
 
 L<Kelp::Middleware> is a class which handles wrapping application in middleware
 based on config. Subclassing it may be the most powerful way to add more
-middleware if configuration is not enough.
+middleware if default configuration is not enough.
 
     # lib/MyApp.pm
     attr middleware_obj => 'MyMiddleware';
 
     # lib/MyMiddleware.pm
+    package MyMiddleware;
     use Kelp::Base 'Kelp::Middleware';
 
     sub wrap {
@@ -693,9 +715,12 @@ middleware if configuration is not enough.
         return $app;
     }
 
-This lets you add middleware before or after config middleware (or disable config middleware completely).
+This lets you add middleware before or after config middleware. You can also
+come up with your own creative ways to use config for declaring middleware.
 
 =head3 In C<app.psgi>
+
+This is the same as adding middleware to vanilla Plack.
 
     # app.psgi
     use MyApp;
@@ -707,21 +732,6 @@ This lets you add middleware before or after config middleware (or disable confi
         enable "Plack::Middleware::ContentLength";
         $app->run;
     };
-
-=head3 By overriding the L<Kelp/run> subroutine in C<lib/MyApp.pm>
-
-Make sure you call C<SUPER> first, and then wrap new middleware around the
-returned app.
-
-    # lib/MyApp.pm
-    sub run {
-        my $self = shift;
-        my $app = $self->SUPER::run(@_);
-        $app = Plack::Middleware::ContentLength->wrap($app);
-        return $app;
-    }
-
-Note that any middleware defined in your config file will be added first.
 
 =head2 Pluggable modules
 

@@ -275,6 +275,59 @@ sub run
     return $middleware->wrap($app);
 }
 
+sub _psgi_internal
+{
+    my ($self, $match) = @_;
+    my $req = $self->req;
+    my $res = $self->res;
+
+    # Go over the entire route chain
+    for my $route (@$match) {
+
+        # Dispatch
+        $req->named($route->named);
+        $req->route_name($route->name);
+        my $data = $self->routes->dispatch($self, $route);
+
+        if ($route->bridge) {
+
+            # Is it a bridge? Bridges must return a true value to allow the
+            # rest of the routes to run. They may also have rendered
+            # something, in which case trust that and don't render 403 (but
+            # still end the execution chain)
+
+            if (!$data) {
+                $res->render_403 unless $res->rendered;
+            }
+        }
+        elsif (defined $data) {
+
+            # If the non-bridge route returned something, then analyze it and render it
+
+            # Handle delayed response if CODE
+            return $data if ref $data eq 'CODE';
+            $res->render($data) unless $res->rendered;
+        }
+
+        # Do not go any further if we got a render
+        last if $res->rendered;
+    }
+
+    # If nothing got rendered
+    if (!$res->rendered) {
+        $self->_run_hook(after_unrendered => ($match));
+    }
+
+    return $self->finalize;
+}
+
+sub NEXT_APP
+{
+    return sub {
+        (shift @{$_[0]->{'kelp.execution_chain'}})->($_[0]);
+    };
+}
+
 sub psgi
 {
     my ($self, $env) = @_;
@@ -294,45 +347,12 @@ sub psgi
     }
 
     return try {
+        $env->{'kelp.execution_chain'} = [
+            (grep { defined } map { $_->psgi_middleware } @$match),
+            sub { $self->_psgi_internal($match) },
+        ];
 
-        # Go over the entire route chain
-        for my $route (@$match) {
-
-            # Dispatch
-            $req->named($route->named);
-            $req->route_name($route->name);
-            my $data = $self->routes->dispatch($self, $route);
-
-            if ($route->bridge) {
-
-                # Is it a bridge? Bridges must return a true value to allow the
-                # rest of the routes to run. They may also have rendered
-                # something, in which case trust that and don't render 403 (but
-                # still end the execution chain)
-
-                if (!$data) {
-                    $res->render_403 unless $res->rendered;
-                }
-            }
-            elsif (defined $data) {
-
-                # If the non-bridge route returned something, then analyze it and render it
-
-                # Handle delayed response if CODE
-                return $data if ref $data eq 'CODE';
-                $res->render($data) unless $res->rendered;
-            }
-
-            # Do not go any further if we got a render
-            last if $res->rendered;
-        }
-
-        # If nothing got rendered
-        if (!$res->rendered) {
-            my $c = $self->_run_hook(after_unrendered => ($match));
-        }
-
-        return $self->finalize;
+        return Kelp->NEXT_APP->($env);
     }
     catch {
         my $exception = $_;
@@ -935,6 +955,22 @@ Example new JSON encoder type defined in config:
             },
         },
     },
+
+=head2 NEXT_APP
+
+Helper method for giving Kelp back the control over PSGI application. It must
+be used when declaring route-level middleware. It is context-independent and
+can be called from C<Kelp> package.
+
+    use Plack::Builder;
+
+    builder {
+        enable 'SomeMiddleware';
+        Kelp->NEXT_APP;
+    }
+
+Internally, it uses C<kelp.execution_chain> PSGI environment to dynamically
+construct a wrapped PSGI app without too much overhead.
 
 =head1 AUTHOR
 

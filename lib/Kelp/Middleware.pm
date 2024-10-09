@@ -56,9 +56,12 @@ Kelp::Middleware - Kelp app wrapper (PSGI middleware)
 
 =head1 DESCRIPTION
 
-This is a small helper object which wraps Kelp in PSGI middleware. It is loaded
+This is a small helper class which wraps Kelp in PSGI middleware. It is loaded
 and constructed by Kelp based on the value of L<Kelp/middleware_obj> (class
 name).
+
+This class only handles global middleware declared in configuration. Middleware
+localized to routes cannot be adjusted by customizing this class.
 
 =head1 ATTRIBUTES
 

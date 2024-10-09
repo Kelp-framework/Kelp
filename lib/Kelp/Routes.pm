@@ -667,6 +667,48 @@ the paths set for the nested app will be wrong.
 
 Note that a route cannot have C<psgi> and C<bridge> (or C<tree>) simultaneously.
 
+=head1 PLACK MIDDLEWARES
+
+If your route is not a Plack app and you want to reuse Plack middleware when
+handling it, you may use C<psgi_middleware> and wrap L<Kelp/NEXT_APP>:
+
+    use Plack::Middleware::ContentMD5;
+
+    $r->add('/checksummed' => {
+        to => 'get_content',
+        psgi_middleware => Plack::Middleware::ContentMD5->wrap(Kelp->NEXT_APP),
+    });
+
+You can also apply C<psgi_middleware> to bridges. Also, it is more readable to
+use L<Plack::Builder> for this:
+
+    use Plack::Builder;
+
+    $r->add('/api' => {
+        to => sub { 1 }, # always pass through
+        bridge => 1,
+        psgi_middleware => builder {
+            enable 'Auth::Basic', authenticator => sub { ... };
+            Kelp->NEXT_APP;
+        },
+    });
+
+Now everything under C</api> will go through this middleware. Note however that
+C<psgi_middleware> is app-level middleware, not route-level. This means that
+even if your bridge was to cut off traffic (return false value), all middleware
+declared in routes will still have to run regardless, and it will run even
+before the first route is executed. Don't think about it as I<"middleware for a
+route">, but rather as I<"middleware for an app which is going to execute that
+route">.
+
+It is worth noting that using middleware in your routes will result in better
+performance than global middleware. Having a ton of global middleware, even if
+bound to a specific route, may result in quite a big overhead since it will
+have to do a bunch of regular expression matches or string comparisons for
+every route in your system. On the other hand, Kelp router is pretty optimized
+and will only do the matching once, and only the matched routes will have to go
+through this middleware.
+
 =head1 ATTRIBUTES
 
 =head2 base
