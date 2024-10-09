@@ -650,7 +650,7 @@ information and examples.
 
 =head2 Adding middleware
 
-Kelp, being Plack-centric, will let you easily add middleware. There are three
+Kelp, being Plack-centric, will let you easily add middleware. There are four
 possible ways to add middleware to your application, and all three ways can be
 used separately or together.
 
@@ -672,9 +672,30 @@ the corresponding initializing arguments in the C<middleware_init> hash:
     }
 
 The middleware will be added in the order you specify in the C<middleware>
-array.
+array. See L<Kelp::Middleware/Advanced> for details.
 
-=head3 In C<app.psgi>:
+=head3 By subclassing L<Kelp::Middleware>
+
+L<Kelp::Middleware> is a class which handles wrapping application in middleware
+based on config. Subclassing it may be the most powerful way to add more
+middleware if configuration is not enough.
+
+    # lib/MyApp.pm
+    attr middleware_obj => 'MyMiddleware';
+
+    # lib/MyMiddleware.pm
+    use Kelp::Base 'Kelp::Middleware';
+
+    sub wrap {
+        my $self = shift;
+        my $app = $self->SUPER::wrap(@_);
+        $app = Plack::Middleware::ContentLength->wrap($app);
+        return $app;
+    }
+
+This lets you add middleware before or after config middleware (or disable config middleware completely).
+
+=head3 In C<app.psgi>
 
     # app.psgi
     use MyApp;
@@ -687,7 +708,7 @@ array.
         $app->run;
     };
 
-=head3 By overriding the L<Kelp/run> subroutine in C<lib/MyApp.pm>:
+=head3 By overriding the L<Kelp/run> subroutine in C<lib/MyApp.pm>
 
 Make sure you call C<SUPER> first, and then wrap new middleware around the
 returned app.

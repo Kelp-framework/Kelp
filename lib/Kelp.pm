@@ -21,6 +21,7 @@ attr -name => sub { (ref($_[0]) =~ /(\w+)$/) ? $1 : 'Noname' };
 attr request_obj => 'Kelp::Request';
 attr response_obj => 'Kelp::Response';
 attr context_obj => 'Kelp::Context';
+attr middleware_obj => 'Kelp::Middleware';
 
 # Debug
 attr long_error => $ENV{KELP_LONG_ERROR} // 0;
@@ -267,25 +268,11 @@ sub run
 
     Kelp::Util::_DEBUG(1 => 'Running the application...');
 
-    # Add middleware
-    if (defined(my $middleware = $self->config('middleware'))) {
-        for my $class (@$middleware) {
+    my $middleware = Kelp::Util::load_package($self->middleware_obj)->new(
+        app => $self,
+    );
 
-            # Make sure the middleware was not already loaded
-            # This does not apply for testing, in which case we want
-            # the middleware to wrap every single time
-            next if $self->{_loaded_middleware}->{$class}++ && !$ENV{KELP_TESTING};
-
-            my $mw = Plack::Util::load_class($class, 'Plack::Middleware');
-            my $args = $self->config("middleware_init.$class") // {};
-
-            Kelp::Util::_DEBUG(modules => "Wrapping app in $mw middleware with args: ", $args);
-
-            $app = $mw->wrap($app, %$args);
-        }
-    }
-
-    return $app;
+    return $middleware->wrap($app);
 }
 
 sub psgi
@@ -581,6 +568,11 @@ L<Kelp::Module::Config> for more information.
 Provide a custom package name to define the ::Context object. Defaults to
 L<Kelp::Context>.
 
+=head2 middleware_obj
+
+Provide a custom package name to define the middleware object. Defaults to
+L<Kelp::Middleware>.
+
 =head2 request_obj
 
 Provide a custom package name to define the ::Request object. Defaults to
@@ -852,8 +844,8 @@ every route.
 
 =head2 run
 
-This method builds and returns the PSGI app. You can override it in order to
-include middleware. See L<Kelp::Manual/Adding middleware> for an example.
+This method builds and returns the PSGI app. You can override it to get more
+control over PSGI representation of the app.
 
 =head2 param
 
