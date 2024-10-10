@@ -153,7 +153,9 @@ sub _build_regex
         # - /test/ matches
         # - /test/something matches
         # - /testsomething does not match
-        $pattern .= '(?:/|$)';
+        # if the bridge is already followed by a trailing slash, it's not a
+        # concern
+        $pattern .= '(?:/|$)' unless $trailing_slash;
     }
     else {
 

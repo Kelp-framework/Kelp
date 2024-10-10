@@ -9,6 +9,7 @@ Revision history for Kelp
             [Changes]
             - Middleware building is now done using Kelp::Middleware, making it easier to customize
             - Kelp now uses a dynamic PSGI execution chain, allowing adding PSGI middlewares at route level
+            - Fixed trailing slash bridges not applying for deeper paths (broken in 2.18)
 
 2.18 - 2024-10-08
             [New Interface]

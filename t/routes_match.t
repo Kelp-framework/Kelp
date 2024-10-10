@@ -81,6 +81,28 @@ my $r = Kelp::Routes->new;
     is_deeply _d($r->match('/a/b/c'), 'to'), [{to => 'A::b'}, {to => 'A::d'}];
 }
 
+# Bridges - root
+{
+    $r->clear;
+    $r->add('' => {to => 'a#b', bridge => 1});
+    $r->add('/' => {to => 'a#c', bridge => 1});
+
+    is_deeply _d($r->match('/'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+    is_deeply _d($r->match('/test'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+}
+
+# Bridges - trailing slashes
+{
+    $r->clear;
+    $r->add('/test' => {to => 'a#b', bridge => 1});
+    $r->add('/test/' => {to => 'a#c', bridge => 1});
+
+    is_deeply _d($r->match('/test'), 'to'), [{to => 'A::b'}];
+    is_deeply _d($r->match('/test/'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+    is_deeply _d($r->match('/test/more'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+    is_deeply _d($r->match('/test/more/stuff'), 'to'), [{to => 'A::b'}, {to => 'A::c'}];
+}
+
 # Bridges - no longer url parts than defined
 {
     $r->clear;
