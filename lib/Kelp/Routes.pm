@@ -377,6 +377,9 @@ Then you add your application's routes and their descriptions:
     $r->add( '/path' => 'Module::function' );
     ...
 
+If you add a trailing slash to your route, it will be mandatory in request path
+for the route to match. If you don't add it, it will be optional.
+
 =item B<Matching>
 
 Once you have your routes added, you can match with the L</match> subroutine.
