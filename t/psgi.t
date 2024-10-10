@@ -25,8 +25,38 @@ my $psgi_dumper = sub {
     ];
 };
 
+# this is a PSGI app which compares env keys
+my $psgi_comparer = sub {
+    my $env = shift;
+
+    my %env_before = %$env;
+    my $res = Kelp->NEXT_APP->($env);
+
+    my $all_valid = 1;
+    foreach my $key (keys %env_before) {
+        my $value = $env_before{$key};
+        next if ref $value;
+
+        $all_valid &&= $value eq $env->{$key};
+    }
+
+    if (!$all_valid) {
+        push @{$res->[2]}, "BADENV\n";
+    }
+
+    return $res;
+};
+
 my $app = Kelp->new(mode => 'test');
 $app->routes->fatal(1);
+
+$app->add_route(
+    '/' => {
+        to => sub { 1 },
+        bridge => 1,
+        psgi_middleware => $psgi_comparer,
+    }
+);
 
 $app->add_route(
     '/app1' => {
@@ -64,59 +94,72 @@ my $t = Kelp::Test->new(app => $app);
 $t->request(GET "/app1")
     ->code_is(200)
     ->content_like(qr{^script: /app1$}m)
-    ->content_like(qr{^path: $}m);
+    ->content_like(qr{^path: $}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app1/")
     ->code_is(200)
     ->content_like(qr{^script: /app1$}m)
-    ->content_like(qr{^path: /$}m);
+    ->content_like(qr{^path: /$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app1/x")
-    ->code_is(404);
+    ->code_is(404)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app2")
     ->code_is(200)
     ->content_like(qr{^script: /app2$}m)
-    ->content_like(qr{^path: $}m);
+    ->content_like(qr{^path: $}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app2/")
     ->code_is(200)
     ->content_like(qr{^script: /app2$}m)
-    ->content_like(qr{^path: /$}m);
+    ->content_like(qr{^path: /$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app2/x")
     ->code_is(200)
     ->content_like(qr{^script: /app2$}m)
-    ->content_like(qr{^path: /x$}m);
+    ->content_like(qr{^path: /x$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app2/x/")
     ->code_is(200)
     ->content_like(qr{^script: /app2$}m)
-    ->content_like(qr{^path: /x/$}m);
+    ->content_like(qr{^path: /x/$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app2/x/y")
     ->code_is(200)
     ->content_like(qr{^script: /app2$}m)
-    ->content_like(qr{^path: /x/y$}m);
+    ->content_like(qr{^path: /x/y$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app3")
-    ->code_is(404);
+    ->code_is(404)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app3/")
-    ->code_is(404);
+    ->code_is(404)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app3/x")
     ->code_is(200)
     ->content_like(qr{^script: /app3$}m)
-    ->content_like(qr{^path: /x$}m);
+    ->content_like(qr{^path: /x$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app3/x/")
     ->code_is(200)
     ->content_like(qr{^script: /app3$}m)
-    ->content_like(qr{^path: /x/$}m);
+    ->content_like(qr{^path: /x/$}m)
+    ->content_unlike(qr{^BADENV$}m);
 
 $t->request(GET "/app3/x/y")
-    ->code_is(404);
+    ->code_is(404)
+    ->content_unlike(qr{^BADENV$}m);
 
 # application unicode support should be distinct from Kelp. Kelp will just have
 # to pass everything to the app through psgi env undecoded. App result should
@@ -139,7 +182,8 @@ subtest 'testing unicode' => sub {
         ->code_is(200)
         ->full_content_type_is('text/plain')
         ->content_like(qr{^script: /zażółć$}m)
-        ->content_like(qr{^path: /gęślą/jaźń$}m);
+        ->content_like(qr{^path: /gęślą/jaźń$}m)
+        ->content_unlike(qr{^BADENV$}m);
 };
 
 done_testing;
