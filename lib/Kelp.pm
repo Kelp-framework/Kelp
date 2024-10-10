@@ -562,13 +562,13 @@ routes, then analyzing the response.
 
 =head1 ATTRIBUTES
 
-=head2 hostname
+=head2 host
 
 Gets the current hostname.
 
     sub some_route {
         my $self = shift;
-        if ( $self->hostname eq 'prod-host' ) {
+        if ( $self->host eq 'prod-host' ) {
             ...
         }
     }
