@@ -482,6 +482,13 @@ match C<$regexp>. An optional name of the test can be added as a second paramete
     $t->request( GET '/path' )->header_like( "Content-Type", qr/json/ );
     $t->request( GET '/path' )->header_unlike( "Content-Type", qr/image/ );
 
+=head2 json_content
+
+C<json_content()>
+
+Returns the content decoded as JSON. Does not perform any checks, but may
+C<fail()> and return C<undef> if the JSON decoding fails.
+
 =head2 json_cmp
 
 C<json_cmp( $expected, $test_name )>
