@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+
+2.19 - 2024-10-10
             [New Interface]
             - Added middleware_obj attribute to Kelp
             - Added NEXT_APP method to Kelp
