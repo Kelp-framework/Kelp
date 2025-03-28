@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+            [Changes]
+            - Fixed value 0 being ignored during url building
 
 2.19 - 2024-10-10
             [New Interface]

@@ -33,5 +33,7 @@ is $r->url(qw/a a bar b foo/), '/bar/foo';
 is $r->url(qw/b a bar b moo/), '/bar/moo';
 is $r->url(qw/b a bar/), '/bar/foo';
 
+is $r->url('a', a => '0', b => '0'), '/0/0';
+
 done_testing;
 

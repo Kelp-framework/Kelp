@@ -177,7 +177,7 @@ sub _rep_build
     }
 
     my $rep = $args{$token} // $self->defaults->{$token} // '';
-    if (!__optional($switch) && !$rep) {
+    if (!__optional($switch) && !length $rep) {
         return '{?' . $token . '}';
     }
 
