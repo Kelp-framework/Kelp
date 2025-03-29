@@ -3,6 +3,8 @@ Revision history for Kelp
 {{$NEXT}}
             [Changes]
             - Fixed value 0 being ignored during url building
+            - Bad attempt to build an url will now always croak (instead of sometimes raising a warning and returning undef)
+                * this breaking change is considered a bugfix, since the old behavior was surprising and inconsistent
 
 2.19 - 2024-10-10
             [New Interface]

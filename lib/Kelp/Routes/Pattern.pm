@@ -194,10 +194,8 @@ sub build
     my ($self, %args) = @_;
 
     my $pattern = $self->pattern;
-    if (ref $pattern eq 'Regexp') {
-        carp "Can't build a path for regular expressions";
-        return;
-    }
+    croak "Can't build a regular expression route"
+        if ref $pattern eq 'Regexp';
 
     my $placeholder_pattern = qr{
         \{?            # may be embraced in curlies
@@ -208,11 +206,13 @@ sub build
 
     $pattern =~ s/$placeholder_pattern/$self->_rep_build($1, $2, %args)/eg;
     if ($pattern =~ /{([!?])(\w+|[*>])}/) {
-        carp $1 eq '!'
-            ? "Field $2 doesn't match checks"
-            : "Default value for field $2 is missing";
-        return;
+        croak "Can't build '$pattern', " . (
+            $1 eq '!'
+            ? "field $2 doesn't match checks"
+            : "Default value for field $2 is missing"
+        );
     }
+
     return $pattern;
 }
 

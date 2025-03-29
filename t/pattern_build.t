@@ -3,21 +3,17 @@ use strict;
 use warnings;
 use v5.10;
 
-BEGIN {
-    my $DOWARN = 0;
-    $SIG{'__WARN__'} = sub { warn $_[0] if $DOWARN }
-}
-
 use Test::More;
+use Test::Exception;
 use Kelp::Routes::Pattern;
 
 {
     my $p = Kelp::Routes::Pattern->new(pattern => '/:a/:b');
     is $p->build(a => 1, b => 2), '/1/2';
     is $p->build(a => 'bar', b => 'foo'), '/bar/foo';
-    is $p->build(a => 'bar'), undef;
-    is $p->build(b => 'bar'), undef;
-    is $p->build(), undef;
+    dies_ok { $p->build(a => 'bar') };
+    dies_ok { $p->build(b => 'bar') };
+    dies_ok { $p->build() };
 }
 
 {
@@ -25,7 +21,7 @@ use Kelp::Routes::Pattern;
     is $p->build(a => 1, b => 2), '/1/2';
     is $p->build(a => 'bar', b => 'foo'), '/bar/foo';
     is $p->build(a => 'bar'), '/bar/';
-    is $p->build(b => 'bar'), undef;
+    dies_ok { $p->build(b => 'bar') };
 }
 
 # Checks
@@ -35,8 +31,8 @@ use Kelp::Routes::Pattern;
         check => {a => '\d+', b => '[a-z]+'}
     );
     is $p->build(a => 1, b => 'a'), '/1/a';
-    is $p->build(a => 1, b => 2), undef;
-    is $p->build(a => 'a', b => 'b'), undef;
+    dies_ok { $p->build(a => 1, b => 2) };
+    dies_ok { $p->build(a => 'a', b => 'b') };
 }
 
 # Defaults
@@ -47,7 +43,7 @@ use Kelp::Routes::Pattern;
     );
     is $p->build(a => 'bar', b => 'baz'), '/bar/baz';
     is $p->build(a => 'bar'), '/bar/foo';
-    is $p->build(b => 'bar'), undef;
+    dies_ok { $p->build(b => 'bar') };
 }
 
 {
@@ -57,7 +53,7 @@ use Kelp::Routes::Pattern;
     );
     is $p->build(a => 'foo', b => 'baz'), '/foo/baz';
     is $p->build(b => 'bar'), '/bar/bar';
-    is $p->build(a => 'foo'), undef;
+    dies_ok { $p->build(a => 'foo') };
 }
 
 {
@@ -67,14 +63,14 @@ use Kelp::Routes::Pattern;
     );
     is $p->build(a => 'bar', b => 'baz'), '/bar/baz';
     is $p->build(a => 'foo'), '/foo/bar/baz';
-    is $p->build(b => 'bar'), undef;
+    dies_ok { $p->build(b => 'bar') };
 }
 
 # Captures
 {
     my $p = Kelp::Routes::Pattern->new(pattern => '/{:a}ing/{:b}ing');
     is $p->build(a => 'go', b => 'walk'), '/going/walking';
-    is $p->build(a => 'go'), undef;
+    dies_ok { $p->build(a => 'go') };
 }
 
 # Conditional captures
@@ -84,13 +80,13 @@ use Kelp::Routes::Pattern;
         defaults => {b => 'fart'}
     );
     is $p->build(a => 'sleep'), '/sleeping/farting';
-    is $p->build(b => 'talk'), undef;
+    dies_ok { $p->build(b => 'talk') };
 }
 
 {
     my $p = Kelp::Routes::Pattern->new(pattern => '/{:a}ing/{?b}ing');
     is $p->build(a => 'sleep'), '/sleeping/ing';
-    is $p->build(b => 'talk'), undef;
+    dies_ok { $p->build(b => 'talk') };
 }
 
 # Globs
@@ -98,16 +94,16 @@ use Kelp::Routes::Pattern;
     my $p = Kelp::Routes::Pattern->new(pattern => '/*a/:b');
     is $p->build(a => 'bar', b => 'foo'), '/bar/foo';
     is $p->build(a => 'bar/bat', b => 'foo'), '/bar/bat/foo';
-    is $p->build(b => 'foo'), undef;
-    is $p->build(a => 'foo'), undef;
+    dies_ok { $p->build(b => 'foo') };
+    dies_ok { $p->build(a => 'foo') };
 }
 
 {
     my $p = Kelp::Routes::Pattern->new(pattern => '/a/*/*b');
     is $p->build('*' => 'hello', b => 5), '/a/hello/5';
     is $p->build('*' => 'b/c', b => 'd'), '/a/b/c/d';
-    is $p->build(b => '??'), undef;
-    is $p->build('*' => 'foo'), undef;
+    dies_ok { $p->build(b => '??') };
+    dies_ok { $p->build('*' => 'foo') };
 }
 
 # Slurpy
@@ -115,7 +111,7 @@ use Kelp::Routes::Pattern;
     my $p = Kelp::Routes::Pattern->new(pattern => '/:a/>b');
     is $p->build(a => 'bar', b => 'foo'), '/bar/foo';
     is $p->build(a => 'bar', b => 'bat/foo'), '/bar/bat/foo';
-    is $p->build(b => 'foo'), undef;
+    dies_ok { $p->build(b => 'foo') };
     is $p->build(a => 'foo'), '/foo/';
 }
 
@@ -130,6 +126,12 @@ use Kelp::Routes::Pattern;
 {
     my $p = Kelp::Routes::Pattern->new(pattern => '/hello/*/>');
     is $p->build('*' => 'kelp', '>' => 'world'), '/hello/kelp/world';
+}
+
+# Regex pattern cannot be built
+{
+    my $p = Kelp::Routes::Pattern->new(pattern => qr{^/hello});
+    dies_ok { $p->build() };
 }
 
 done_testing;
