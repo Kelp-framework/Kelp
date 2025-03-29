@@ -231,11 +231,6 @@ sub json_param
     };
 
     return $hash->{$_[0]} if @_;
-    if (!wantarray) {
-        carp
-            "param() called in scalar context on json request is deprecated and will return the number of keys in the future. Use json_content instead";
-        return $hash;
-    }
     return keys %$hash;
 }
 
@@ -446,11 +441,6 @@ a hash with its reftype as a key, for example:
     { '' => [...] }    # when JSON contains something that's not a reference
 
     my $array_ref = $kelp->param('ARRAY');
-
-There also exists a special, deprecated behavior of C<param> returning the
-entire contents of json when called without arguments in scalar context. This
-will be later removed, so that C<param> will work exactly the same regardless
-of whether the request was json. Use L</json_content> for that instead.
 
 Since this method behaves differently based on the form of input, you're
 encouraged to use other, more specific methods listed below.

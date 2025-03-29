@@ -74,7 +74,7 @@ $app->add_route(
             return \%h;
         }
         elsif ($n == 3) {
-            return scalar($self->param);
+            return $self->req->json_content // {};
         }
     }
 );
@@ -114,7 +114,7 @@ $t->request(
     'Content' => '[1,2,3]'
     )
     ->code_is(200)
-    ->json_cmp({ARRAY => [1, 2, 3]}, "JSON content is not a hash");
+    ->json_cmp([1, 2, 3], "JSON content is not a hash");
 
 $t->request(POST '/param/1', [a => "bar", b => "foo"])
     ->code_is(200)
