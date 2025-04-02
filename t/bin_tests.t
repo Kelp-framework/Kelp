@@ -20,8 +20,11 @@ sub test_app
 }
 
 my $help = `$Config{perlpath} $Bin/../bin/kelp-generator --help`;
-like $help, qr/\Qkelp-generator [options] <application-name>\E/, 'help head ok';
+like $help, qr/\Qkelp-generator [options] <Application::Package>\E/, 'help head ok';
 like $help, qr/\QAvailable application types:\E/, 'help templates ok';
+
+my $bad_call = `$Config{perlpath} $Bin/../bin/kelp-generator application-name 2>&1`;
+like $bad_call, qr/\Qnot a Perl package name\E/, 'bad call ok';
 
 done_testing;
 

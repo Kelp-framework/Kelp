@@ -41,7 +41,10 @@ sub get_template
 {
     my ($self, $template, $name, %args) = @_;
 
-    my $vars = {'name' => $name, %args};
+    croak "Invalid name $name - not a Perl package name"
+        unless $name =~ m/^[\w:]+$/;
+
+    my $vars = {name => $name, %args};
     my @parts = split(/::/, $name);
     $vars->{module_file} = pop @parts;
     $vars->{module_path} = join('/', @parts);

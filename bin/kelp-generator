@@ -25,7 +25,7 @@ GetOptions(
 my $name = $ARGV[0];
 my $generator = Kelp::Generator->new;
 
-if ( !$name || $help ) {
+if (!$name || $help) {
     say 'Error - no application name.' unless $help;
     pod2usage(-verbose => 1, -exitval => 'NOEXIT');
     say 'Available application types:';
@@ -85,7 +85,7 @@ kelp-generator - Generate Kelp applications
 
 =head1 SYNOPSIS
 
-    kelp-generator [options] <application-name>
+    kelp-generator [options] <Application::Package>
 
 =head1 OPTIONS
 
@@ -119,6 +119,6 @@ This help screen
 
 =head1 DESCRIPTION
 
-B<This program> will generate a Kelp project from one of the registered
-templates. C<< <application-name> >> will be used as the name of the package.
+This program will generate a Kelp project from one of the registered
+templates. C<< <Application::Package> >> will be used as the name of the package.
 
