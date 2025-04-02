@@ -277,8 +277,6 @@ sub template
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Kelp::Response - Format an HTTP response
@@ -316,13 +314,13 @@ is an instance of C<Kelp::Response>:
     # Render a template
     sub view {
         my $self = shift;
-        $self->res->template('view.tt', { name => 'Rick James' } );
+        $self->res->template('view.tt', { name => 'Rick James' });
     }
 
 =head1 DESCRIPTION
 
 The L<PSGI> specification requires that each route returns an array with status
-code, headers and body. C<Plack::Response> already provides many useful methods
+code, headers and body. L<Plack::Response> already provides many useful methods
 that deal with that. This module extends C<Plack::Response> to add the tools we
 need to write graceful PSGI compliant responses. Some methods return C<$self>,
 which makes them easy to chain.
@@ -364,10 +362,10 @@ set C<partial> to 1 and use C<finalize> to get a C<writer> object for streaming.
             $self->res->set_code(200)->json->partial(1);
 
             # finalize will now return only the status code and headers
-            my $writer = $responder->( $self->res->finalize );
+            my $writer = $responder->($self->res->finalize);
 
             # Stream JSON body using the writer object
-            for ( 1 .. 30 ) {
+            for (1 .. 30) {
                 $writer->write(qq|{"id":$_}\n|);
                 sleep 1;
             }
@@ -401,7 +399,7 @@ of the data rendered. If it's a reference, then the content-type will be set to
 C<application/json>, otherwise it will be set to C<text/html>.
 
     # Will set the content-type to json
-    $res->render( { numbers => [ 1, 2, 3 ] } );
+    $res->render({ numbers => [1, 2, 3] });
 
 =item
 
@@ -431,8 +429,8 @@ chained.
     $self->res->html->render("<p>word</p>");
     $self->res->json->render({ word => \1 });
 
-NOTE: These methods will also call L</charset> and set it to
-application's charset (unless it was previously set).
+NOTE: These methods will also call L</charset> and set it to application's
+charset (unless it was previously set).
 
 =head2 set_header
 
@@ -466,17 +464,17 @@ any charset.
 
     get '/image/:name' => sub {
         my $content = Path::Tiny::path("$name.jpg")->slurp_raw;
-        res->set_content_type('image/jpeg')->render_binary( $content );
+        res->set_content_type('image/jpeg')->render_binary($content);
 
         # the same, but probably more effective way (PSGI-server dependent)
-        open( my $handle, "<:raw", "$name.png" )
-            or die("cannot open $name: $!");
-        res->set_content_type('image/png')->render_binary( $handle );
+        open my $handle, "<:raw", "$name.png"
+            or die "cannot open $name: $!";
+        res->set_content_type('image/png')->render_binary($handle);
     };
 
 =head2 render_error
 
-C<render_error( $code, $error )>
+    $self->render_error($code, $error)
 
 Renders the specified return code and an error message. This sub will first look
 for this error template C<error/$code>, before displaying a plain page with the
@@ -505,17 +503,18 @@ A convenience method that sets code 404 and returns "File Not Found".
     }
 
 If your application's tone is overly friendly or humorous, you will want to create a
-custom 404 page. The best way to do this is to design your own 404.tt template and
-put it in the views/error folder.
+custom 404 page. The best way to do this is to design your own C<404.tt> template and
+put it in the C<views/error>.
 
 =head2 render_500
 
-C<render_500($optional_error)>
+    $self->render_500($optional_error)
 
-Renders the stock "500 - Server Error" message.
-Designing your own 500 page is also possible. All you need to do is add file 500.tt in
-views/error. Keep in mind that it will only show in C<deployment>. In any other mode,
-this method will display the optional error, or the stock error message.
+Renders the 500 error page. Designing your own 500 page is possible by adding file
+C<500.tt> in C<views/error>.
+
+Keep in mind C<$optional_error> will not show in C<deployment> mode, and
+instead stock error message will be displayed.
 
 =head2 redirect_to
 
@@ -523,10 +522,13 @@ Redirects the client to a named route or to a given url. In case the route is pa
 name, a hash reference with the needed arguments can be passed after the route's name.
 As a third optional argument, you can enter the desired response code:
 
- $self->redirect_to( '/example' );
- $self->redirect_to( 'catalogue' );
- $self->redirect_to( 'catalogue', { id => 243 });
- $self->redirect_to( 'other', {}, 303 );
+    $self->redirect_to( '/example' );
+    $self->redirect_to( 'catalogue' );
+    $self->redirect_to( 'catalogue', { id => 243 });
+    $self->redirect_to( 'other', {}, 303 );
+
+This method attempts to build the Kelp route by name, so if you want to just
+redirect to an url it's better to use L<Plack::Response/redirect>.
 
 =head2 template
 
@@ -542,6 +544,4 @@ module.
 =head2 charset_encode
 
 Shortcut method, which encodes a string using the L</charset> or L<Kelp/charset>.
-
-=cut
 
