@@ -33,8 +33,6 @@ sub build
 
 __END__
 
-=pod
-
 =head1 NAME
 
 Kelp::Module::Routes - Default router module for Kelp
@@ -43,7 +41,8 @@ Kelp::Module::Routes - Default router module for Kelp
 
     # config.pl
     {
-        modules      => ['Routes'],    # included by default
+        # This module is included by default
+        # modules      => ['Routes'],
         modules_init => {
             Routes => {
                 base => 'MyApp'
@@ -54,7 +53,7 @@ Kelp::Module::Routes - Default router module for Kelp
     # lib/MyApp.pm
     sub build {
         my $self = shift;
-        mt $self->add_route( '/', 'home' );
+        mt $self->add_route('/', 'home');
     }
 
 
@@ -71,12 +70,6 @@ This module registers the following methods into the underlying app:
 
 An instance to L<Kelp::Routes>, or whichever router was specified in the
 configuration.
-
-    # lib/MyApp.pm
-    sub build {
-        my $self = shift;
-        $self->routes->add( '/', 'home' );
-    }
 
 =head2 add_route
 
@@ -97,12 +90,10 @@ C<Kelp::Routes>, for example:
 will look for C<Kelp::Routes::Custom>. To specify a fully qualified class,
 prefix it with a plus sign.
 
-    router => '+My::Special::Router
+    router => '+My::Special::Router'
 
 =head3 configuration of the router
 
 All other configuration is passed to the router. For the configuration of the
 default router, see L<Kelp::Routes/ATTRIBUTES>.
-
-=cut
 
