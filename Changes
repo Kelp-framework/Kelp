@@ -4,6 +4,7 @@ Revision history for Kelp
             [Changes]
             - kelp-generator now checks whether package name is a valid Perl package name
             - Documentation improvements
+            - Add an example script - perldoc.psgi
 
 2.20 - 2025-03-30
             [Changes]
