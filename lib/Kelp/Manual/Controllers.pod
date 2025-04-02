@@ -9,18 +9,34 @@ Kelp::Manual::Controllers - Making your app use controllers
 =head1 DESCRIPTION
 
 This document describes the technical aspect of implementing controllers in
-your app. By default, Kelp has no controllers - it resolves all your routes in
-the context of the main app. In other words, all routes take a instance of the
-web application as a first parameter - even if those routes live in another
-class.
+your app. By default, Kelp application has no controllers - it resolves all
+your routes in the context of the main app. In other words, all routes take a
+instance of the web application as a first parameter - even if those routes
+live in another class.
 
 Controllers lets you separate some of the route handling logic to other classes
 and have your subs take the object of the correct class as the first argument.
-In Kelp, there is no special base class for controllers by default - all
-controllers must be subclasses of L<Kelp>, unless you want to develop your own
-base controller - see L</Use different method than reblessing>.
 
-=head2 Reblessing details
+=head2 PSA: Modern controllers
+
+New Kelp versions are very flexible when it comes to tweaking the call process
+of a route. However, the core of the framework uses legacy "reblessing" system
+of controllers for backward-compatibility reasons.
+
+For all new projects which need controllers, you should configure your app to
+use L<KelpX::Controller>. This extension implements a separate controller class
+hierarchy, much more fitting for a modern web development. It is an official
+extension supported by Kelp developers.
+
+Refer to L<KelpX::Controller> documentation for details on setting that up. The
+rest of this document contains only details about the legacy system, so it can
+be safely ignored if you choose to use that extension.
+
+=head2 Legacy controller details
+
+Core Kelp uses reblessing as a method of implementing controllers. There is no
+special base class for controllers - all controllers must be subclasses of
+L<Kelp>.
 
 Reblessing will happen after request is matched to a route. Route handler has
 to be specified as class and method string, and class must be a subclass of class
@@ -113,89 +129,6 @@ You no longer have to prefix destinations with the base controller class name.
 
     }
 
-=head2 Use different method than reblessing
-
-While reblessing is how core Kelp deals with controllers, it is entirely
-possible to introduce your own base controller classes. Most of the details
-remain the same, like setting C<rebless> and C<base> configuration, but your
-main controller class does not have to inherit from your app class.
-
-Below is a guide on how to implement that from scratch. Alternatively,
-L<KelpX::Controller> module may be used, which comes with pre-implemented
-custom base controller and context classes.
-
-=head3 Step 1: Custom Context object
-
-Create a custom context object which will call C<new> on your controller
-classes instead of reblessing the main app. It is also a good idea in this case
-to enable C<persistent_controllers> regardless of configuration.
-
-    # lib/MyContext.pm
-    package MyContext;
-
-    use Kelp::Base 'Kelp::Context';
-
-    # make sure controller objects are never cleaned
-    attr persistent_controllers => !!1;
-
-    sub build_controller {
-        my ($self, $class) = @_;
-
-        return $class->new(context => $self);
-    }
-
-=head3 Step 2: Custom base controller
-
-A base controller class has to implement at least C<context> to be compatible
-with core Kelp. Some specific modules might assume it's a descendant of Kelp,
-which may require adding more methods to achieve compatibility. It may be also
-a good idea to implement C<req> and C<res> for easier access.
-
-    # lib/MyController.pm
-    package MyController;
-
-    use Kelp::Base;
-
-    attr -context => undef;
-
-    sub app {
-        my $self = shift;
-        return $self->context->app;
-    }
-
-    sub req {
-        my $self = shift;
-        return $self->context->req;
-    }
-
-    sub res {
-        my $self = shift;
-        return $self->context->res;
-    }
-
-    sub some_route {
-        my $self = shift;
-        $self->res->text->render('hello from controller');
-    }
-
-=head3 Step 3: setting the custom context in the app
-
-This can be done a couple different ways, but the easiest one is to change the
-default C<context_obj>, which is the class name of the context:
-
-    # lib/MyApp.pm
-    package MyApp;
-
-    use Kelp::Base 'Kelp';
-
-    attr context_obj => 'MyContext';
-
-    sub build {
-        my $self = shift;
-
-        $self->add_route('/' => 'some_route');
-    }
-
 =head1 CAVEATS
 
 There are some controller gotchas which come from a fact that they are not by
@@ -244,7 +177,6 @@ controller - you may use C<context> tracking object:
         # will return the main controller (MyApp::Controller)
         my $controller = $self->context->controller;
         $controller->build;
-
     }
 
 Note that you will still have to use the controller name in routes even though
