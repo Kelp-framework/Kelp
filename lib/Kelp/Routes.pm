@@ -324,10 +324,10 @@ sub dispatch
     $route->dest($self->load_destination($route->to))
         unless $dest;
 
-    my ($to, $controller, $action) = ($route->to, @{$dest});
+    my ($controller, $action) = @{$dest};
     my $c = $app->context->set_controller($controller);
 
-    $app->_run_hook(before_dispatch => ($to));
+    $app->_run_hook(before_dispatch => ($route->to));
     return $action->($c, @{$route->param});
 }
 
