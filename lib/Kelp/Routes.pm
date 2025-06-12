@@ -327,7 +327,7 @@ sub dispatch
     my ($controller, $action) = @{$dest};
     my $c = $app->context->set_controller($controller);
 
-    $app->_run_hook(before_dispatch => ($route->to));
+    $app->context->run_method(before_dispatch => ($route->to));
     return $action->($c, @{$route->param});
 }
 

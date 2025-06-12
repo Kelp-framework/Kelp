@@ -62,6 +62,22 @@ sub clear
     $self->current($self->app);
 }
 
+# run method in current context. If current context does not provide this
+# method, run it in app instead.
+sub run_method
+{
+    my $self = shift;
+    my $method = shift;
+    my $c = $self->current;
+
+    if ($c->can($method)) {
+        $c->$method(@_);
+    }
+    else {
+        $self->app->$method(@_);
+    }
+}
+
 1;
 
 __END__
@@ -147,4 +163,13 @@ use it unless you extend Kelp router itself.
 
 Clears context in anticipation of the next request. Called automatically at the
 start of every request.
+
+=head2 run_method
+
+    $self->context->run_method($name => @args);
+
+This method runs method C<$name> in current context. If the current context
+does not provide that method, it will be run in application context instead. It
+should only be used for methods which are known to be available in application
+instance.
 

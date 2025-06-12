@@ -203,20 +203,6 @@ sub res
     return $self->context->res(@_);
 }
 
-sub _run_hook
-{
-    my $self = shift;
-    my $method = shift;
-    my $c = $self->context->current;
-
-    if ($c->can($method)) {
-        $c->$method(@_);
-    }
-    else {
-        $self->$method(@_);
-    }
-}
-
 # Override to change what happens before the route is handled
 sub before_dispatch
 {
@@ -315,7 +301,7 @@ sub _psgi_internal
 
     # If nothing got rendered
     if (!$res->rendered) {
-        $self->_run_hook(after_unrendered => ($match));
+        $self->context->run_method(after_unrendered => ($match));
     }
 
     return $self->finalize;
@@ -391,7 +377,7 @@ sub finalize
 
     # call it with current context, so that it will get controller's hook if
     # possible
-    $self->_run_hook(before_finalize => ());
+    $self->context->run_method(before_finalize => ());
 
     return $self->res->finalize;
 }

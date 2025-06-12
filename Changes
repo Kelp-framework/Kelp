@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+            [New Interface]
+            - Added Kelp::Context::run_method method
 
 2.21 - 2025-04-02
             [Changes]
