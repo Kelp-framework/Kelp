@@ -46,6 +46,7 @@ sub build
             psgi => 1,
         }
     );
+    $app->add_route('/b' => 'foo#test_template');
 }
 
 sub bridge

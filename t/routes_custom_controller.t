@@ -26,5 +26,9 @@ $t->request_ok(GET '/a/b/e')
     ->header_is('X-Final', 'CustomContext::Controller')
     ->content_is('PSGI OK');
 
+# test template generated from response
+$t->request_ok(GET '/b')
+    ->content_like(qr{Hello, world!});
+
 done_testing;
 

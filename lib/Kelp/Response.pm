@@ -269,7 +269,7 @@ sub template
         unless $self->app->can('template');
 
     # run template in current controller context
-    my $output = $self->app->context->current->template($template, $vars, @rest);
+    my $output = $self->app->context->run_method('template', $template, $vars, @rest);
     $self->render($output);
 }
 

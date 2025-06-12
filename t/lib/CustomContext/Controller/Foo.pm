@@ -10,6 +10,13 @@ sub test
     return ref $self;
 }
 
+sub test_template
+{
+    my ($self) = @_;
+
+    $self->res->template('home');
+}
+
 sub nested_psgi
 {
     my ($self) = @_;
