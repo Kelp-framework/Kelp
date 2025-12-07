@@ -284,7 +284,7 @@ The pattern to match against. Each pattern is a string, which may contain named
 placeholders. For more information on the types and use of placeholders, look at
 L<Kelp::Routes/PLACEHOLDERS>.
 
-    my $p = Kelp::Routes::Patters->new( pattern => '/:id/*other' );
+    my $p = Kelp::Routes::Pattern->new( pattern => '/:id/*other' );
     ...
     $p->match('/4/something-else');    # True
 
@@ -292,7 +292,7 @@ L<Kelp::Routes/PLACEHOLDERS>.
 
 Specifies an HTTP method to be matched by the route.
 
-    my $p = Kelp::Routes::Patters->new(
+    my $p = Kelp::Routes::Pattern->new(
         pattern => '/:id/*other',
         method  => 'PUT'
     );
@@ -304,7 +304,7 @@ Specifies an HTTP method to be matched by the route.
 You are encouraged to give each route a name, so you can look it up later when
 you build a URL for it.
 
-    my $p = Kelp::Routes::Patters->new(
+    my $p = Kelp::Routes::Pattern->new(
         pattern => '/:id/*other',
         name    => 'other_id'
     );
@@ -326,7 +326,7 @@ A hashref with placeholder names as keys and regular expressions as values. It
 is used to match the values of the placeholders against the provided regular
 expressions.
 
-    my $p = Kelp::Routes::Patters->new(
+    my $p = Kelp::Routes::Pattern->new(
         pattern => '/:id/*other',
         check   => { id => qr/\d+/ }    # id may only be a didgit
     );
@@ -343,7 +343,7 @@ A hashref with placeholder defaults. This only applies to optional placeholders,
 or those prefixed with a question mark. If a default value is provided for any
 of them, it will be used in case the placeholder value is missing.
 
-    my $p = Kelp::Routes::Patters->new(
+    my $p = Kelp::Routes::Pattern->new(
         pattern  => '/:id/?other',
         defaults => { other => 'info' }
     );
@@ -370,7 +370,7 @@ We recommend that you stick to using patterns, because they are simpler and
 easier to read, but if you need to match a really complicated route, then
 you can use a regular expression.
 
-    my $p = Kelp::Routes::Patters->new( regex => qr{^(\d+)/(\d+)$} );
+    my $p = Kelp::Routes::Pattern->new( regex => qr{^(\d+)/(\d+)$} );
     $p->match('/100/200');  # True. $p->param will be [ 100, 200 ]
 
 After matching, the L</param> array will be initialized with the values of the
@@ -379,7 +379,7 @@ If you used a regex with named captures, then a hashref L</named> will also be
 initialized with the names and values of the named placeholders. In other words,
 this hash will be a permanent copy of the C<%+> built-in hash.
 
-    my $p = Kelp::Routes::Patters->new( regex => qr{^(?<id>\d+)/(?<line>\d+)$} );
+    my $p = Kelp::Routes::Pattern->new( regex => qr{^(?<id>\d+)/(?<line>\d+)$} );
     $p->match('/100/200');  # True.
                             # $p->param will be [ 100, 200 ]
                             # $p->named will be { id => 100, line => 200 }
@@ -429,13 +429,13 @@ C<build( %args )>
 
 Builds a URL from a pattern.
 
-    my $p = Kelp::Routes::Patters->new( pattern  => '/:id/:line/:row' );
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/:id/:line/:row' );
     $p->build( id => 100, line => 5, row => 8 ); # Returns '/100/5/8'
 
 If the pattern contains an unnamed wildcard C<*> or slurpy C<< > >>, then it
 should be built like this:
 
-    my $p = Kelp::Routes::Patters->new( pattern  => '/hello/*/>' );
+    my $p = Kelp::Routes::Pattern->new( pattern  => '/hello/*/>' );
     $p->build( '*' => 'kelp', '>' => 'world' ); # Returns '/hello/kelp/world'
 
 If the pattern contains more than one unnamed items, then you should

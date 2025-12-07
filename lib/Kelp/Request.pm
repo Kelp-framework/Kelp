@@ -265,7 +265,7 @@ Kelp::Request - Request class for a Kelp application
 
 =head1 SYNOPSIS
 
-    my $request = Kelp::Request( app => $app, env => $env );
+    my $request = Kelp::Request->new( app => $app, env => $env );
 
 =head1 DESCRIPTION
 
