@@ -342,33 +342,49 @@ sub psgi
     }
     catch {
         my $exception = $_;
-
-        # CONTEXT CHANGE: we need to clear response state because anything that
-        # was rendered beforehand is no longer valid. Body and code will be
-        # replaced automatically with render methods, but headers must be
-        # cleared explicitly
-        $res->headers->clear;
-
-        if (blessed $exception && $exception->isa('Kelp::Exception')) {
-
-            # only log it as an error if the body is present
-            $self->logger('error', $exception->body)
-                if $self->can('logger') && defined $exception->body;
-
-            $res->render_exception($exception);
-        }
-        else {
-            my $message = $self->long_error ? longmess($exception) : $exception;
-
-            # Log error
-            $self->logger('critical', $message) if $self->can('logger');
-
-            # Render an application erorr (hides details on production)
-            $res->render_500($exception);
-        }
-
-        return $self->finalize;
+        return $self->context->run_method(handle_exception => ($exception));
     };
+}
+
+# Override to change what happens when a route dies
+sub handle_exception
+{
+    my ($self, $exception) = @_;
+    my $res = $self->res;
+
+    # Exceptions which know how to turn themselves into a PSGI response (the
+    # convention used by Plack::Middleware::HTTPExceptions and Catalyst) are
+    # meant to be handled by a middleware: rethrow them
+    die $exception
+        if blessed $exception
+        && !$exception->isa('Kelp::Exception')
+        && $exception->can('as_psgi');
+
+    # CONTEXT CHANGE: we need to clear response state because anything that
+    # was rendered beforehand is no longer valid. Body and code will be
+    # replaced automatically with render methods, but headers must be
+    # cleared explicitly
+    $res->headers->clear;
+
+    if (blessed $exception && $exception->isa('Kelp::Exception')) {
+
+        # only log it as an error if the body is present
+        $self->logger('error', $exception->body)
+            if $self->can('logger') && defined $exception->body;
+
+        $res->render_exception($exception);
+    }
+    else {
+        my $message = $self->long_error ? longmess($exception) : $exception;
+
+        # Log error
+        $self->logger('critical', $message) if $self->can('logger');
+
+        # Render an application erorr (hides details on production)
+        $res->render_500($exception);
+    }
+
+    return $self->finalize;
 }
 
 sub finalize
@@ -847,6 +863,28 @@ finalized.
 The above is an example of how to insert a custom header into the response of
 every route.
 
+=head2 handle_exception
+
+Override this method to control what happens when a route dies. It is passed
+the exception (anything that was thrown, string or object) and must return a
+PSGI response, usually by rendering into the response object and calling
+C<finalize>. The default behavior is to render the matching error page for a
+L<Kelp::Exception>, and a 500 error page for anything else, logging the
+error (if C<logger> is available).
+
+The only exceptions which are not handled this way are objects implementing an
+C<as_psgi> method (the convention used by L<Plack::Middleware::HTTPExceptions>
+and L<Catalyst>): they are rethrown as they are, so that a PSGI middleware
+wrapping the application can turn them into a response. This makes it possible
+to end a route from deep within the call stack with something other than an
+error, a redirect for example. If no middleware handles such an exception, it
+reaches the PSGI server.
+
+Note that a rethrown exception does not go through C<finalize>, so
+C<before_finalize> is not called for it.
+
+If possible, this method will be run on the controller object (allowing
+overriding C<handle_exception> on controller classes).
 
 =head2 run
 
