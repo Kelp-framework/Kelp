@@ -1,6 +1,8 @@
 Revision history for Kelp
 
 {{$NEXT}}
+            [New Interface]
+            - Added handle_exception hook
 
 2.22 - 2025-06-12
             [New Interface]

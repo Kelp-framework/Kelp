@@ -8,6 +8,7 @@ use Plack::Builder;
 use Test::More;
 
 {
+
     package CustomApp;
     use Kelp::Base 'Kelp';
 
@@ -27,6 +28,7 @@ use Test::More;
 }
 
 {
+
     package RethrowApp;
     use Kelp::Base 'Kelp';
 
@@ -69,7 +71,7 @@ subtest 'rethrowing everything to a middleware' => sub {
                         503,
                         ['Content-Type' => 'text/plain'],
                         ["handled by middleware: $logged"]
-                      ];
+                    ];
                 }
                 return $res;
             };
