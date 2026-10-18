@@ -61,6 +61,8 @@ Nikolay Mishin (@mishin)
 
 Bartosz Jarzyna (bbrtj)
 
+Sébastien Mourlhou
+
 ## License
 
 This framework is governed by the same license as Perl itself.
